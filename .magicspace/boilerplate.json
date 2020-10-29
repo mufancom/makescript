@@ -1,0 +1,43 @@
+{
+  "extends": "@mufan/code-boilerplates/typescript",
+  "options": {
+    "name": "awesome-project",
+    "license": "MIT",
+    "author": "Awesome Author",
+    "packages": [
+      {
+        "name": "@awesome/core",
+        "tsProjects": [
+          {
+            "name": "library"
+          },
+          {
+            "name": "test"
+          }
+        ]
+      },
+      {
+        "name": "@awesome/server",
+        "tsProjects": [
+          {
+            "name": "program"
+          },
+          {
+            "name": "test"
+          }
+        ]
+      },
+      {
+        "name": "@awesome/client",
+        "tsProjects": [
+          {
+            "name": "program"
+          },
+          {
+            "name": "test"
+          }
+        ]
+      }
+    ]
+  }
+}

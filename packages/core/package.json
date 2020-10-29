@@ -1,0 +1,9 @@
+{
+  "name": "@awesome/core",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Awesome Author",
+  "dependencies": {
+    "tslib": "^2.0.3"
+  }
+}
