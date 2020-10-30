@@ -1,4 +1,4 @@
-# awesome-project
+# makescript
 
 Just another awesome magic.
 
