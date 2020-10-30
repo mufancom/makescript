@@ -17,6 +17,12 @@
     },
     {
       "path": "packages/makescript-agent/src/test"
+    },
+    {
+      "path": "packages/makescript-web/src/program"
+    },
+    {
+      "path": "packages/makescript-web/src/test"
     }
   ],
   "files": []

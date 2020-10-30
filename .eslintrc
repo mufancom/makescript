@@ -25,6 +25,10 @@
     {
       "files": ["packages/makescript-agent/src/test/**/*.{ts,tsx}"],
       "extends": ["plugin:@mufan/override-dev"]
+    },
+    {
+      "files": ["packages/makescript-web/src/test/**/*.{ts,tsx}"],
+      "extends": ["plugin:@mufan/override-dev"]
     }
   ]
 }
