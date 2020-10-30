@@ -12,7 +12,8 @@
   "workspaces": [
     "packages/makescript-shared",
     "packages/makescript",
-    "packages/makescript-agent"
+    "packages/makescript-agent",
+    "packages/makescript-web"
   ],
   "devDependencies": {
     "@mufan/code": "^0.2.5",
