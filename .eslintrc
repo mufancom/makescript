@@ -15,15 +15,15 @@
       }
     },
     {
-      "files": ["packages/core/src/test/**/*.{ts,tsx}"],
+      "files": ["packages/makescript-shared/src/test/**/*.{ts,tsx}"],
       "extends": ["plugin:@mufan/override-dev"]
     },
     {
-      "files": ["packages/server/src/test/**/*.{ts,tsx}"],
+      "files": ["packages/makescript/src/test/**/*.{ts,tsx}"],
       "extends": ["plugin:@mufan/override-dev"]
     },
     {
-      "files": ["packages/client/src/test/**/*.{ts,tsx}"],
+      "files": ["packages/makescript-agent/src/test/**/*.{ts,tsx}"],
       "extends": ["plugin:@mufan/override-dev"]
     }
   ]

@@ -1,12 +1,12 @@
 {
   "extends": "@mufan/code-boilerplates/typescript",
   "options": {
-    "name": "awesome-project",
+    "name": "makescript",
     "license": "MIT",
-    "author": "Awesome Author",
+    "author": "Chengdu Mufan Technology Co., Ltd.",
     "packages": [
       {
-        "name": "@awesome/core",
+        "name": "@makeflow/makescript-shared",
         "tsProjects": [
           {
             "name": "library"
@@ -17,7 +17,7 @@
         ]
       },
       {
-        "name": "@awesome/server",
+        "name": "@makeflow/makescript",
         "tsProjects": [
           {
             "name": "program"
@@ -28,7 +28,18 @@
         ]
       },
       {
-        "name": "@awesome/client",
+        "name": "@makeflow/makescript-agent",
+        "tsProjects": [
+          {
+            "name": "program"
+          },
+          {
+            "name": "test"
+          }
+        ]
+      },
+      {
+        "name": "@makeflow/makescript-web",
         "tsProjects": [
           {
             "name": "program"

@@ -1,22 +1,22 @@
 {
   "references": [
     {
-      "path": "packages/core/src/library"
+      "path": "packages/makescript-shared/src/library"
     },
     {
-      "path": "packages/core/src/test"
+      "path": "packages/makescript-shared/src/test"
     },
     {
-      "path": "packages/server/src/program"
+      "path": "packages/makescript/src/program"
     },
     {
-      "path": "packages/server/src/test"
+      "path": "packages/makescript/src/test"
     },
     {
-      "path": "packages/client/src/program"
+      "path": "packages/makescript-agent/src/program"
     },
     {
-      "path": "packages/client/src/test"
+      "path": "packages/makescript-agent/src/test"
     }
   ],
   "files": []

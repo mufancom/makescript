@@ -1,8 +1,8 @@
 {
-  "name": "awesome-project",
+  "name": "makescript",
   "private": true,
   "license": "MIT",
-  "author": "Awesome Author",
+  "author": "Chengdu Mufan Technology Co., Ltd.",
   "scripts": {
     "build": "rimraf packages/*/bld && tsc --build",
     "lint": "eslint .",
@@ -10,9 +10,9 @@
     "test": "yarn lint-prettier && yarn build && yarn lint"
   },
   "workspaces": [
-    "packages/core",
-    "packages/server",
-    "packages/client"
+    "packages/makescript-shared",
+    "packages/makescript",
+    "packages/makescript-agent"
   ],
   "devDependencies": {
     "@mufan/code": "^0.2.5",
