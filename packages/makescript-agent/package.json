@@ -19,6 +19,7 @@
     "@hapi/boom": "^9.1.0",
     "@hapi/hapi": "^20.0.1",
     "clime": "^0.5.14",
+    "entrance-decorator": "^0.1.0",
     "tslib": "^2.0.3",
     "uuid": "^7.0.0",
     "yaml": "^1.10.0"
