@@ -4,6 +4,7 @@
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "dependencies": {
+    "entrance-decorator": "^0.1.0",
     "tslib": "^2.0.3"
   }
 }

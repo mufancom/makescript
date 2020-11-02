@@ -13,22 +13,6 @@
       "parserOptions": {
         "project": "!(node_modules)/**/tsconfig.json"
       }
-    },
-    {
-      "files": ["packages/makescript-shared/src/test/**/*.{ts,tsx}"],
-      "extends": ["plugin:@mufan/override-dev"]
-    },
-    {
-      "files": ["packages/makescript/src/test/**/*.{ts,tsx}"],
-      "extends": ["plugin:@mufan/override-dev"]
-    },
-    {
-      "files": ["packages/makescript-agent/src/test/**/*.{ts,tsx}"],
-      "extends": ["plugin:@mufan/override-dev"]
-    },
-    {
-      "files": ["packages/makescript-web/src/test/**/*.{ts,tsx}"],
-      "extends": ["plugin:@mufan/override-dev"]
     }
   ]
 }
