@@ -1,13 +1,28 @@
+import {Config as AgentConfig} from '@makeflow/makescript-agent';
+
 export interface Config {
+  /**
+   * The port to listen for API
+   */
   port: number;
-  externalURL: string;
-  sessionSecret: string;
+  /**
+   * The port to listen for administration web client
+   */
+  'web-port': number;
+  'external-url': string;
+  'session-secret': string;
+  /**
+   * The path for storing data
+   */
+  workspace: string;
+
+  'default-agent': AgentConfig;
 
   makeflow: {
     address: string;
-    powerApp: {
+    'power-app': {
       name: string;
-      displayName: string;
+      'display-name': string;
       description: string;
     };
   };

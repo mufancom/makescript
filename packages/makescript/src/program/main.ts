@@ -1,3 +1,3 @@
-import {Config} from './types';
+import {Config} from './config';
 
 export function main(config: Config): void {}

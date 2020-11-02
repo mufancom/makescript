@@ -1,6 +1,6 @@
 {
   "name": "@makeflow/makescript-web",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "dependencies": {

@@ -17,17 +17,6 @@
         ]
       },
       {
-        "name": "@makeflow/makescript",
-        "tsProjects": [
-          {
-            "name": "program"
-          },
-          {
-            "name": "test"
-          }
-        ]
-      },
-      {
         "name": "@makeflow/makescript-agent",
         "tsProjects": [
           {
@@ -40,6 +29,17 @@
       },
       {
         "name": "@makeflow/makescript-web",
+        "tsProjects": [
+          {
+            "name": "program"
+          },
+          {
+            "name": "test"
+          }
+        ]
+      },
+      {
+        "name": "@makeflow/makescript",
         "tsProjects": [
           {
             "name": "program"

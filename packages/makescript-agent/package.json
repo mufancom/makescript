@@ -1,9 +1,30 @@
 {
   "name": "@makeflow/makescript-agent",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
+  "main": "bld/program/index.js",
+  "types": "bld/program/index.d.ts",
+  "bin": {
+    "makescript-agent": "bld/program/@cli.js"
+  },
+  "files": [
+    "src/**/*.ts",
+    "bld"
+  ],
+  "scripts": {
+    "build": "rimraf bld && tsc --project src/program/tsconfig.json"
+  },
   "dependencies": {
-    "tslib": "^2.0.3"
+    "@hapi/boom": "^9.1.0",
+    "@hapi/hapi": "^20.0.1",
+    "clime": "^0.5.14",
+    "tslib": "^2.0.3",
+    "uuid": "^7.0.0",
+    "yaml": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/hapi__hapi": "^20.0.2",
+    "@types/uuid": "^7.0.0"
   }
 }

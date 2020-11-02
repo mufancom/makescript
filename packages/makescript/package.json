@@ -1,9 +1,10 @@
 {
   "name": "@makeflow/makescript",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "dependencies": {
+    "@makeflow/makescript-agent": "^0.1.0",
     "tslib": "^2.0.3"
   }
 }
