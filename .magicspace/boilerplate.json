@@ -1,5 +1,5 @@
 {
-  "extends": "@mufan/code-boilerplates/typescript",
+  "extends": "@mufan/code-boilerplates/typescript-entrances",
   "options": {
     "name": "makescript",
     "license": "MIT",
@@ -10,9 +10,6 @@
         "tsProjects": [
           {
             "name": "library"
-          },
-          {
-            "name": "test"
           }
         ]
       },
@@ -21,9 +18,6 @@
         "tsProjects": [
           {
             "name": "program"
-          },
-          {
-            "name": "test"
           }
         ]
       },
@@ -32,9 +26,6 @@
         "tsProjects": [
           {
             "name": "program"
-          },
-          {
-            "name": "test"
           }
         ]
       },
@@ -43,9 +34,6 @@
         "tsProjects": [
           {
             "name": "program"
-          },
-          {
-            "name": "test"
           }
         ]
       }
