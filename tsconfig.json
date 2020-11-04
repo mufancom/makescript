@@ -1,16 +1,13 @@
 {
   "references": [
     {
-      "path": "packages/makescript-shared/src/library"
-    },
-    {
       "path": "packages/makescript-agent/src/program"
     },
     {
-      "path": "packages/makescript-web/src/program"
+      "path": "packages/makescript/src/program"
     },
     {
-      "path": "packages/makescript/src/program"
+      "path": "packages/makescript/src/web"
     }
   ],
   "files": []

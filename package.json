@@ -9,14 +9,10 @@
     "lint-prettier": "prettier --check .",
     "test": "yarn lint-prettier && yarn build && yarn lint"
   },
-  "workspaces": {
-    "packages": [
-      "packages/makescript-shared",
-      "packages/makescript-agent",
-      "packages/makescript-web",
-      "packages/makescript"
-    ]
-  },
+  "workspaces": [
+    "packages/makescript-agent",
+    "packages/makescript"
+  ],
   "devDependencies": {
     "@mufan/code": "^0.2.5",
     "@mufan/eslint-plugin": "^0.1.36",
