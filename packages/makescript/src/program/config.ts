@@ -2,6 +2,11 @@ import {Config as AgentConfig} from '@makeflow/makescript-agent';
 
 export interface Config {
   /**
+   * The host ot listen on
+   */
+  host: string;
+
+  /**
    * The port to listen for API
    */
   port: number;

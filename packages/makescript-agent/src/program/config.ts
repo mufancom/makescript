@@ -1,4 +1,7 @@
-export interface Config {
+/**
+ * Config type use for external applications
+ */
+export interface MakescriptAgentConfig {
   /**
    * The port to listen on
    */
@@ -13,8 +16,4 @@ export interface Config {
    * The token to authenticate
    */
   token: string;
-  /**
-   * A
-   */
-  'working-dir': string;
 }

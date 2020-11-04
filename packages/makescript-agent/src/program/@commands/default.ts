@@ -6,14 +6,14 @@ import {Castable, Command, Options, command, metadata, option} from 'clime';
 import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
-import {Config} from '../config';
+import {MakescriptAgentConfig} from '../config';
 import {main} from '../main';
 
-const CONFIG_PATH_DEFAULT = Path.resolve(
+const WORKSPACE_PATH_DEFAULT = Path.resolve(
   OS.homedir(),
   '.config',
   'makescript',
-  'agent.yaml',
+  'agent',
 );
 const GENERATE_CONFIG_DEFAULT = false;
 
@@ -31,6 +31,8 @@ host: 0.0.0.0
 token: ${uuidv4()}
 `;
 
+const CONFIG_FILE_NAME = 'agent.yaml';
+
 export class CLIOptions extends Options {
   @option({
     flag: 'g',
@@ -41,44 +43,54 @@ export class CLIOptions extends Options {
   generateConfigOnly!: boolean;
 
   @option({
-    flag: 'c',
-    description: 'The path of makescript agent config.',
-    default: CONFIG_PATH_DEFAULT,
+    flag: 'w',
+    description: 'The path for makescript agent to work.',
+    default: WORKSPACE_PATH_DEFAULT,
   })
-  configPath!: Castable.File;
+  workspace!: Castable.Directory;
 }
 
 @command()
 export default class extends Command {
   @metadata
-  async execute({generateConfigOnly, configPath}: CLIOptions): Promise<void> {
-    let fileExists = await configPath.exists();
+  async execute({generateConfigOnly, workspace}: CLIOptions): Promise<void> {
+    let configFilePath = Path.join(workspace.fullName, CONFIG_FILE_NAME);
 
-    if (fileExists && generateConfigOnly) {
+    let configFileExists = FS.existsSync(configFilePath);
+
+    if (configFileExists && generateConfigOnly) {
       console.warn(
-        `The config file "${configPath.fullName}" has existed, so the new config has not generated.`,
+        `The config file "${configFilePath}" has existed, so the new config has not generated.`,
       );
       return;
     }
 
-    if (!fileExists) {
-      let dirname = Path.dirname(configPath.fullName);
+    if (!configFileExists) {
+      let dirname = workspace.fullName;
 
       if (!FS.existsSync(dirname)) {
         FS.mkdirSync(dirname);
       }
 
-      FS.writeFileSync(configPath.fullName, YAML_CONFIG_CONTENT_DEFAULT);
+      FS.writeFileSync(configFilePath, YAML_CONFIG_CONTENT_DEFAULT);
     }
 
     if (generateConfigOnly) {
       return;
     }
 
-    let yamlConfigContent = await configPath.text();
+    let yamlConfigContent = FS.readFileSync(configFilePath).toString();
 
-    let config: Config = YAML.parse(yamlConfigContent);
+    let config: MakescriptAgentConfig = YAML.parse(yamlConfigContent);
 
-    await main(config);
+    // TODO:
+    // let tiva = new Tiva();
+
+    // await tiva.validate(
+    //   {module: '@makeflow/makescript-agent', type: 'MakescriptAgentConfig'},
+    //   config,
+    // );
+
+    await main(config, workspace.fullName);
   }
 }

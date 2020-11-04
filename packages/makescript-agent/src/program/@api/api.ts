@@ -1,21 +1,24 @@
 import Boom from '@hapi/boom';
 import Hapi, {ServerAuthSchemeObject} from '@hapi/hapi';
 
+import {Config} from '../@config';
+import {Entrances} from '../@entrances';
+
+import {routeRunning} from './running';
+import {routeScripts} from './scripts';
+
 const TOKEN_REQUEST_HEADER_NAME = 'x-access-token';
 
 const TOKEN_AUTH_SCHEME_NAME = 'token';
 const TOKEN_AUTH_STRATEGY_NAME = 'token';
 
-export interface ServeAPIOptions {
-  port: number;
-  host: string;
-  token: string;
-}
-
-export async function serveAPI(options: ServeAPIOptions): Promise<void> {
+export async function serveAPI(
+  entrances: Entrances,
+  config: Config,
+): Promise<void> {
   const server = Hapi.server({
-    port: options.port,
-    host: options.host,
+    port: config.port,
+    host: config.host,
   });
 
   server.auth.scheme(
@@ -23,7 +26,7 @@ export async function serveAPI(options: ServeAPIOptions): Promise<void> {
     (): ServerAuthSchemeObject => {
       return {
         authenticate(request, h): Hapi.Lifecycle.ReturnValue {
-          if (request.headers[TOKEN_REQUEST_HEADER_NAME] !== options.token) {
+          if (request.headers[TOKEN_REQUEST_HEADER_NAME] !== config.token) {
             return Boom.unauthorized();
           }
 
@@ -44,6 +47,13 @@ export async function serveAPI(options: ServeAPIOptions): Promise<void> {
     },
   });
 
+  routeAPI(entrances, server);
+
   await server.start();
-  console.info(`Makescript agent server is running on port ${options.port}`);
+  console.info(`Makescript agent server is running on port ${config.port}`);
+}
+
+function routeAPI(entrances: Entrances, server: Hapi.Server): void {
+  routeScripts(entrances.scriptService, server);
+  routeRunning(entrances.runningService, server);
 }
