@@ -17,7 +17,10 @@
         "name": "@makeflow/makescript",
         "tsProjects": [
           {
-            "name": "program"
+            "name": "shared"
+          },
+          {
+            "name": "server"
           },
           {
             "name": "web"
