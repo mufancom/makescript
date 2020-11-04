@@ -10,9 +10,7 @@
     "test": "yarn lint-prettier && yarn build && yarn lint"
   },
   "workspaces": [
-    "packages/makescript-shared",
     "packages/makescript-agent",
-    "packages/makescript-web",
     "packages/makescript"
   ],
   "devDependencies": {
