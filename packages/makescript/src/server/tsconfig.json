@@ -2,7 +2,7 @@
   "extends": "@mufan/code/tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "outDir": "../../bld/program",
+    "outDir": "../../bld/server",
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
