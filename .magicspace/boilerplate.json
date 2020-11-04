@@ -6,23 +6,7 @@
     "author": "Chengdu Mufan Technology Co., Ltd.",
     "packages": [
       {
-        "name": "@makeflow/makescript-shared",
-        "tsProjects": [
-          {
-            "name": "library"
-          }
-        ]
-      },
-      {
         "name": "@makeflow/makescript-agent",
-        "tsProjects": [
-          {
-            "name": "program"
-          }
-        ]
-      },
-      {
-        "name": "@makeflow/makescript-web",
         "tsProjects": [
           {
             "name": "program"
@@ -34,6 +18,9 @@
         "tsProjects": [
           {
             "name": "program"
+          },
+          {
+            "name": "web"
           }
         ]
       }
