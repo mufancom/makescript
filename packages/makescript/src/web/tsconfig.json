@@ -8,5 +8,5 @@
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "react"
   },
-  "references": [{"path": "../shared"}]
+  "references": [{"path": "../program"}]
 }
