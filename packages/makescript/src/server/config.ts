@@ -1,6 +1,10 @@
-import {Config as AgentConfig} from '@makeflow/makescript-agent';
+import {MakescriptAgentConfig} from '@makeflow/makescript-agent';
+import YAML from 'yaml';
 
-export interface Config {
+/**
+ * The config type use for config file
+ */
+export interface MakescriptConfig {
   /**
    * The host ot listen on
    */
@@ -15,48 +19,28 @@ export interface Config {
    */
   'web-port': number;
   'external-url': string;
-  'session-secret': string;
-  /**
-   * The path for storing data
-   */
-  workspace: string;
+  'cookie-password': string;
 
-  'default-agent': AgentConfig;
-
-  makeflow: {
-    address: string;
-    'power-app': {
-      name: string;
-      'display-name': string;
-      description: string;
-    };
-  };
-
-  mail: {
-    host: string;
-    port: number;
-    username: string;
-    password: string;
-  };
-
-  agents: {
-    address: string;
-    token: string;
-  }[];
+  'default-agent': MakescriptAgentConfig;
 
   /**
    * Not yet implemented
    */
-  adapters: {
-    /**
-     * @unique
-     *
-     * The script type to execute
-     */
-    type: string;
-    /**
-     * The node package to execute the scripts with this type
-     */
-    package: string;
-  }[];
+  // adapters: {
+  //   /**
+  //    * @unique
+  //    *
+  //    * The script type to execute
+  //    */
+  //   type: string;
+  //   /**
+  //    * The node package to execute the scripts with this type
+  //    */
+  //   package: string;
+  // }[];
+}
+
+export function generateYamlConfig(config: MakescriptConfig): string {
+  // TODO: add comments
+  return YAML.stringify(config);
 }

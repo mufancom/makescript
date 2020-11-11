@@ -3,16 +3,30 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
+  "bin": {
+    "makescript": "bld/server/@cli.js"
+  },
+  "files": [
+    "src/**/*.ts",
+    "bld"
+  ],
+  "scripts": {
+    "build": "rimraf bld && tsc --project src/shared/tsconfig.json && tsc --project src/server/tsconfig.json"
+  },
   "dependencies": {
     "@makeflow/makescript-agent": "^0.1.0",
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",
+    "ip": "^1.1.5",
     "tslib": "^2.0.3",
+    "uuid": "^7.0.0",
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@types/ip": "^1.1.0",
     "@types/react": "^16.9.55",
     "@types/react-dom": "^16.9.9",
+    "@types/uuid": "^7.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   }

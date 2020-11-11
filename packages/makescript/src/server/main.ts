@@ -1,3 +1,3 @@
-import {Config} from './config';
+import {MakescriptConfig} from './config';
 
-export function main(config: Config): void {}
+export function main(config: MakescriptConfig, workspace: string): void {}

@@ -7,5 +7,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": true
-  }
+  },
+  "references": [{"path": "../shared"}]
 }

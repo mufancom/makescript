@@ -6,7 +6,7 @@ import {Castable, Command, Options, command, metadata, option} from 'clime';
 import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
-import {MakescriptAgentConfig} from '../config';
+import {MakescriptAgentConfig, generateYamlConfig} from '../config';
 import {main} from '../main';
 
 const WORKSPACE_PATH_DEFAULT = Path.resolve(
@@ -18,18 +18,12 @@ const WORKSPACE_PATH_DEFAULT = Path.resolve(
 const GENERATE_CONFIG_DEFAULT = false;
 
 // TODO: Type safe
-const YAML_CONFIG_CONTENT_DEFAULT = `
-# Config for makescript agent
-
-# The port to listen on
-port: 8902
-
-# The interface host to listen on
-host: 0.0.0.0
-
-# The token use to authenticate
-token: ${uuidv4()}
-`;
+const YAML_CONFIG_CONTENT_DEFAULT = (): string =>
+  generateYamlConfig({
+    port: 8902,
+    host: '0.0.0.0',
+    token: uuidv4(),
+  });
 
 const CONFIG_FILE_NAME = 'agent.yaml';
 
@@ -72,7 +66,7 @@ export default class extends Command {
         FS.mkdirSync(dirname);
       }
 
-      FS.writeFileSync(configFilePath, YAML_CONFIG_CONTENT_DEFAULT);
+      FS.writeFileSync(configFilePath, YAML_CONFIG_CONTENT_DEFAULT());
     }
 
     if (generateConfigOnly) {
