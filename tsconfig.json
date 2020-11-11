@@ -4,10 +4,7 @@
       "path": "packages/makescript-agent/src/program"
     },
     {
-      "path": "packages/makescript/src/shared"
-    },
-    {
-      "path": "packages/makescript/src/server"
+      "path": "packages/makescript/src/program"
     },
     {
       "path": "packages/makescript/src/web"
