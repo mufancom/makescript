@@ -1,7 +1,7 @@
 import entrance from 'entrance-decorator';
 
-import {Config} from './@config';
 import {RunningService, ScriptService} from './@services';
+import {Config} from './config';
 
 export class Entrances {
   constructor(private config: Config) {}

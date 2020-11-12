@@ -1,11 +1,11 @@
 import Boom from '@hapi/boom';
 import Hapi, {ServerAuthSchemeObject} from '@hapi/hapi';
 
-import {Config} from '../@config';
 import {Entrances} from '../@entrances';
+import {Config} from '../config';
 
-import {routeRunning} from './running';
-import {routeScripts} from './scripts';
+import {routeRunning} from './@running';
+import {routeScripts} from './@scripts';
 
 const TOKEN_REQUEST_HEADER_NAME = 'x-access-token';
 

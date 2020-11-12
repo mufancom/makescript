@@ -6,7 +6,7 @@ import {Castable, Command, Options, command, metadata, option} from 'clime';
 import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
-import {MakescriptAgentConfig, generateYamlConfig} from '../config';
+import {ConfigFile, generateYamlConfig, transformConfig} from '../config';
 import {main} from '../main';
 
 const WORKSPACE_PATH_DEFAULT = Path.resolve(
@@ -75,7 +75,7 @@ export default class extends Command {
 
     let yamlConfigContent = FS.readFileSync(configFilePath).toString();
 
-    let config: MakescriptAgentConfig = YAML.parse(yamlConfigContent);
+    let configFileContent: ConfigFile = YAML.parse(yamlConfigContent);
 
     // TODO:
     // let tiva = new Tiva();
@@ -85,6 +85,8 @@ export default class extends Command {
     //   config,
     // );
 
-    await main(config, workspace.fullName);
+    let config = transformConfig(configFileContent, workspace.fullName);
+
+    await main(config);
   }
 }

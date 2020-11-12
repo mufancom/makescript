@@ -6,7 +6,7 @@ import extractZip from 'extract-zip';
 import rimraf from 'rimraf';
 import * as villa from 'villa';
 
-import {Config} from '../@config';
+import {Config} from '../config';
 import {ScriptDefinition, ScriptsDefinition, ScriptsSyncResult} from '../types';
 
 const SCRIPTS_DIRECTORY_NAME = 'scripts';

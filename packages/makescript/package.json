@@ -14,20 +14,32 @@
     "build": "rimraf bld && tsc --project src/shared/tsconfig.json && tsc --project src/server/tsconfig.json"
   },
   "dependencies": {
+    "@hapi/hapi": "^20.0.2",
     "@makeflow/makescript-agent": "^0.1.0",
+    "archiver": "^5.0.2",
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",
+    "extendable-error": "^0.1.7",
     "ip": "^1.1.5",
+    "lowdb": "^1.0.0",
+    "node-fetch": "^2.6.1",
+    "rimraf": "^3.0.2",
     "tslib": "^2.0.3",
     "uuid": "^7.0.0",
+    "villa": "^0.3.2",
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@makeflow/types": "^0.1.24",
+    "@makeflow/types-nominal": "^0.1.2",
+    "@types/hapi__hapi": "^20.0.2",
     "@types/ip": "^1.1.0",
+    "@types/lowdb": "^1.0.9",
     "@types/react": "^16.9.55",
     "@types/react-dom": "^16.9.9",
     "@types/uuid": "^7.0.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "tslang": "^0.1.22"
   }
 }

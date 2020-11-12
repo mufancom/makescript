@@ -58,8 +58,8 @@ export class RunningService {
       onError,
     });
 
-    onOutputDone();
-    onErrorDone();
+    await onOutputDone();
+    await onErrorDone();
 
     await this.handleResources(argument, resourcesPath);
 
@@ -164,7 +164,7 @@ export class RunningService {
     argument: ScriptRunningArgument,
     scriptDefinition: ScriptDefinition,
     error: boolean,
-  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): void} {
+  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): Promise<void>} {
     let outputMode = scriptDefinition.config.output;
 
     let outputCallbackAPI = getCallbackAPI(
@@ -174,6 +174,8 @@ export class RunningService {
 
     let output = '';
 
+    let promises: Promise<unknown>[] = [];
+
     return {
       onOutput: data => {
         if (outputMode === 'cover') {
@@ -182,20 +184,29 @@ export class RunningService {
           output += data;
         }
 
+        // TODO: 时序问题
         if (outputMode === 'stream' || outputMode === 'cover') {
-          fetch(outputCallbackAPI, {
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({content: output}),
-          }).catch(console.error);
+          promises.push(
+            fetch(outputCallbackAPI, {
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({content: output}),
+            }),
+          );
         }
       },
-      done: () => {
-        if (outputMode === 'aggregate') {
-          fetch(outputCallbackAPI, {
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({content: output}),
-          }).catch(console.error);
+      done: async () => {
+        if (output) {
+          if (outputMode === 'aggregate') {
+            promises.push(
+              fetch(outputCallbackAPI, {
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content: output}),
+              }),
+            );
+          }
         }
+
+        await Promise.all(promises);
       },
     };
   }

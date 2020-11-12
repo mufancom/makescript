@@ -4,6 +4,7 @@
     "composite": true,
     "outDir": "../../bld/program",
 
+    "types": ["node", "@makeflow/types-nominal/default"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": true
