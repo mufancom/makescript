@@ -15,7 +15,7 @@ const DB_MODEL_DEFAULT: Model = {
     powerAppVersion: '0.1.0',
   },
   settings: {
-    scriptsRepo: undefined,
+    scriptsRepoURL: undefined,
   },
   users: [],
   tokens: [],

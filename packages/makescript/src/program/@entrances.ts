@@ -21,7 +21,7 @@ export class Entrances {
 
   @entrance
   get makeflowService(): MakeflowService {
-    return new MakeflowService(this.dbService, this.config);
+    return new MakeflowService(this.scriptService, this.dbService, this.config);
   }
 
   @entrance
@@ -31,7 +31,7 @@ export class Entrances {
 
   @entrance
   get scriptService(): ScriptService {
-    return new ScriptService(this.agentService, this.config);
+    return new ScriptService(this.agentService, this.dbService, this.config);
   }
 
   @entrance

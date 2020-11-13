@@ -1,3 +1,4 @@
+import type {ProcedureField} from '@makeflow/types';
 import {Nominal} from 'tslang';
 
 export interface ScriptsDefinition {
@@ -31,6 +32,12 @@ export interface ScriptDefinitionDetailedParameter {
   name: string;
   displayName: string;
   required: boolean;
+  field?: ScriptDefinitionDetailedParameterField;
+}
+
+export interface ScriptDefinitionDetailedParameterField {
+  type: ProcedureField.BuiltInProcedureFieldType;
+  data: unknown;
 }
 
 // Options

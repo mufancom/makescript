@@ -35,6 +35,7 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@makeflow/types": "^0.1.26",
     "@types/archiver": "^3.1.1",
     "@types/hapi__hapi": "^20.0.2",
     "@types/hapi__joi": "^17.1.6",
