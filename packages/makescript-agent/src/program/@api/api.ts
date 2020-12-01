@@ -7,7 +7,7 @@ import {Config} from '../config';
 import {routeRunning} from './@running';
 import {routeScripts} from './@scripts';
 
-const TOKEN_REQUEST_HEADER_NAME = 'x-access-token';
+const TOKEN_AUTHORIZATION_REGEX = /^Token (\w+)$/i;
 
 const TOKEN_AUTH_SCHEME_NAME = 'token';
 const TOKEN_AUTH_STRATEGY_NAME = 'token';
@@ -26,7 +26,16 @@ export async function serveAPI(
     (): ServerAuthSchemeObject => {
       return {
         authenticate(request, h): Hapi.Lifecycle.ReturnValue {
-          if (request.headers[TOKEN_REQUEST_HEADER_NAME] !== config.token) {
+          let authorization = request.headers['authorization'];
+          let authorizationExecResult =
+            authorization && TOKEN_AUTHORIZATION_REGEX.exec(authorization);
+
+          if (
+            !authorization ||
+            !authorizationExecResult ||
+            !authorizationExecResult[1] ||
+            authorizationExecResult[1] !== config.token
+          ) {
             return Boom.unauthorized();
           }
 

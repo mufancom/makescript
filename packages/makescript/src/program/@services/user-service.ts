@@ -8,7 +8,7 @@ import {DBService} from './db-service';
 const USER_PASSWORD_HASH_SALT = 'makescript-user-password-hash-salt';
 
 export class UserService {
-  get hasUser(): boolean {
+  get hasAnyUser(): boolean {
     return this.dbService.db.get('users').size().value() > 0;
   }
 
@@ -24,6 +24,15 @@ export class UserService {
       .value();
   }
 
+  getUserById(id: string): UserModel | undefined {
+    return this.dbService.db
+      .get('users')
+      .find({
+        id,
+      })
+      .value();
+  }
+
   async initializeAdminUser({
     username,
     password,
@@ -32,12 +41,12 @@ export class UserService {
     username: string;
     password: string;
     notificationHook: string | undefined;
-  }): Promise<void> {
-    if (this.hasUser) {
+  }): Promise<UserModel> {
+    if (this.hasAnyUser) {
       throw new ExpectedError('APP_ALREADY_INITIALIZED');
     }
 
-    await this.dbService.db
+    let insertedUsers = await this.dbService.db
       .get('users')
       .push({
         id: uuidv4(),
@@ -47,6 +56,8 @@ export class UserService {
         admin: true,
       })
       .write();
+
+    return insertedUsers[0];
   }
 
   async createUser(username: string): Promise<string> {

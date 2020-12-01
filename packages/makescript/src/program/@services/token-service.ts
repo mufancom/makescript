@@ -20,6 +20,7 @@ export class TokenService {
         id: uuidv4(),
         label,
         hash,
+        createdAt: Date.now(),
         disabledAt: undefined,
       })
       .write();

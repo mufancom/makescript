@@ -1,6 +1,5 @@
 import {
   ScriptDefinition,
-  ScriptDefinitionDetailedParameter,
   ScriptDefinitionParameter,
 } from '@makeflow/makescript-agent';
 import type {
@@ -18,11 +17,24 @@ import {Config} from '../config';
 import {MFUserCandidate} from '../types/makeflow';
 
 import {DBService} from './db-service';
+import {RunningService} from './running-service';
 import {ScriptService} from './script-service';
+import {TokenService} from './token-service';
+
+const TASK_NUMERIC_ID_INPUT_NAME = 'taskNumericId' as PowerAppInput.Name;
+const TASK_NUMERIC_ID_VARIABLE = 'task_numericId';
+const TASK_BRIEF_INPUT_NAME = 'taskBrief' as PowerAppInput.Name;
+const TASK_BRIEF_VARIABLE = 'task_brief';
+const TASK_ASSIGNEE_INPUT_NAME = 'taskAssignee' as PowerAppInput.Name;
+const TASK_ASSIGNEE_VARIABLE = 'task_assignee';
+const TASK_URL_INPUT_NAME = 'taskURL' as PowerAppInput.Name;
+const TASK_URL_VARIABLE = 'task_url';
 
 export class MakeflowService {
   constructor(
     private scriptService: ScriptService,
+    private runningService: RunningService,
+    private tokenService: TokenService,
     private dbService: DBService,
     private config: Config,
   ) {}
@@ -60,6 +72,47 @@ export class MakeflowService {
     await this.dbService.db.get('makeflow').set('loginToken', token).write();
   }
 
+  checkAuthentication(): boolean {
+    let makeflowSettings = this.dbService.db.get('makeflow').value();
+
+    return !!makeflowSettings.loginToken;
+  }
+
+  async triggerAction(
+    actionName: string,
+    powerItemToken: string,
+    inputs: Dict<unknown>,
+    accessToken: string,
+  ): Promise<void> {
+    let {namespace, name} = convertActionNameToScriptName(actionName);
+
+    // TODO: check token
+    let tokenLabel =
+      this.tokenService.getActiveToken(accessToken)?.label ?? 'Unknown';
+
+    let {
+      taskNumericId,
+      taskBrief,
+      taskAssignee,
+      taskURL,
+      ...parameters
+    } = inputs;
+
+    await this.runningService.enqueueRunningRecord({
+      namespace,
+      name,
+      triggerTokenLabel: tokenLabel,
+      parameters,
+      makeflowTask: {
+        taskUrl: taskURL as string,
+        numericId: taskNumericId as number,
+        brief: taskBrief as string,
+        assignee: taskAssignee,
+        powerItemToken,
+      },
+    });
+  }
+
   async publishPowerApp(): Promise<void> {
     let powerAppDefinition = await this.generateAppDefinition();
 
@@ -72,7 +125,7 @@ export class MakeflowService {
     await this.increasePowerAppVersion();
   }
 
-  private async generateAppDefinition(): Promise<PowerApp.RawDefinition> {
+  async generateAppDefinition(): Promise<PowerApp.RawDefinition> {
     let scriptsDefinition = await this.scriptService.scriptsDefinition;
     let makeflowInfo = this.dbService.db.get('makeflow').value();
 
@@ -96,10 +149,12 @@ export class MakeflowService {
         },
       ],
       contributions: {
-        powerItems: convertCommandConfigsToPowerItemDefinitions(
-          scriptsDefinition.scripts,
-          this.config.agents.map(agent => agent.namespace),
-        ),
+        powerItems: scriptsDefinition
+          ? convertCommandConfigsToPowerItemDefinitions(
+              scriptsDefinition.scripts,
+              this.config.agents.map(agent => agent.namespace),
+            )
+          : [],
       },
     };
   }
@@ -166,7 +221,10 @@ function convertCommandConfigsToPowerItemDefinitions(
         return namespaces.map(
           (namespace): PowerItem.Definition => {
             return {
-              name: `${namespace}:${name}` as PowerItem.Name,
+              name: convertScriptNameToActionName(
+                namespace,
+                name,
+              ) as PowerItem.Name,
               displayName: toLabelNamespace
                 ? `[${namespace}] ${displayName}`
                 : displayName,
@@ -175,9 +233,45 @@ function convertCommandConfigsToPowerItemDefinitions(
                   convertCommandConfigParameterToPowerItemField(parameter),
                 ),
               ),
-              inputs: parameters.map(parameter =>
-                convertCommandConfigParamaterToPowerItemActionInput(parameter),
-              ),
+              inputs: [
+                {
+                  name: TASK_NUMERIC_ID_INPUT_NAME,
+                  displayName: 'Task Numeric Id',
+                  bind: {
+                    type: 'variable',
+                    variable: TASK_NUMERIC_ID_VARIABLE,
+                  },
+                },
+                {
+                  name: TASK_BRIEF_INPUT_NAME,
+                  displayName: 'Task Brief',
+                  bind: {
+                    type: 'variable',
+                    variable: TASK_BRIEF_VARIABLE,
+                  },
+                },
+                {
+                  name: TASK_ASSIGNEE_INPUT_NAME,
+                  displayName: 'Task Assignee',
+                  bind: {
+                    type: 'variable',
+                    variable: TASK_ASSIGNEE_VARIABLE,
+                  },
+                },
+                {
+                  name: TASK_URL_INPUT_NAME,
+                  displayName: 'Task URL',
+                  bind: {
+                    type: 'variable',
+                    variable: TASK_URL_VARIABLE,
+                  },
+                },
+                ...parameters.map(parameter =>
+                  convertCommandConfigParamaterToPowerItemActionInput(
+                    parameter,
+                  ),
+                ),
+              ],
               actions: [
                 {
                   name: name as PowerItem.ActionName,
@@ -211,10 +305,7 @@ function convertCommandConfigParameterToPowerItemField(
   parameter: ScriptDefinitionParameter,
 ): PowerItem.PowerItemFieldDefinition | undefined {
   // TODO: as?
-  let field =
-    typeof parameter === 'object'
-      ? (parameter as ScriptDefinitionDetailedParameter).field
-      : undefined;
+  let field = typeof parameter === 'object' ? parameter.field : undefined;
 
   if (!field) {
     return undefined;
@@ -241,9 +332,8 @@ function getNameAndDisplayNameOfParameter(
     name = parameter;
     displayName = parameter;
   } else {
-    name = (parameter as ScriptDefinitionDetailedParameter).name;
-    displayName =
-      (parameter as ScriptDefinitionDetailedParameter).displayName ?? name;
+    name = parameter.name;
+    displayName = parameter.displayName ?? name;
   }
 
   return [name, displayName];
@@ -251,4 +341,22 @@ function getNameAndDisplayNameOfParameter(
 
 function compact<T>(list: (T | undefined)[]): T[] {
   return list.filter((item): item is T => !!item);
+}
+
+function convertScriptNameToActionName(
+  namespace: string,
+  name: string,
+): string {
+  return `${namespace}:${name}`;
+}
+
+function convertActionNameToScriptName(
+  actionName: string,
+): {namespace: string; name: string} {
+  let [namespace, ...nameFragments] = actionName.split(':');
+
+  return {
+    namespace,
+    name: nameFragments.join(':'),
+  };
 }

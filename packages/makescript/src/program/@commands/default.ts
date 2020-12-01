@@ -28,7 +28,7 @@ const YAML_CONFIG_CONTENT_DEFAULT = (): string =>
     api: {
       host: 'localhost',
       port: 8901,
-      url: `${ip.address}:8901`,
+      url: `${ip.address()}:8901`,
     },
 
     'default-agent': {

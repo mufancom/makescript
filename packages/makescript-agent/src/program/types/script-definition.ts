@@ -1,5 +1,4 @@
 import type {ProcedureField} from '@makeflow/types';
-import {Nominal} from 'tslang';
 
 export interface ScriptsDefinition {
   scripts: ScriptDefinition[];
@@ -21,12 +20,7 @@ export interface ScriptDefinition {
 
 export type ScriptDefinitionParameter =
   | ScriptDefinitionDetailedParameter
-  | ScriptDefinitionBriefParameter;
-
-export type ScriptDefinitionBriefParameter = Nominal<
-  string,
-  'script-definition-brief-parameter'
->;
+  | string;
 
 export interface ScriptDefinitionDetailedParameter {
   name: string;

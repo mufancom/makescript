@@ -15,7 +15,6 @@ import {
   IAdapter,
   ScriptDefinition,
   ScriptRunningArgument,
-  ScriptRunningArgumentParameter,
 } from '../types';
 
 import {ScriptService} from './script-service';
@@ -28,13 +27,12 @@ export class RunningService {
   async runScript(
     argument: ScriptRunningArgument,
   ): Promise<AdapterRunScriptResult> {
-    let {name, parameters: parameterArray, resourcesBaseURL} = argument;
+    let {name, parameters, resourcesBaseURL} = argument;
 
     let definition = this.requireScriptDefinition(name);
     let source = this.resolveSource(definition);
     let adapter = this.requireAdapter(definition);
     let options = this.resolveOptions(definition);
-    let parameters = this.transformParameters(parameterArray);
     let resourcesPath = this.generateRandomResourcesPath();
 
     let {onOutput, done: onOutputDone} = this.getOnOutput(
@@ -119,14 +117,6 @@ export class RunningService {
         // TODO:
         throw new Error();
       }),
-    );
-  }
-
-  private transformParameters(
-    parameters: ScriptRunningArgumentParameter[],
-  ): Dict<unknown> {
-    return Object.fromEntries(
-      parameters.map(parameter => [parameter.name, parameter.value]),
     );
   }
 

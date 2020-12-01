@@ -7,5 +7,6 @@ npm-debug.log
 # TypeScript Build Artifacts
 bld/
 .bld-cache/
+.cache/
 # Test
 /test.*

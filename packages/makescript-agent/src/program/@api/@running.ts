@@ -28,12 +28,7 @@ export function routeRunning(
         payload: (Joi.object({
           token: Joi.string(),
           name: Joi.string(),
-          parameters: Joi.array().items(
-            Joi.object({
-              name: Joi.string(),
-              value: Joi.any(),
-            }),
-          ),
+          parameters: Joi.object(),
           resourcesBaseURL: Joi.string(),
           hostURL: Joi.string(),
         }) as unknown) as Dict<any>,

@@ -11,10 +11,15 @@
     "bld"
   ],
   "scripts": {
-    "build": "rimraf bld && tsc --project src/shared/tsconfig.json && tsc --project src/server/tsconfig.json"
+    "pack-web": "rimraf bld/web && parcel build src/web/index.html --out-dir bld/web/",
+    "watch-web": "parcel watch src/web/index.html --out-dir bld/web/",
+    "build": "rimraf bld/program && tsc --project src/program/tsconfig.json"
   },
   "dependencies": {
+    "@hapi/cookie": "^11.0.2",
     "@hapi/hapi": "^20.0.2",
+    "@hapi/inert": "^6.0.3",
+    "@hapi/joi": "^17.1.1",
     "@makeflow/makescript-agent": "^0.1.0",
     "archiver": "^5.0.2",
     "clime": "^0.5.14",
@@ -31,18 +36,38 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@ant-design/icons": "^4.3.0",
     "@makeflow/types": "^0.1.24",
     "@makeflow/types-nominal": "^0.1.2",
+    "@types/classnames": "^2.2.11",
+    "@types/clipboard": "^2.0.1",
+    "@types/hapi__cookie": "^10.1.1",
     "@types/hapi__hapi": "^20.0.2",
+    "@types/hapi__inert": "^5.2.2",
+    "@types/history": "^4.7.8",
     "@types/ip": "^1.1.0",
     "@types/lowdb": "^1.0.9",
     "@types/react": "^16.9.55",
     "@types/react-dom": "^16.9.9",
     "@types/semver": "^7.3.4",
+    "@types/styled-components": "^5.1.4",
     "@types/uuid": "^7.0.0",
+    "antd": "^4.8.5",
+    "boring-router": "^0.4.3",
+    "boring-router-react": "^0.4.0",
+    "classnames": "^2.2.6",
+    "clipboard": "^2.0.6",
+    "highlight.js": "^10.4.0",
+    "history": "^5.0.0",
+    "memorize-decorator": "^0.2.4",
+    "mobx": "^5.15.5",
+    "mobx-react": "^6.2.5",
+    "mobx-utils": "^5.6.1",
+    "parcel-bundler": "^1.12.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "semver": "^7.3.2",
+    "styled-components": "^5.2.1",
     "tslang": "^0.1.22"
   }
 }

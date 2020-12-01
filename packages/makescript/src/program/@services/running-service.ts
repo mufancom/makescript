@@ -1,13 +1,24 @@
-import {ScriptRunningArgumentParameter} from '@makeflow/makescript-agent';
+import {ScriptRunningArgumentParameters} from '@makeflow/makescript-agent';
 import {v4 as uuidv4} from 'uuid';
 
-import {ExpectedError, RunningRecordMakeflowTask} from '../@core';
+import {
+  ExpectedError,
+  RunningRecordModel,
+  RunningRecordModelMakeflowInfo,
+} from '../@core';
 import {Config} from '../config';
+import {RunningRecord, RunningRecordMakeflowInfo} from '../types';
 
 import {AgentService} from './agent-service';
 import {DBService} from './db-service';
 
 export class RunningService {
+  get runningRecords(): RunningRecord[] {
+    let runningRecordModels = this.dbService.db.get('records').value();
+
+    return runningRecordModels.map(model => convertRecordModelToRecord(model));
+  }
+
   constructor(
     private agentService: AgentService,
     private dbService: DBService,
@@ -18,15 +29,16 @@ export class RunningService {
     namespace,
     name,
     parameters,
-    triggerToken,
+    triggerTokenLabel,
     makeflowTask,
   }: {
     namespace: string;
     name: string;
-    parameters: ScriptRunningArgumentParameter[];
-    triggerToken: string;
-    makeflowTask: RunningRecordMakeflowTask | undefined;
+    parameters: ScriptRunningArgumentParameters;
+    triggerTokenLabel: string;
+    makeflowTask: RunningRecordModelMakeflowInfo | undefined;
   }): Promise<string> {
+    // TODO: Filter parameters
     let insertedRecords = await this.dbService.db
       .get('records')
       .unshift({
@@ -34,9 +46,11 @@ export class RunningService {
         namespace,
         name,
         parameters,
-        triggerToken,
-        makeflowTask,
+        deniedParameters: {},
+        triggerTokenLabel,
+        makeflow: makeflowTask,
         result: undefined,
+        output: undefined,
         createdAt: Date.now(),
         ranAt: undefined,
       })
@@ -64,4 +78,23 @@ export class RunningService {
 
     await this.dbService.db.get('records').find({id}).assign({result}).write();
   }
+}
+
+function convertRecordModelToRecord(
+  recordModel: RunningRecordModel,
+): RunningRecord {
+  let {makeflow, ...rest} = recordModel;
+
+  let convertedMakeflow: RunningRecordMakeflowInfo | undefined;
+
+  if (makeflow) {
+    let {powerItemToken, ...restMakeflow} = makeflow;
+
+    convertedMakeflow = restMakeflow;
+  }
+
+  return {
+    ...rest,
+    makeflow: convertedMakeflow,
+  };
 }

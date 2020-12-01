@@ -4,6 +4,7 @@
     "composite": true,
     "outDir": "../../bld/web",
 
+    "experimentalDecorators": true,
     "target": "es5",
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "react"

@@ -1,12 +1,11 @@
+import {Dict} from 'tslang';
+
 export interface ScriptRunningArgument {
   token: string;
   name: string;
-  parameters: ScriptRunningArgumentParameter[];
+  parameters: ScriptRunningArgumentParameters;
   resourcesBaseURL: string;
   hostURL: string;
 }
 
-export interface ScriptRunningArgumentParameter {
-  name: string;
-  value: unknown;
-}
+export type ScriptRunningArgumentParameters = Dict<unknown>;

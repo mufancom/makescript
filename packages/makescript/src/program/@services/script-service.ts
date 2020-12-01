@@ -6,7 +6,7 @@ import {ScriptsDefinition} from '@makeflow/makescript-agent';
 import rimraf from 'rimraf';
 import * as villa from 'villa';
 
-import {ExpectedError} from '../@core';
+import {spawn} from '../@utils';
 import {Config} from '../config';
 
 import {AgentService} from './agent-service';
@@ -25,12 +25,16 @@ export class ScriptService {
     return Path.join(this.scriptsPath, SCRIPTS_CONFIG_FILE_NAME);
   }
 
-  get scriptsDefinition(): ScriptsDefinition {
+  get scriptsDefinition(): ScriptsDefinition | undefined {
     if (!FS.existsSync(this.scriptsDefinitionPath)) {
-      throw new ExpectedError('SCRIPTS_DEFINITION_FILE_NOT_FOUND');
+      return undefined;
     }
 
     return JSON.parse(FS.readFileSync(this.scriptsDefinitionPath).toString());
+  }
+
+  get scriptsRepoURL(): string | undefined {
+    return this.dbService.db.get('settings').value().scriptsRepoURL;
   }
 
   constructor(
@@ -42,13 +46,14 @@ export class ScriptService {
   async updateScriptsRepoURL(repoURL: string): Promise<void> {
     await villa.async(rimraf)(this.scriptsPath);
 
-    let cp = CP.spawn('git', [repoURL, this.scriptsPath]);
+    await spawn('git', ['clone', repoURL, this.scriptsPath], {});
 
-    await villa.awaitable(cp);
+    await this.dbService.db
+      .get('settings')
+      .assign({scriptsRepoURL: repoURL})
+      .write();
 
     await this.agentService.updateScriptsForAllAgents(this.scriptsPath);
-
-    this.dbService.db.get('settings').assign({scriptsRepoURL: repoURL});
   }
 
   async updateScripts(): Promise<void> {

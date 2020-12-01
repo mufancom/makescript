@@ -6,6 +6,8 @@ import {
   MakeflowService,
   RunningService,
   ScriptService,
+  TokenService,
+  UserService,
 } from './@services';
 import {Config} from './config';
 
@@ -21,7 +23,13 @@ export class Entrances {
 
   @entrance
   get makeflowService(): MakeflowService {
-    return new MakeflowService(this.scriptService, this.dbService, this.config);
+    return new MakeflowService(
+      this.scriptService,
+      this.runningService,
+      this.tokenService,
+      this.dbService,
+      this.config,
+    );
   }
 
   @entrance
@@ -37,5 +45,15 @@ export class Entrances {
   @entrance
   get runningService(): RunningService {
     return new RunningService(this.agentService, this.dbService, this.config);
+  }
+
+  @entrance
+  get userService(): UserService {
+    return new UserService(this.dbService);
+  }
+
+  @entrance
+  get tokenService(): TokenService {
+    return new TokenService(this.dbService);
   }
 }

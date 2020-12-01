@@ -4,7 +4,7 @@ import * as Path from 'path';
 
 import {
   AdapterRunScriptResult,
-  ScriptRunningArgumentParameter,
+  ScriptRunningArgumentParameters,
 } from '@makeflow/makescript-agent';
 import fetch from 'node-fetch';
 import rimraf from 'rimraf';
@@ -61,7 +61,7 @@ export class AgentService {
     }: {
       id: string;
       name: string;
-      parameters: ScriptRunningArgumentParameter[];
+      parameters: ScriptRunningArgumentParameters;
       resourcesBaseURL: string;
       hostURL: string;
     },
