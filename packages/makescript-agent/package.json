@@ -16,15 +16,12 @@
     "build": "rimraf bld && tsc --project src/program/tsconfig.json"
   },
   "dependencies": {
-    "@hapi/boom": "^9.1.0",
-    "@hapi/hapi": "^20.0.1",
-    "@hapi/joi": "^17.1.1",
     "archiver": "^5.0.2",
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",
-    "extract-zip": "^2.0.1",
     "node-fetch": "^2.6.1",
     "rimraf": "^3.0.2",
+    "socket.io-client": "^3.0.3",
     "sqlite": "^4.0.15",
     "sqlite3": "^5.0.0",
     "tiva": "^0.2.2",

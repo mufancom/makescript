@@ -54,8 +54,8 @@ export class HomeView extends Component<HomeViewProps> {
             <Link to={route.makeflow}>
               <Button>Makefow</Button>
             </Link>
-            <Link to={route.configs}>
-              <Button>更新配置</Button>
+            <Link to={route.status}>
+              <Button>系统状态</Button>
             </Link>
           </CardContent>
         </Card>

@@ -4,9 +4,9 @@ import entrance from 'entrance-decorator';
 /* eslint-disable @mufan/explicit-return-type */
 import {route} from './@routes';
 import {
+  AgentService,
   AuthorizationService,
   MakeflowService,
-  ScriptService,
   TokenService,
 } from './@services';
 
@@ -23,8 +23,8 @@ export class Entrances {
   }
 
   @entrance
-  get scriptsService() {
-    return new ScriptService();
+  get agentService() {
+    return new AgentService();
   }
 
   @entrance
@@ -41,6 +41,16 @@ export class Entrances {
     // Route services
     route.$beforeUpdate(() => Modal.destroyAll());
 
+    route.notFound.$beforeEnter(match => {
+      if (match.$exact) {
+        route.home.$push();
+      }
+    });
+
+    route.status.$beforeEnterOrUpdate(() => {
+      this.agentService.fetchStatus().catch(console.error);
+    });
+
     route.scripts.$beforeEnterOrUpdate(match => {
       if (match.$exact) {
         route.scripts.records.$replace();
@@ -48,16 +58,14 @@ export class Entrances {
     });
 
     route.scripts.records.$beforeEnter(() => {
-      this.scriptsService.fetchRunningRecords().catch(console.error);
+      this.agentService.fetchRunningRecords().catch(console.error);
     });
 
     route.scripts.management.$beforeEnter(() => {
-      this.scriptsService.fetchScriptsDefinition().catch(console.error);
+      this.agentService.fetchScriptsDefinition().catch(console.error);
     });
 
     route.tokens.$beforeEnter(() => {
-      console.log('aaaaaa');
-
       this.tokenService.fetchTokens().catch(console.error);
     });
 

@@ -47,7 +47,7 @@ export class RunningRecordViewerView extends Component<
       },
     } = this.props;
 
-    return ENTRANCES.scriptsService.getRunningRecord(recordId);
+    return ENTRANCES.agentService.getRunningRecord(recordId);
   }
 
   @computed
@@ -118,15 +118,15 @@ export class RunningRecordViewerView extends Component<
   }
 
   private onExecuteButtonClick = async (): Promise<void> => {
-    let command = this.runningRecord;
+    let record = this.runningRecord;
 
-    if (!command) {
+    if (!record) {
       return;
     }
 
     let confirmationMessage: string;
 
-    if (command.ranAt) {
+    if (record.ranAt) {
       confirmationMessage = '是否再次以相同参数执行该脚本?';
     } else {
       confirmationMessage = '请确保已检查脚本参数';
@@ -137,9 +137,7 @@ export class RunningRecordViewerView extends Component<
       content: confirmationMessage,
       onOk: async () => {
         try {
-          // TODO:
-          // await ENTRANCES.scriptsService.executeCommandForQueue(command!.id);
-          // await ENTRANCES.scriptsService.fetchCommandHistoryItem(command!.id);
+          await ENTRANCES.agentService.runScript(record!.id);
           await message.success('执行成功');
         } catch (error) {
           await message.error('执行失败');

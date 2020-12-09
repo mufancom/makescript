@@ -4,4 +4,4 @@ export * from './db-service';
 export * from './token-service';
 export * from './user-service';
 export * from './agent-service';
-export * from './script-service';
+export * from './socket-service';

@@ -1,6 +1,8 @@
 import {Dict} from 'tslang';
 
 export interface IAdapter<TOptions = AdapterRunScriptArgumentOptions> {
+  readonly type: string;
+
   runScript(
     argument: AdapterRunScriptArgument<TOptions>,
   ): Promise<AdapterRunScriptResult>;

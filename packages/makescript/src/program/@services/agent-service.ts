@@ -3,51 +3,46 @@ import * as OS from 'os';
 import * as Path from 'path';
 
 import {
-  AdapterRunScriptResult,
+  ScriptDefinition,
   ScriptRunningArgumentParameters,
+  ScriptRunningResult,
+  SocketEventGetScriptsResponseData,
+  SocketEventRunScriptResponseData,
+  SocketEventSyncScriptsResponseData,
 } from '@makeflow/makescript-agent';
-import fetch from 'node-fetch';
-import rimraf from 'rimraf';
+import extractZip from 'extract-zip';
+import SocketIO from 'socket.io';
 import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
 import {ExpectedError} from '../@core';
-import {zip} from '../@utils';
 import {Config} from '../config';
 
+import {SocketService} from './socket-service';
+
+const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
+
 export class AgentService {
-  constructor(private config: Config) {}
+  scriptDefinitionsMap = new Map<string, ScriptDefinition[]>();
 
-  async updateScriptsForAllAgents(scriptsPath: string): Promise<void> {
-    let agents = this.config.agents;
+  private socketMap = new Map<string, SocketIO.Socket>();
 
-    if (!agents) {
-      return;
+  constructor(private socketService: SocketService, private config: Config) {
+    this.initialize();
+  }
+
+  async updateScriptsForAllAgents(): Promise<void> {
+    for (let socket of this.socketMap.values()) {
+      await new Promise(resolve =>
+        socket.emit(
+          'sync-scripts',
+          {},
+          (response: SocketEventSyncScriptsResponseData) => {
+            resolve(response);
+          },
+        ),
+      );
     }
-
-    let temporaryFilePath = Path.join(OS.tmpdir(), uuidv4());
-
-    await zip(scriptsPath, temporaryFilePath);
-
-    let readStream = FS.createReadStream(temporaryFilePath);
-
-    await Promise.all(
-      agents.map(async agent => {
-        let response = await fetch(`${agent.url}/scripts/sync`, {
-          method: 'POST',
-          body: readStream,
-        });
-
-        if (!response.ok) {
-          // TODO:
-          throw Error(response.statusText);
-        }
-      }),
-    );
-
-    readStream.close();
-
-    await villa.async(rimraf)(temporaryFilePath);
   }
 
   async runScript(
@@ -57,40 +52,107 @@ export class AgentService {
       name,
       parameters,
       resourcesBaseURL,
-      hostURL,
     }: {
       id: string;
       name: string;
       parameters: ScriptRunningArgumentParameters;
       resourcesBaseURL: string;
-      hostURL: string;
     },
-  ): Promise<AdapterRunScriptResult> {
-    let agent = this.config.agents.find(agent => agent.namespace === namespace);
+  ): Promise<ScriptRunningResult> {
+    let socket = this.socketMap.get(namespace);
 
-    if (!agent) {
-      throw new ExpectedError('AGENT_NAMESPACE_NOT_FOUND');
+    if (!socket) {
+      console.info(`Agent for ${namespace} not found.`);
+      throw new ExpectedError('NAMESPACE_NOT_REGISTERED');
     }
 
-    let response = await fetch(`${agent.url}/running/run`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Access-Token': agent.token,
-      },
-      body: JSON.stringify({
-        token: id,
-        name,
-        parameters,
-        resourcesBaseURL,
-        hostURL,
-      }),
+    console.info(`Running record "${id}" of script "${namespace}:${name}"`);
+
+    let response = await new Promise<SocketEventRunScriptResponseData>(
+      resolve =>
+        socket!.emit(
+          'run-script',
+          {
+            id,
+            name,
+            parameters,
+            resourcesBaseURL,
+          },
+          (response: SocketEventRunScriptResponseData) => {
+            resolve(response);
+          },
+        ),
+    );
+
+    console.info(
+      `Complete running record "${id}" of script "${namespace}:${name}"`,
+    );
+
+    return response.result;
+  }
+
+  private initialize(): void {
+    let server = this.socketService.server;
+
+    server.on('connection', (socket: SocketIO.Socket) => {
+      socket.on('register', ({namespace, resume}, callback) => {
+        console.info(`Registering agent "${namespace}" ...`);
+
+        if (this.socketMap.has(namespace) && !resume) {
+          console.info(`Agent "${namespace}" has already registered`);
+          callback({error: true, message: 'Namespace has registered.'});
+          socket.disconnect();
+          return;
+        }
+
+        socket.on('disconnect', () => {
+          console.info(`Agent "${namespace}" disconnected`);
+          this.socketMap.delete(namespace);
+        });
+
+        this.socketMap.set(namespace, socket);
+
+        callback({error: false});
+
+        this.retrieveScriptDefinitions().catch(console.error);
+
+        console.info(`Agent "${namespace}" registered`);
+      });
+
+      // TODO:
+      socket.on('update-resources', async ({id, buffer}) => {
+        let temporaryPath = Path.join(MAKESCRIPT_TMPDIR, `${uuidv4()}.zip`);
+
+        if (!FS.existsSync(MAKESCRIPT_TMPDIR)) {
+          FS.mkdirSync(MAKESCRIPT_TMPDIR);
+        }
+
+        await villa.async(FS.writeFile)(temporaryPath, buffer, {
+          encoding: 'binary',
+        });
+
+        await extractZip(temporaryPath, {
+          dir: Path.join(this.config.resourcesPath, id),
+        });
+
+        // await villa.async(rimraf)(temporaryPath);
+      });
     });
+  }
 
-    if (!response.ok) {
-      throw new ExpectedError('REQUEST_FAILED', response.statusText);
+  private async retrieveScriptDefinitions(): Promise<void> {
+    for (let [namespace, socket] of this.socketMap.entries()) {
+      let scriptDefinitions = await new Promise<
+        SocketEventGetScriptsResponseData
+      >(resolve => {
+        socket.emit(
+          'get-scripts',
+          {},
+          (response: SocketEventGetScriptsResponseData) => resolve(response),
+        );
+      });
+
+      this.scriptDefinitionsMap.set(namespace, scriptDefinitions);
     }
-
-    return response.json();
   }
 }

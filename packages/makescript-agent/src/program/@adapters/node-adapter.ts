@@ -9,6 +9,8 @@ import {
 } from '../types';
 
 export class NodeAdapter implements IAdapter {
+  type = 'node';
+
   async runScript({
     source,
     parameters,
@@ -27,8 +29,12 @@ export class NodeAdapter implements IAdapter {
         },
       });
 
-      cp.stdout.on('data', onOutput);
-      cp.stderr.on('data', onError);
+      cp.stdout.on('data', (buffer: Buffer) => {
+        onOutput(buffer.toString());
+      });
+      cp.stderr.on('data', (buffer: Buffer) => {
+        onError(buffer.toString());
+      });
 
       await villa.awaitable(cp);
 

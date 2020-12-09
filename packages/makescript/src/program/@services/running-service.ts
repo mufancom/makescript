@@ -66,17 +66,28 @@ export class RunningService {
       throw new ExpectedError('SCRIPT_RUNNING_RECORD_NOT_FOUND');
     }
 
-    let resourcesBaseURL = `${this.config.api.url}/resources/${id}`;
+    let resourcesBaseURL = `${this.config.webAdmin.url}/resources/${id}`;
 
-    let result = await this.agentService.runScript(record.namespace, {
+    let runningResult = await this.agentService.runScript(record.namespace, {
       id: record.id,
       name: record.name,
       parameters: record.parameters,
       resourcesBaseURL,
-      hostURL: this.config.api.url,
     });
 
-    await this.dbService.db.get('records').find({id}).assign({result}).write();
+    let {parameters, deniedParameters, result, output} = runningResult;
+
+    await this.dbService.db
+      .get('records')
+      .find({id})
+      .assign({
+        parameters,
+        deniedParameters,
+        result,
+        output,
+        ranAt: Date.now(),
+      })
+      .write();
   }
 }
 

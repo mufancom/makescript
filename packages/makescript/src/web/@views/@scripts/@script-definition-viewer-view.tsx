@@ -18,7 +18,7 @@ import {ExecuteButton, Item, Label, Title} from './@common';
 
 const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
 
-type ScriptNameMatch = Router['scripts']['management']['scriptName'];
+type ScriptNameMatch = Router['scripts']['management']['namespace']['scriptName'];
 
 const Wrapper = styled.div`
   flex: 1;
@@ -75,13 +75,13 @@ export class ScriptDefinitionViewerView extends Component<
   private get scriptDefinition(): ScriptDefinition | undefined {
     let {
       match: {
-        $params: {scriptName},
+        $params: {namespace, scriptName},
       },
     } = this.props;
 
-    return ENTRANCES.scriptsService.scriptDefinitions.find(
-      script => script.name === scriptName,
-    );
+    return ENTRANCES.agentService.scriptDefinitionsMap
+      .get(namespace)
+      ?.find(script => script.name === scriptName);
   }
 
   @computed

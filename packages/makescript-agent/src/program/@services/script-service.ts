@@ -2,8 +2,6 @@ import * as CP from 'child_process';
 import * as FS from 'fs';
 import * as Path from 'path';
 
-import extractZip from 'extract-zip';
-import rimraf from 'rimraf';
 import * as villa from 'villa';
 
 import {Config} from '../config';
@@ -13,7 +11,7 @@ const SCRIPTS_DIRECTORY_NAME = 'scripts';
 const SCRIPTS_CONFIG_FILE_NAME = 'makescript.json';
 
 export class ScriptService {
-  private scriptsDefinition: ScriptsDefinition | undefined;
+  readonly ready: Promise<void>;
 
   private get scriptsPath(): string {
     return Path.join(this.config.workspace, SCRIPTS_DIRECTORY_NAME);
@@ -23,25 +21,39 @@ export class ScriptService {
     return Path.join(this.scriptsPath, SCRIPTS_CONFIG_FILE_NAME);
   }
 
-  constructor(private config: Config) {
-    try {
-      if (FS.existsSync(this.scriptsDefinitionPath)) {
-        this.scriptsDefinition = JSON.parse(
-          FS.readFileSync(this.scriptsDefinitionPath).toString(),
-        );
-      }
-    } catch (error) {
-      console.error(error);
+  get scriptsDefinition(): ScriptsDefinition | undefined {
+    if (!FS.existsSync(this.scriptsDefinitionPath)) {
+      return undefined;
     }
+
+    try {
+      return JSON.parse(FS.readFileSync(this.scriptsDefinitionPath).toString());
+    } catch {}
+
+    return undefined;
   }
 
-  async syncScripts(temporaryFilePath: string): Promise<ScriptsSyncResult> {
+  constructor(private config: Config) {
+    this.ready = this.initialize();
+  }
+
+  async syncScripts(): Promise<ScriptsSyncResult> {
     try {
-      await villa.async(rimraf)(this.scriptsPath);
-
-      await extractZip(temporaryFilePath, {dir: this.scriptsPath});
-
-      await villa.async(rimraf)(temporaryFilePath);
+      if (FS.existsSync(this.scriptsPath)) {
+        await villa.awaitable(
+          CP.spawn('git', ['pull'], {
+            cwd: this.scriptsPath,
+          }),
+        );
+      } else {
+        await villa.awaitable(
+          CP.spawn('git', [
+            'clone',
+            this.config.scriptsRepoURL,
+            this.scriptsPath,
+          ]),
+        );
+      }
     } catch (error) {
       return {result: 'unzip-failed', message: error.message ?? String(error)};
     }
@@ -50,16 +62,12 @@ export class ScriptService {
       return {result: 'scripts-definition-not-found', message: ''};
     }
 
-    let scriptsDefinition: ScriptsDefinition;
+    let scriptsDefinition = this.scriptsDefinition;
 
-    try {
-      scriptsDefinition = JSON.parse(
-        FS.readFileSync(this.scriptsDefinitionPath).toString(),
-      );
-    } catch (error) {
+    if (!scriptsDefinition) {
       return {
         result: 'scripts-definition-parse-error',
-        message: error.message ?? String(error),
+        message: '',
       };
     }
 
@@ -82,6 +90,10 @@ export class ScriptService {
   }
 
   resolveSource(script: ScriptDefinition): string {
-    return Path.join(this.config.workspace, script.source);
+    return Path.join(this.config.workspace, 'scripts', script.source);
+  }
+
+  private async initialize(): Promise<void> {
+    await this.syncScripts();
   }
 }

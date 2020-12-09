@@ -12,7 +12,7 @@ export function routeMakeflow(
     method: 'POST',
     path: '/api/makeflow/power-item/{item}/action/{action}',
     async handler(request) {
-      let actionName = request.params.action as string;
+      let actionName = request.params.item as string;
 
       let {
         token: powerItemToken,
@@ -30,10 +30,13 @@ export function routeMakeflow(
         inputs,
         accessToken,
       );
+
+      return {};
     },
     options: {
       validate: {
         payload: Joi.object({
+          source: Joi.object(),
           token: Joi.string(),
           configs: Joi.object({
             token: Joi.string(),

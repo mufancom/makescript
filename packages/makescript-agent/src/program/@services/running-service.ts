@@ -2,7 +2,6 @@ import * as FS from 'fs';
 import * as OS from 'os';
 import * as Path from 'path';
 
-import fetch from 'node-fetch';
 import rimraf from 'rimraf';
 import {Dict} from 'tslang';
 import {v4 as uuidv4} from 'uuid';
@@ -11,29 +10,43 @@ import * as villa from 'villa';
 import {zip} from '../@utils';
 import {
   AdapterRunScriptArgument,
-  AdapterRunScriptResult,
   IAdapter,
   ScriptDefinition,
   ScriptRunningArgument,
+  ScriptRunningResult,
 } from '../types';
 
 import {ScriptService} from './script-service';
+import {SocketService} from './socket-service';
+
+const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
 export class RunningService {
   private adapterMap = new Map<string, IAdapter>();
 
-  constructor(private scriptService: ScriptService) {}
+  constructor(
+    private scriptService: ScriptService,
+    private socketService: SocketService,
+  ) {}
 
   async runScript(
     argument: ScriptRunningArgument,
-  ): Promise<AdapterRunScriptResult> {
+  ): Promise<ScriptRunningResult> {
     let {name, parameters, resourcesBaseURL} = argument;
+
+    console.info(
+      `Running record "${argument.id}" of script "${argument.name}"`,
+    );
 
     let definition = this.requireScriptDefinition(name);
     let source = this.resolveSource(definition);
     let adapter = this.requireAdapter(definition);
     let options = this.resolveOptions(definition);
     let resourcesPath = this.generateRandomResourcesPath();
+    let [allowedParameters, deniedParameters] = validateParameters(
+      parameters,
+      definition,
+    );
 
     let {onOutput, done: onOutputDone} = this.getOnOutput(
       argument,
@@ -48,7 +61,7 @@ export class RunningService {
 
     let result = await adapter.runScript({
       source,
-      parameters,
+      parameters: allowedParameters,
       options,
       resourcesPath,
       resourcesBaseURL,
@@ -56,15 +69,29 @@ export class RunningService {
       onError,
     });
 
-    await onOutputDone();
-    await onErrorDone();
+    let output = onOutputDone();
+    let error = onErrorDone();
 
     await this.handleResources(argument, resourcesPath);
 
-    return result;
+    console.info(
+      `Complete running record "${argument.id}" of script "${argument.name}"`,
+    );
+
+    return {
+      name,
+      displayName: definition.displayName,
+      parameters,
+      deniedParameters,
+      result,
+      output: {
+        output,
+        error,
+      },
+    };
   }
 
-  registerAdapter(type: string, adapter: IAdapter): void {
+  registerAdapter(type: string, adapter: IAdapter<any>): void {
     this.adapterMap.set(type, adapter);
   }
 
@@ -92,13 +119,19 @@ export class RunningService {
 
     if (!adapter) {
       // TODO:
-      throw Error();
+      throw Error(
+        `Adapter for script type "${scriptDefinition.type}" not found`,
+      );
     }
 
     return adapter;
   }
 
   private resolveOptions(scriptDefinition: ScriptDefinition): Dict<unknown> {
+    if (!scriptDefinition.options) {
+      return {};
+    }
+
     return Object.fromEntries(
       scriptDefinition.options.map(option => {
         if (option.type === 'value') {
@@ -132,19 +165,26 @@ export class RunningService {
       return;
     }
 
-    let temporaryArchiveFilePath = Path.join(OS.tmpdir(), `${uuidv4()}.zip`);
+    console.info(
+      `Transmitting resources for record "${argument.id}" of script "${argument.name}"`,
+    );
+
+    let temporaryArchiveFilePath = Path.join(
+      MAKESCRIPT_TMPDIR,
+      `${uuidv4()}.zip`,
+    );
+
+    if (!FS.existsSync(MAKESCRIPT_TMPDIR)) {
+      FS.mkdirSync(MAKESCRIPT_TMPDIR);
+    }
 
     await zip(resourcesPath, temporaryArchiveFilePath);
 
-    let resourceCallbackAPI = getCallbackAPI(argument, 'resources');
+    let buffer = await villa.async(FS.readFile)(temporaryArchiveFilePath);
 
-    let fileStream = FS.createReadStream(temporaryArchiveFilePath);
-
-    await fetch(resourceCallbackAPI, {
-      headers: {
-        'Content-Type': 'application/octet-stream',
-      },
-      body: fileStream,
+    this.socketService.socket.emit('update-resources', {
+      id: argument.id,
+      buffer,
     });
 
     await villa.async(rimraf)(temporaryArchiveFilePath);
@@ -154,57 +194,92 @@ export class RunningService {
     argument: ScriptRunningArgument,
     scriptDefinition: ScriptDefinition,
     error: boolean,
-  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): Promise<void>} {
-    let outputMode = scriptDefinition.config.output;
-
-    let outputCallbackAPI = getCallbackAPI(
-      argument,
-      error ? 'error' : 'output',
-    );
+  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): string} {
+    let outputMode = scriptDefinition.config?.output ?? 'aggregate';
 
     let output = '';
 
-    let promises: Promise<unknown>[] = [];
-
     return {
       onOutput: data => {
+        // TODO:
         if (outputMode === 'cover') {
           output = data;
         } else {
           output += data;
         }
 
-        // TODO: 时序问题
         if (outputMode === 'stream' || outputMode === 'cover') {
-          promises.push(
-            fetch(outputCallbackAPI, {
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({content: output}),
-            }),
-          );
+          this.socketService.socket.emit('update-output', {
+            id: argument.id,
+            ...(error ? {error: output} : {output}),
+          });
         }
       },
-      done: async () => {
+      done: () => {
         if (output) {
           if (outputMode === 'aggregate') {
-            promises.push(
-              fetch(outputCallbackAPI, {
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({content: output}),
-              }),
-            );
+            this.socketService.socket.emit('update-output', {
+              id: argument.id,
+              ...(error ? {error: output} : {output}),
+            });
           }
         }
 
-        await Promise.all(promises);
+        return output;
       },
     };
   }
 }
 
-function getCallbackAPI(
-  {hostURL, token}: ScriptRunningArgument,
-  type: 'output' | 'error' | 'resources',
-): string {
-  return `${hostURL}/api/agent-callback/${type}/${token}`;
+function validateParameters(
+  parameters: Dict<unknown>,
+  definition: ScriptDefinition,
+): [Dict<unknown>, Dict<unknown>] {
+  let {filteredParameters, missingParameters} = definition.parameters.reduce<{
+    filteredParameters: Dict<unknown>;
+    missingParameters: string[];
+  }>(
+    (reducer, parameterDefinition) => {
+      let {filteredParameters, missingParameters} = reducer;
+
+      let parameterName =
+        typeof parameterDefinition === 'object'
+          ? parameterDefinition.name
+          : parameterDefinition;
+      let parameterRequired =
+        typeof parameterDefinition === 'object'
+          ? parameterDefinition.required
+          : false;
+
+      let parameterValue = parameters[parameterName];
+
+      let serializedValue =
+        typeof parameterValue === 'object'
+          ? JSON.stringify(parameterValue)
+          : parameterValue;
+
+      if (serializedValue !== undefined) {
+        filteredParameters[parameterName] = serializedValue;
+      } else {
+        if (parameterRequired) {
+          missingParameters.push(parameterName);
+        }
+      }
+
+      return reducer;
+    },
+    {filteredParameters: {}, missingParameters: []},
+  );
+
+  if (missingParameters.length) {
+    throw new Error(
+      `Missing command required parameters "${missingParameters.join('", "')}"`,
+    );
+  }
+
+  let deniedParameters = Object.fromEntries(
+    Object.entries(parameters).filter(([key]) => !(key in filteredParameters)),
+  );
+
+  return [filteredParameters, deniedParameters];
 }

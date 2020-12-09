@@ -1,0 +1,35 @@
+ POST http://localhost:8901/api/makeflow/power-item/makescript-agent:echo-message/action/echo-message
+ Content-Type: application/json
+
+{
+      "source": {
+        "url": "http://localhost:8060",
+        "token": "6ae75e36-12b7-479e-be14-adef46cb464a",
+        "organization": {
+          "id": "323736ed-de2e-4fdd-8471-4d16e65ff735"
+        },
+        "team": {
+          "id": "a5d91f95-b427-45f1-854a-4106740cd5f4",
+          "abstract": false
+        },
+        "installation": {
+          "id": "9e5152c7-f85f-4760-96d7-a70cde79dc62"
+        },
+        "version": "0.1.0"
+      },
+      "token": "66a56faa-976f-42bc-9e7f-0f77c2b96d18",
+      "inputs": {
+        "MESSAGE2": "option1",
+        "MESSAGE1": "Hello",
+        "taskURL": "http://localhost:8060/app/?_redirect=/task/3",
+        "taskAssignee": {
+          "id": "ca8f16aa-6cb7-4f88-b361-ee79803e2d56",
+          "displayName": "老万"
+        },
+        "taskBrief": "asdadasd",
+        "taskNumericId": 3
+      },
+      "configs": {
+        "token": "003be58d-3297-4703-b2dc-0cb506851d98"
+      }
+    }

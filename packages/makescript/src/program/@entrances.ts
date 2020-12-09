@@ -1,3 +1,5 @@
+import {Server} from 'http';
+
 import entrance from 'entrance-decorator';
 
 import {
@@ -5,7 +7,7 @@ import {
   DBService,
   MakeflowService,
   RunningService,
-  ScriptService,
+  SocketService,
   TokenService,
   UserService,
 } from './@services';
@@ -14,7 +16,7 @@ import {Config} from './config';
 export class Entrances {
   readonly ready = Promise.all([this.dbService.ready]);
 
-  constructor(readonly config: Config) {}
+  constructor(private httpServer: Server, readonly config: Config) {}
 
   @entrance
   get dbService(): DBService {
@@ -22,11 +24,17 @@ export class Entrances {
   }
 
   @entrance
+  get socketService(): SocketService {
+    return new SocketService(this.httpServer, this.config);
+  }
+
+  @entrance
   get makeflowService(): MakeflowService {
     return new MakeflowService(
-      this.scriptService,
+      this.agentService,
       this.runningService,
       this.tokenService,
+      this.socketService,
       this.dbService,
       this.config,
     );
@@ -34,12 +42,7 @@ export class Entrances {
 
   @entrance
   get agentService(): AgentService {
-    return new AgentService(this.config);
-  }
-
-  @entrance
-  get scriptService(): ScriptService {
-    return new ScriptService(this.agentService, this.dbService, this.config);
+    return new AgentService(this.socketService, this.config);
   }
 
   @entrance

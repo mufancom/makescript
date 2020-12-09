@@ -14,6 +14,8 @@ export interface SqliteAdapterOptions {
 }
 
 export class SqliteAdapter implements IAdapter<SqliteAdapterOptions> {
+  type = 'sqlite';
+
   async runScript({
     source,
     parameters,

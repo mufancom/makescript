@@ -17,7 +17,7 @@ export const routeSchema = schema({
           $children: {
             recordId: {
               $exact: true,
-              $match: /\d+/,
+              $match: RouteMatch.SEGMENT,
             },
           },
           $query: {
@@ -27,9 +27,15 @@ export const routeSchema = schema({
         management: {
           $exact: true,
           $children: {
-            scriptName: {
+            namespace: {
               $exact: true,
               $match: RouteMatch.SEGMENT,
+              $children: {
+                scriptName: {
+                  $exact: true,
+                  $match: RouteMatch.SEGMENT,
+                },
+              },
             },
           },
         },
@@ -42,6 +48,7 @@ export const routeSchema = schema({
       },
     },
     tokens: true,
+    status: true,
     login: true,
     initialize: true,
     notFound: {

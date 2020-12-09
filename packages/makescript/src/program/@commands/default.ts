@@ -23,18 +23,13 @@ const YAML_CONFIG_CONTENT_DEFAULT = (): string =>
     'web-admin': {
       host: 'localhost',
       port: 8900,
+      url: `http://${ip.address()}:8900`,
     },
 
     api: {
       host: 'localhost',
       port: 8901,
-      url: `${ip.address()}:8901`,
-    },
-
-    'default-agent': {
-      port: 8902,
-      host: 'localhost',
-      token: uuidv4(),
+      url: `http://${ip.address()}:8901`,
     },
 
     makeflow: {
@@ -46,7 +41,9 @@ const YAML_CONFIG_CONTENT_DEFAULT = (): string =>
       },
     },
 
-    agents: [],
+    'join-token': uuidv4(),
+
+    'resources-path': Path.join(OS.tmpdir(), 'makescript-resources'),
   });
 
 const CONFIG_FILE_NAME = 'makescript.yaml';

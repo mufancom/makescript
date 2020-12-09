@@ -49,8 +49,8 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
   }
 
   @computed
-  private get commandListRendering(): ReactNode {
-    let runningRecords = ENTRANCES.scriptsService.runningRecords;
+  private get recordsRendering(): ReactNode {
+    let runningRecords = ENTRANCES.agentService.runningRecords;
 
     if (!runningRecords.length) {
       return (
@@ -144,7 +144,7 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
               </ActionButton>
             </Tooltip>
           </ScriptListLabel>
-          {this.commandListRendering}
+          {this.recordsRendering}
         </ScriptList>
         <Route match={match.recordId} component={RunningRecordViewerView} />
         {this.notSelectedPanelRendering}

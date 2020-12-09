@@ -1,13 +1,4 @@
-import * as Path from 'path';
-
-import {
-  Config as AgentConfig,
-  ConfigFile as AgentConfigFile,
-  transformConfig as transformAgentConfig,
-} from '@makeflow/makescript-agent';
 import YAML from 'yaml';
-
-const DEFAULT_AGENT_DIRECTORY = 'agent';
 
 /**
  * The config type use for app internal
@@ -17,6 +8,7 @@ export interface Config {
   webAdmin: {
     host: string;
     port: number;
+    url: string;
   };
 
   api: {
@@ -25,7 +17,7 @@ export interface Config {
     url: string;
   };
 
-  defaultAgent: AgentConfig;
+  joinToken: string;
 
   makeflow: {
     baseURL: string;
@@ -36,11 +28,7 @@ export interface Config {
     };
   };
 
-  agents: {
-    namespace: string;
-    url: string;
-    token: string;
-  }[];
+  resourcesPath: string;
 
   workspace: string;
 }
@@ -52,6 +40,7 @@ export interface ConfigFile {
   'web-admin': {
     host: string;
     port: number;
+    url: string;
   };
 
   api: {
@@ -59,8 +48,6 @@ export interface ConfigFile {
     port: number;
     url: string;
   };
-
-  'default-agent': AgentConfigFile;
 
   makeflow: {
     'base-url': string;
@@ -71,11 +58,9 @@ export interface ConfigFile {
     };
   };
 
-  agents: {
-    namespace: string;
-    url: string;
-    token: string;
-  }[];
+  'join-token': string;
+
+  'resources-path': string;
 
   /**
    * Not yet implemented
@@ -107,11 +92,6 @@ export function transformConfig(
     webAdmin: configFile['web-admin'],
     api: configFile.api,
 
-    defaultAgent: transformAgentConfig(
-      configFile['default-agent'],
-      Path.join(workspace, DEFAULT_AGENT_DIRECTORY),
-    ),
-
     makeflow: {
       baseURL: configFile.makeflow['base-url'],
       powerApp: {
@@ -121,8 +101,9 @@ export function transformConfig(
       },
     },
 
-    agents: configFile.agents,
+    joinToken: configFile['join-token'],
 
+    resourcesPath: configFile['resources-path'],
     workspace,
   };
 }

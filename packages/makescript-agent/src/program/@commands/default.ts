@@ -20,9 +20,13 @@ const GENERATE_CONFIG_DEFAULT = false;
 // TODO: Type safe
 const YAML_CONFIG_CONTENT_DEFAULT = (): string =>
   generateYamlConfig({
+    'makescript-secret-url': '',
+    'scripts-repo-url': '',
+    namespace: 'makescript-agent',
     port: 8902,
     host: '0.0.0.0',
     token: uuidv4(),
+    proxy: undefined,
   });
 
 const CONFIG_FILE_NAME = 'agent.yaml';

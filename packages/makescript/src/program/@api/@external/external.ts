@@ -4,12 +4,10 @@ import {Entrances} from '../../@entrances';
 
 import {routeMakeflow} from './@makeflow';
 
-export async function serveExternalAPI(entrances: Entrances): Promise<void> {
-  let server = Hapi.server({
-    port: entrances.config.api.port,
-    host: entrances.config.api.host,
-  });
-
+export async function serveExternalAPI(
+  server: Hapi.Server,
+  entrances: Entrances,
+): Promise<void> {
   routeMakeflow(entrances.makeflowService, server);
 
   await server.start();

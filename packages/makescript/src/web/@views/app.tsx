@@ -10,6 +10,7 @@ import {InitializeView} from './@initialize';
 import {LoginView} from './@login';
 import {MakeflowLoginView, MakeflowView} from './@makeflow';
 import {RunningRecordsView, ScriptsManagementView} from './@scripts';
+import {StatusView} from './@status';
 import {TokensView} from './@tokens';
 
 const Wrapper = styled.div`
@@ -30,6 +31,7 @@ export class App extends Component {
           component={ScriptsManagementView}
         />
         <Route match={route.tokens} component={TokensView} />
+        <Route match={route.status} component={StatusView} />
         <Route exact match={route.makeflow} component={MakeflowView} />
         <Route match={route.makeflow.login} component={MakeflowLoginView} />
       </Wrapper>
