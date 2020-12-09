@@ -2,6 +2,7 @@ import URL from 'url';
 
 import SocketIO from 'socket.io-client';
 
+import {logger} from '../@utils';
 import {Config} from '../config';
 
 export class SocketService {
@@ -21,13 +22,13 @@ export class SocketService {
     });
 
     socket.on('connect', () =>
-      console.info(`Connected to ${makescriptSecretURL}`),
+      logger.info(`Connected to ${makescriptSecretURL}`),
     );
     socket.on('disconnect', (reason: string) =>
-      console.error(`Disconnected from ${makescriptSecretURL}: ${reason}`),
+      logger.error(`Disconnected from ${makescriptSecretURL}: ${reason}`),
     );
     socket.on('connect_error', (error: Error) =>
-      console.error(
+      logger.error(
         `Failed to connect to ${makescriptSecretURL}: ${error.message}`,
       ),
     );

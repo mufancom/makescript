@@ -3,9 +3,11 @@ import * as OS from 'os';
 import * as Path from 'path';
 
 import {Castable, Command, Options, command, metadata, option} from 'clime';
+import {Tiva} from 'tiva';
 import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
+import {logger} from '../@utils';
 import {ConfigFile, generateYamlConfig, transformConfig} from '../config';
 import {main} from '../main';
 
@@ -81,16 +83,29 @@ export default class extends Command {
 
     let configFileContent: ConfigFile = YAML.parse(yamlConfigContent);
 
-    // TODO:
-    // let tiva = new Tiva();
+    let tiva = new Tiva();
 
-    // await tiva.validate(
-    //   {module: '@makeflow/makescript-agent', type: 'MakescriptAgentConfig'},
-    //   config,
-    // );
+    logger.info('Checking config file ...');
 
-    let config = transformConfig(configFileContent, workspace.fullName);
+    try {
+      await tiva.validate(
+        {module: '@makeflow/makescript-agent', type: 'ConfigFile'},
+        configFileContent,
+      );
 
-    await main(config);
+      let config = transformConfig(configFileContent, workspace.fullName);
+
+      await main(config);
+    } catch (error) {
+      if (error.diagnostics) {
+        logger.error(
+          `Config file structure does not match:\n${error.diagnostics}`,
+        );
+      } else {
+        logger.error(`Unknown error occurred:\n${error.message}`);
+      }
+
+      process.exit(1);
+    }
   }
 }

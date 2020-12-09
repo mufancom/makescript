@@ -16,6 +16,7 @@ import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
 import {ExpectedError} from '../@core';
+import {logger} from '../@utils';
 import {Config} from '../config';
 
 import {SocketService} from './socket-service';
@@ -62,11 +63,11 @@ export class AgentService {
     let socket = this.socketMap.get(namespace);
 
     if (!socket) {
-      console.info(`Agent for ${namespace} not found.`);
+      logger.info(`Agent for ${namespace} not found.`);
       throw new ExpectedError('NAMESPACE_NOT_REGISTERED');
     }
 
-    console.info(`Running record "${id}" of script "${namespace}:${name}"`);
+    logger.info(`Running record "${id}" of script "${namespace}:${name}"`);
 
     let response = await new Promise<SocketEventRunScriptResponseData>(
       resolve =>
@@ -84,7 +85,7 @@ export class AgentService {
         ),
     );
 
-    console.info(
+    logger.info(
       `Complete running record "${id}" of script "${namespace}:${name}"`,
     );
 
@@ -96,17 +97,17 @@ export class AgentService {
 
     server.on('connection', (socket: SocketIO.Socket) => {
       socket.on('register', ({namespace, resume}, callback) => {
-        console.info(`Registering agent "${namespace}" ...`);
+        logger.info(`Registering agent "${namespace}" ...`);
 
         if (this.socketMap.has(namespace) && !resume) {
-          console.info(`Agent "${namespace}" has already registered`);
+          logger.info(`Agent "${namespace}" has already registered`);
           callback({error: true, message: 'Namespace has registered.'});
           socket.disconnect();
           return;
         }
 
         socket.on('disconnect', () => {
-          console.info(`Agent "${namespace}" disconnected`);
+          logger.info(`Agent "${namespace}" disconnected`);
           this.socketMap.delete(namespace);
         });
 
@@ -114,9 +115,9 @@ export class AgentService {
 
         callback({error: false});
 
-        this.retrieveScriptDefinitions().catch(console.error);
+        this.retrieveScriptDefinitions().catch(logger.error);
 
-        console.info(`Agent "${namespace}" registered`);
+        logger.info(`Agent "${namespace}" registered`);
       });
 
       // TODO:

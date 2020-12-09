@@ -7,7 +7,7 @@ import {Dict} from 'tslang';
 import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
-import {zip} from '../@utils';
+import {logger, zip} from '../@utils';
 import {
   AdapterRunScriptArgument,
   IAdapter,
@@ -34,9 +34,7 @@ export class RunningService {
   ): Promise<ScriptRunningResult> {
     let {name, parameters, resourcesBaseURL} = argument;
 
-    console.info(
-      `Running record "${argument.id}" of script "${argument.name}"`,
-    );
+    logger.info(`Running record "${argument.id}" of script "${argument.name}"`);
 
     let definition = this.requireScriptDefinition(name);
     let source = this.resolveSource(definition);
@@ -74,7 +72,7 @@ export class RunningService {
 
     await this.handleResources(argument, resourcesPath);
 
-    console.info(
+    logger.info(
       `Complete running record "${argument.id}" of script "${argument.name}"`,
     );
 
@@ -165,7 +163,7 @@ export class RunningService {
       return;
     }
 
-    console.info(
+    logger.info(
       `Transmitting resources for record "${argument.id}" of script "${argument.name}"`,
     );
 

@@ -1,5 +1,6 @@
 import {Dict} from 'tslang';
 
+import {logger} from '../@utils';
 import {Config} from '../config';
 import {
   SocketEventGetScriptsRequestData,
@@ -39,7 +40,7 @@ export class MakescriptService {
             let response: SocketEventSyncScriptsResponseData = result;
             callback(response);
           })
-          .catch(console.error);
+          .catch(logger.error);
       },
     );
 
@@ -83,7 +84,7 @@ export class MakescriptService {
             callback(response);
           })
           .catch(error => {
-            console.error(error);
+            logger.error(error);
 
             callback({message: error.message});
           });
@@ -103,12 +104,12 @@ export class MakescriptService {
       {namespace: this.config.namespace, resume: this.registered},
       (response: Dict<unknown>) => {
         if (response?.error) {
-          console.error(response?.message);
+          logger.error((response?.message as string) ?? '');
           process.exit(1);
         }
 
         this.registered = true;
-        console.info(`Successfully to registered as ${this.config.namespace}`);
+        logger.info(`Successfully to registered as ${this.config.namespace}`);
       },
     );
   }

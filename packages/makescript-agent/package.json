@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "archiver": "^5.0.2",
+    "chalk": "^4.1.0",
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",
     "node-fetch": "^2.6.1",

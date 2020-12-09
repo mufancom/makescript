@@ -13,6 +13,7 @@ import semver from 'semver';
 import type {Dict} from 'tslang';
 
 import {ExpectedError} from '../@core';
+import {logger} from '../@utils';
 import {Config} from '../config';
 import {MFUserCandidate} from '../types/makeflow';
 
@@ -253,7 +254,7 @@ export class MakeflowService {
             description: output ?? error,
             stage: undefined,
             outputs: undefined,
-          }).catch(console.error);
+          }).catch(logger.error);
         },
       );
     });

@@ -4,6 +4,7 @@ import Hapi from '@hapi/hapi';
 import Inert from '@hapi/inert';
 
 import {Entrances} from '../../@entrances';
+import {logger} from '../../@utils';
 
 import {routeAgent} from './@agent';
 import {setupAuth} from './@auth';
@@ -53,7 +54,7 @@ export async function serveWeb(
   });
   await server.start();
 
-  console.info(
+  logger.info(
     `Makescript web ui is running on port ${entrances.config.webAdmin.port}`,
   );
 }

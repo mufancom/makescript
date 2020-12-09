@@ -47,7 +47,8 @@ export interface ConfigFile {
         username: string;
         password: string;
       }
-    | undefined;
+    | undefined
+    | null;
 }
 
 export function generateYamlConfig(config: ConfigFile): string {
@@ -63,7 +64,7 @@ export function transformConfig(config: ConfigFile, workspace: string): Config {
     port: config.port,
     host: config.host,
     token: config.token,
-    proxy: config.proxy,
+    proxy: config.proxy ?? undefined,
     workspace,
   };
 }
