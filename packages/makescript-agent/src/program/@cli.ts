@@ -4,7 +4,7 @@ import * as Path from 'path';
 
 import {CLI, Shim} from 'clime';
 
-import {logger} from './@utils';
+import {logger} from './shared';
 
 let cli = new CLI('makescript-agent', Path.join(__dirname, '@commands'));
 

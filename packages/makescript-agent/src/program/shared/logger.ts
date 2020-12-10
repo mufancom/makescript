@@ -1,7 +1,8 @@
 import chalk from 'chalk';
-import {__asyncDelegator} from 'tslib';
 
 export type LOG_TYPE = 'info' | 'warning' | 'error';
+
+export type Logger = typeof logger;
 
 export const logger = {
   info(message: string): void {
@@ -13,7 +14,7 @@ export const logger = {
     );
   },
 
-  warning(message: string): void {
+  warn(message: string): void {
     console.warn(
       message
         .split('\n')

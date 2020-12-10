@@ -1,22 +1,25 @@
 import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
 
-import {AgentService, RunningService} from '../../@services';
+import {AgentService, RecordService, RunningService} from '../../@services';
 import {Config} from '../../config';
 
 export function routeAgent(
   agentService: AgentService,
   runningService: RunningService,
+  recordService: RecordService,
   server: Hapi.Server,
   config: Config,
 ): void {
   server.route({
     method: 'GET',
     path: '/api/status',
-    handler() {
+    async handler() {
+      let scriptDefinitionsMap = await agentService.getScriptDefinitionsMap();
+
       return {
         joinLink: `${config.api.url}/join/${config.joinToken}`,
-        registeredAgents: Array.from(agentService.scriptDefinitionsMap).map(
+        registeredAgents: Array.from(scriptDefinitionsMap).map(
           ([namespace, definitions]) => {
             return {namespace, scriptQuantity: definitions.length};
           },
@@ -28,22 +31,12 @@ export function routeAgent(
   server.route({
     method: 'GET',
     path: '/api/scripts',
-    handler() {
-      return {
-        definitionsDict: Object.fromEntries(
-          agentService.scriptDefinitionsMap.entries(),
-        ),
-      };
-    },
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/api/scripts/update',
     async handler() {
-      await agentService.updateScriptsForAllAgents();
+      let scriptDefinitionsMap = await agentService.getScriptDefinitionsMap();
 
-      return {};
+      return {
+        definitionsDict: Object.fromEntries(scriptDefinitionsMap.entries()),
+      };
     },
   });
 
@@ -51,7 +44,7 @@ export function routeAgent(
     method: 'GET',
     path: '/api/scripts/running-records',
     handler() {
-      return {records: runningService.runningRecords};
+      return {records: recordService.runningRecords};
     },
   });
 

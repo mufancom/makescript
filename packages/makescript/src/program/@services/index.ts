@@ -5,3 +5,5 @@ export * from './token-service';
 export * from './user-service';
 export * from './agent-service';
 export * from './socket-service';
+export * from './rpc-service';
+export * from './record-service';

@@ -7,8 +7,8 @@ import {
   SqliteAdapter,
 } from './@adapters';
 import {Entrances} from './@entrances';
-import {logger} from './@utils';
 import {Config} from './config';
+import {logger} from './shared';
 
 export async function main(config: Config): Promise<void> {
   let entrances = new Entrances(config);
@@ -23,8 +23,6 @@ export async function main(config: Config): Promise<void> {
   for (let adapter of adapters) {
     entrances.runningService.registerAdapter(adapter.type, adapter);
   }
-
-  await entrances.makescriptService.initialize();
 
   logger.info('Makescript agent started.');
 }

@@ -13,14 +13,12 @@ import semver from 'semver';
 import type {Dict} from 'tslang';
 
 import {ExpectedError} from '../@core';
-import {logger} from '../@utils';
 import {Config} from '../config';
 import {MFUserCandidate} from '../types/makeflow';
 
 import {AgentService} from './agent-service';
 import {DBService} from './db-service';
-import {RunningService} from './running-service';
-import {SocketService} from './socket-service';
+import {RecordService} from './record-service';
 import {TokenService} from './token-service';
 
 const TASK_NUMERIC_ID_INPUT_NAME = 'taskNumericId' as PowerAppInput.Name;
@@ -35,14 +33,11 @@ const TASK_URL_VARIABLE = 'task_url';
 export class MakeflowService {
   constructor(
     private agentService: AgentService,
-    private runningService: RunningService,
+    private recordService: RecordService,
     private tokenService: TokenService,
-    private socketService: SocketService,
     private dbService: DBService,
     private config: Config,
-  ) {
-    this.initialize();
-  }
+  ) {}
 
   async listUserCandidates(
     username: string,
@@ -84,20 +79,29 @@ export class MakeflowService {
   }
 
   async updatePowerItem({
-    token,
+    id,
     stage,
     description,
     outputs,
   }: {
-    token: string;
-    stage: 'done' | 'none' | undefined;
-    description: string | undefined;
-    outputs: Dict<unknown> | undefined;
+    id: string;
+    stage?: 'done' | 'none';
+    description?: string;
+    outputs?: Dict<unknown>;
   }): Promise<void> {
+    let runningRecord = this.dbService.db
+      .get('records')
+      .find(record => record.id === id)
+      .value();
+
+    if (!runningRecord.makeflow?.powerItemToken) {
+      return;
+    }
+
     await this.requestAPI(
       '/power-item/update',
       {
-        token,
+        token: runningRecord.makeflow.powerItemToken,
         description,
         outputs,
         stage,
@@ -126,7 +130,7 @@ export class MakeflowService {
       ...parameters
     } = inputs;
 
-    await this.runningService.enqueueRunningRecord({
+    await this.recordService.enqueueRunningRecord({
       namespace,
       name,
       triggerTokenLabel: tokenLabel,
@@ -154,7 +158,7 @@ export class MakeflowService {
   }
 
   async generateAppDefinition(): Promise<PowerApp.RawDefinition> {
-    let scriptDefinitionsMap = await this.agentService.scriptDefinitionsMap;
+    let scriptDefinitionsMap = await this.agentService.getScriptDefinitionsMap();
     let makeflowInfo = this.dbService.db.get('makeflow').value();
 
     let hookBaseURL = `${this.config.api.url}/api/makeflow`;
@@ -178,9 +182,7 @@ export class MakeflowService {
       ],
       contributions: {
         powerItems: scriptDefinitionsMap.size
-          ? convertCommandConfigsToPowerItemDefinitions(
-              this.agentService.scriptDefinitionsMap,
-            )
+          ? convertCommandConfigsToPowerItemDefinitions(scriptDefinitionsMap)
           : [],
       },
     };
@@ -233,31 +235,6 @@ export class MakeflowService {
     } else {
       return result.data as TData;
     }
-  }
-
-  private initialize(): void {
-    this.socketService.server.on('connection', socket => {
-      socket.on(
-        'update-output',
-        ({id, output, error}: {id: string; output: string; error: string}) => {
-          let runningRecord = this.dbService.db
-            .get('records')
-            .find(record => record.id === id)
-            .value();
-
-          if (!runningRecord.makeflow?.powerItemToken) {
-            return;
-          }
-
-          this.updatePowerItem({
-            token: runningRecord.makeflow.powerItemToken,
-            description: output ?? error,
-            stage: undefined,
-            outputs: undefined,
-          }).catch(logger.error);
-        },
-      );
-    });
   }
 }
 

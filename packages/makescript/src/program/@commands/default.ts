@@ -2,13 +2,13 @@ import * as FS from 'fs';
 import * as OS from 'os';
 import * as Path from 'path';
 
+import {logger} from '@makeflow/makescript-agent';
 import {Castable, Command, Options, command, metadata, option} from 'clime';
 import ip from 'ip';
 import {Tiva} from 'tiva';
 import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
-import {logger} from '../@utils';
 import {ConfigFile, generateYamlConfig, transformConfig} from '../config';
 import {main} from '../main';
 

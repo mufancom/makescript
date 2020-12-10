@@ -7,9 +7,9 @@ import {Tiva} from 'tiva';
 import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
-import {logger} from '../@utils';
 import {ConfigFile, generateYamlConfig, transformConfig} from '../config';
 import {main} from '../main';
+import {logger} from '../shared';
 
 const WORKSPACE_PATH_DEFAULT = Path.resolve(
   OS.homedir(),

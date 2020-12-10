@@ -1,15 +1,17 @@
 import Hapi from '@hapi/hapi';
+import {logger} from '@makeflow/makescript-agent';
 
 import {Entrances} from '../../@entrances';
-import {logger} from '../../@utils';
 
 import {routeMakeflow} from './@makeflow';
+import {routeRunning} from './@running';
 
 export async function serveExternalAPI(
   server: Hapi.Server,
   entrances: Entrances,
 ): Promise<void> {
   routeMakeflow(entrances.makeflowService, server);
+  routeRunning(entrances.recordService, server);
 
   await server.start();
 

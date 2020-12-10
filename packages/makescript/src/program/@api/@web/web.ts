@@ -2,9 +2,9 @@ import * as Path from 'path';
 
 import Hapi from '@hapi/hapi';
 import Inert from '@hapi/inert';
+import {logger} from '@makeflow/makescript-agent';
 
 import {Entrances} from '../../@entrances';
-import {logger} from '../../@utils';
 
 import {routeAgent} from './@agent';
 import {setupAuth} from './@auth';
@@ -28,6 +28,7 @@ export async function serveWeb(
   routeAgent(
     entrances.agentService,
     entrances.runningService,
+    entrances.recordService,
     server,
     entrances.config,
   );

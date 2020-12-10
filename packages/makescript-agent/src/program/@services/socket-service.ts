@@ -2,28 +2,42 @@ import URL from 'url';
 
 import SocketIO from 'socket.io-client';
 
-import {logger} from '../@utils';
 import {Config} from '../config';
+import {logger, wrapSocketToRPC} from '../shared';
+import {MakescriptRPC} from '../types';
 
 export class SocketService {
-  socket!: SocketIO.Socket;
+  readonly socket: SocketIO.Socket;
+  readonly makescriptRPC: MakescriptRPC;
+
+  private registered = false;
 
   constructor(private config: Config) {
-    this.initialize();
-  }
-
-  initialize(): void {
     let makescriptSecretURL = this.config.makescriptSecretURL;
 
     let url = URL.parse(makescriptSecretURL);
 
-    let socket = SocketIO.io(`${url.protocol}//${url.host}`, {
+    this.socket = SocketIO.io(`${url.protocol}//${url.host}`, {
       path: url.pathname ?? '/',
     });
 
-    socket.on('connect', () =>
-      logger.info(`Connected to ${makescriptSecretURL}`),
-    );
+    let socket = this.socket;
+
+    this.makescriptRPC = wrapSocketToRPC(socket);
+
+    socket.on('connect', () => {
+      logger.info(`Connected to ${makescriptSecretURL}`);
+
+      this.makescriptRPC
+        .register(this.config.namespace, this.registered)
+        .then(() => {
+          this.registered = true;
+          logger.info(
+            `Successfully to registered as "${this.config.namespace}"`,
+          );
+        })
+        .catch(logger.error);
+    });
     socket.on('disconnect', (reason: string) =>
       logger.error(`Disconnected from ${makescriptSecretURL}: ${reason}`),
     );
@@ -32,7 +46,5 @@ export class SocketService {
         `Failed to connect to ${makescriptSecretURL}: ${error.message}`,
       ),
     );
-
-    this.socket = socket;
   }
 }

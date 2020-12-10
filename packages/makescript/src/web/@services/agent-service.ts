@@ -23,10 +23,6 @@ export class AgentService {
     return this.runningRecords.find(item => item.id === id);
   }
 
-  async updateScripts(): Promise<void> {
-    await fetchAPI('/api/scripts/update', {method: 'POST'});
-  }
-
   async fetchScriptsDefinition(): Promise<void> {
     let {definitionsDict} = await fetchAPI('/api/scripts');
 

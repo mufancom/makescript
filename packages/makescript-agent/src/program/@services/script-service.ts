@@ -5,7 +5,8 @@ import * as Path from 'path';
 import * as villa from 'villa';
 
 import {Config} from '../config';
-import {ScriptDefinition, ScriptsDefinition, ScriptsSyncResult} from '../types';
+import {logger} from '../shared';
+import {ScriptDefinition, ScriptsDefinition} from '../types';
 
 const SCRIPTS_DIRECTORY_NAME = 'scripts';
 const SCRIPTS_CONFIG_FILE_NAME = 'makescript.json';
@@ -37,7 +38,9 @@ export class ScriptService {
     this.ready = this.initialize();
   }
 
-  async syncScripts(): Promise<ScriptsSyncResult> {
+  async syncScripts(): Promise<void> {
+    logger.info('Syncing scripts ...');
+
     try {
       if (FS.existsSync(this.scriptsPath)) {
         await villa.awaitable(
@@ -55,32 +58,30 @@ export class ScriptService {
         );
       }
     } catch (error) {
-      return {result: 'unzip-failed', message: error.message ?? String(error)};
+      throw new Error(`Failed to sync scripts: ${error.message}`);
     }
 
     if (!FS.existsSync(this.scriptsDefinitionPath)) {
-      return {result: 'scripts-definition-not-found', message: ''};
+      throw new Error(
+        `Scripts definition not found in scripts repo "${this.config.scriptsRepoURL}"`,
+      );
     }
 
     let scriptsDefinition = this.scriptsDefinition;
 
     if (!scriptsDefinition) {
-      return {
-        result: 'scripts-definition-parse-error',
-        message: '',
-      };
+      throw new Error(`Cannot to parse scripts definition`);
     }
 
-    try {
-      await villa.awaitable(CP.spawn(scriptsDefinition.initialize));
-    } catch (error) {
-      return {
-        result: 'initialize-failed',
-        message: error.message ?? String(error),
-      };
+    if (scriptsDefinition.initialize) {
+      try {
+        await villa.awaitable(CP.spawn(scriptsDefinition.initialize));
+      } catch (error) {
+        throw new Error(
+          `Cannot to initial script repo with \`${scriptsDefinition.initialize}\`: ${error.message}`,
+        );
+      }
     }
-
-    return {result: 'done', message: ''};
   }
 
   getScriptDefinitionByName(name: string): ScriptDefinition | undefined {

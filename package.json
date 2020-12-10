@@ -4,6 +4,8 @@
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "scripts": {
+    "start:makescript": "node packages/makescript/bld/program/@cli.js",
+    "start:agent": "node packages/makescript-agent/bld/program/@cli.js",
     "build": "rimraf packages/*/bld && tsc --build",
     "lint": "eslint .",
     "lint-prettier": "prettier --check .",

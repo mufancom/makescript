@@ -7,7 +7,8 @@ import {Dict} from 'tslang';
 import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
-import {logger, zip} from '../@utils';
+import {zip} from '../@utils';
+import {logger} from '../shared';
 import {
   AdapterRunScriptArgument,
   IAdapter,
@@ -64,8 +65,8 @@ export class RunningService {
       onError,
     });
 
-    let output = onOutputDone();
-    let error = onErrorDone();
+    let output = await onOutputDone();
+    let error = await onErrorDone();
 
     await this.handleResources(argument, resourcesPath);
 
@@ -177,10 +178,7 @@ export class RunningService {
 
     let buffer = await villa.async(FS.readFile)(temporaryArchiveFilePath);
 
-    this.socketService.socket.emit('update-resources', {
-      id: argument.id,
-      buffer,
-    });
+    await this.socketService.makescriptRPC.updateResources(argument.id, buffer);
 
     await villa.async(rimraf)(temporaryArchiveFilePath);
   }
@@ -188,7 +186,7 @@ export class RunningService {
   private getOnOutput(
     argument: ScriptRunningArgument,
     error: boolean,
-  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): string} {
+  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): Promise<string>} {
     let output = '';
 
     let lastFlushedText: string | undefined;
@@ -203,19 +201,21 @@ export class RunningService {
           return;
         }
 
-        this.socketService.socket.emit('update-output', {
-          id: argument.id,
-          ...(error ? {error: textToFlush} : {output: textToFlush}),
-        });
+        if (!error) {
+          return;
+        }
+
+        this.socketService.makescriptRPC
+          .updateOutput(argument.id, textToFlush)
+          .catch(logger.error);
       },
-      done: () => {
+      done: async () => {
         let textToFlush = getTextToFlush(output, true);
 
-        if (textToFlush && textToFlush !== lastFlushedText) {
-          this.socketService.socket.emit('update-output', {
-            id: argument.id,
-            ...(error ? {error: output} : {output}),
-          });
+        if (!error && textToFlush && textToFlush !== lastFlushedText) {
+          await this.socketService.makescriptRPC
+            .updateOutput(argument.id, textToFlush)
+            .catch(logger.error);
         }
 
         return output;
@@ -286,5 +286,5 @@ function getTextToFlush(text: string, immediate = false): string | undefined {
 
   let offsetForward = immediate ? 0 : 1;
 
-  return splitTexts[splitTexts.length - offsetForward];
+  return splitTexts[splitTexts.length - offsetForward - 1];
 }

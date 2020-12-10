@@ -2,9 +2,8 @@
 
 import * as Path from 'path';
 
+import {logger} from '@makeflow/makescript-agent';
 import {CLI, Shim} from 'clime';
-
-import {logger} from './@utils';
 
 let cli = new CLI('makescript', Path.join(__dirname, '@commands'));
 

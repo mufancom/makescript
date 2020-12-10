@@ -6,6 +6,8 @@ import {
   AgentService,
   DBService,
   MakeflowService,
+  RPCService,
+  RecordService,
   RunningService,
   SocketService,
   TokenService,
@@ -16,7 +18,13 @@ import {Config} from './config';
 export class Entrances {
   readonly ready = Promise.all([this.dbService.ready]);
 
-  constructor(private httpServer: Server, readonly config: Config) {}
+  constructor(private httpServer: Server, readonly config: Config) {
+    this.up();
+  }
+
+  up(): void {
+    this.rpcService.up();
+  }
 
   @entrance
   get dbService(): DBService {
@@ -32,9 +40,8 @@ export class Entrances {
   get makeflowService(): MakeflowService {
     return new MakeflowService(
       this.agentService,
-      this.runningService,
+      this.recordService,
       this.tokenService,
-      this.socketService,
       this.dbService,
       this.config,
     );
@@ -42,12 +49,17 @@ export class Entrances {
 
   @entrance
   get agentService(): AgentService {
-    return new AgentService(this.socketService, this.config);
+    return new AgentService();
   }
 
   @entrance
   get runningService(): RunningService {
-    return new RunningService(this.agentService, this.dbService, this.config);
+    return new RunningService(
+      this.agentService,
+      this.makeflowService,
+      this.dbService,
+      this.config,
+    );
   }
 
   @entrance
@@ -58,5 +70,20 @@ export class Entrances {
   @entrance
   get tokenService(): TokenService {
     return new TokenService(this.dbService);
+  }
+
+  @entrance
+  get recordService(): RecordService {
+    return new RecordService(this.dbService);
+  }
+
+  @entrance
+  get rpcService(): RPCService {
+    return new RPCService(
+      this.agentService,
+      this.makeflowService,
+      this.socketService,
+      this.config,
+    );
   }
 }
