@@ -21,6 +21,8 @@ import {SocketService} from './socket-service';
 
 const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
+const OUTPUT_FLUSH_CHARACTER = '\r';
+
 export class RunningService {
   private adapterMap = new Map<string, IAdapter>();
 
@@ -46,14 +48,9 @@ export class RunningService {
       definition,
     );
 
-    let {onOutput, done: onOutputDone} = this.getOnOutput(
-      argument,
-      definition,
-      false,
-    );
+    let {onOutput, done: onOutputDone} = this.getOnOutput(argument, false);
     let {onOutput: onError, done: onErrorDone} = this.getOnOutput(
       argument,
-      definition,
       true,
     );
 
@@ -190,37 +187,35 @@ export class RunningService {
 
   private getOnOutput(
     argument: ScriptRunningArgument,
-    scriptDefinition: ScriptDefinition,
     error: boolean,
   ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): string} {
-    let outputMode = scriptDefinition.config?.output ?? 'aggregate';
-
     let output = '';
+
+    let lastFlushedText: string | undefined;
 
     return {
       onOutput: data => {
-        // TODO:
-        if (outputMode === 'cover') {
-          output = data;
-        } else {
-          output += data;
+        output += data;
+
+        let textToFlush = getTextToFlush(output);
+
+        if (!textToFlush || textToFlush === lastFlushedText) {
+          return;
         }
 
-        if (outputMode === 'stream' || outputMode === 'cover') {
+        this.socketService.socket.emit('update-output', {
+          id: argument.id,
+          ...(error ? {error: textToFlush} : {output: textToFlush}),
+        });
+      },
+      done: () => {
+        let textToFlush = getTextToFlush(output, true);
+
+        if (textToFlush && textToFlush !== lastFlushedText) {
           this.socketService.socket.emit('update-output', {
             id: argument.id,
             ...(error ? {error: output} : {output}),
           });
-        }
-      },
-      done: () => {
-        if (output) {
-          if (outputMode === 'aggregate') {
-            this.socketService.socket.emit('update-output', {
-              id: argument.id,
-              ...(error ? {error: output} : {output}),
-            });
-          }
         }
 
         return output;
@@ -280,4 +275,16 @@ function validateParameters(
   );
 
   return [filteredParameters, deniedParameters];
+}
+
+function getTextToFlush(text: string, immediate = false): string | undefined {
+  if (!immediate && !text.includes(OUTPUT_FLUSH_CHARACTER)) {
+    return undefined;
+  }
+
+  let splitTexts = text.split(OUTPUT_FLUSH_CHARACTER);
+
+  let offsetForward = immediate ? 0 : 1;
+
+  return splitTexts[splitTexts.length - offsetForward];
 }

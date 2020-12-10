@@ -13,7 +13,6 @@ export interface ScriptDefinition {
   manual: boolean;
   parameters: ScriptDefinitionParameter[];
   options: ScriptDefinitionOptionsItem[];
-  config: ScriptDefinitionConfig;
 }
 
 // Parameters
@@ -52,11 +51,3 @@ export interface ScriptDefinitionOptionsEnvItem {
   env: string;
   required: boolean;
 }
-
-// Config
-
-export interface ScriptDefinitionConfig {
-  output: ScriptDefinitionConfigOutput;
-}
-
-export type ScriptDefinitionConfigOutput = 'aggregate' | 'stream' | 'cover';
