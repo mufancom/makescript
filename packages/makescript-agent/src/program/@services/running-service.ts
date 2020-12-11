@@ -228,6 +228,10 @@ function validateParameters(
   parameters: Dict<unknown>,
   definition: ScriptDefinition,
 ): [Dict<unknown>, Dict<unknown>] {
+  if (!definition.parameters) {
+    return [{}, {}];
+  }
+
   let {filteredParameters, missingParameters} = definition.parameters.reduce<{
     filteredParameters: Dict<unknown>;
     missingParameters: string[];
