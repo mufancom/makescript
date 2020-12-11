@@ -2,7 +2,7 @@ import type {ProcedureField} from '@makeflow/types';
 
 export interface ScriptsDefinition {
   scripts: ScriptDefinition[];
-  initialize: string;
+  initialize?: string;
 }
 
 export interface ScriptDefinition {
@@ -10,9 +10,9 @@ export interface ScriptDefinition {
   name: string;
   type: string;
   source: string;
-  manual: boolean;
-  parameters: ScriptDefinitionParameter[];
-  options: ScriptDefinitionOptionsItem[];
+  manual?: boolean;
+  parameters?: ScriptDefinitionParameter[];
+  options?: ScriptDefinitionOptionsItem[];
 }
 
 // Parameters
@@ -30,7 +30,7 @@ export interface ScriptDefinitionDetailedParameter {
 
 export interface ScriptDefinitionDetailedParameterField {
   type: ProcedureField.BuiltInProcedureFieldType;
-  data: unknown;
+  data?: unknown;
 }
 
 // Options
@@ -49,5 +49,5 @@ export interface ScriptDefinitionOptionsEnvItem {
   name: string;
   type: 'env';
   env: string;
-  required: boolean;
+  required?: boolean;
 }

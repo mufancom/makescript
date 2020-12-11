@@ -12,7 +12,10 @@ export class SocketService {
 
   private registered = false;
 
-  constructor(private config: Config) {
+  constructor(
+    private config: Config,
+    private entrancesReady: Promise<unknown>,
+  ) {
     let makescriptSecretURL = this.config.makescriptSecretURL;
 
     let url = URL.parse(makescriptSecretURL);
@@ -28,15 +31,18 @@ export class SocketService {
     socket.on('connect', () => {
       logger.info(`Connected to ${makescriptSecretURL}`);
 
-      this.makescriptRPC
-        .register(this.config.namespace, this.registered)
-        .then(() => {
-          this.registered = true;
-          logger.info(
-            `Successfully to registered as "${this.config.namespace}"`,
-          );
-        })
-        .catch(logger.error);
+      (async () => {
+        await this.entrancesReady;
+
+        await this.makescriptRPC.register(
+          this.config.namespace,
+          this.registered,
+        );
+
+        this.registered = true;
+
+        logger.info(`Successfully to registered as "${this.config.namespace}"`);
+      })().catch(logger.error);
     });
     socket.on('disconnect', (reason: string) =>
       logger.error(`Disconnected from ${makescriptSecretURL}: ${reason}`),

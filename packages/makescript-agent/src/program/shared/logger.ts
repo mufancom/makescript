@@ -7,7 +7,7 @@ export type Logger = typeof logger;
 export const logger = {
   info(message: string): void {
     console.info(
-      message
+      String(message)
         .split('\n')
         .map(line => `[${chalk.green('INFO')}] ${line}`)
         .join('\n'),
@@ -16,7 +16,7 @@ export const logger = {
 
   warn(message: string): void {
     console.warn(
-      message
+      String(message)
         .split('\n')
         .map(line => `[${chalk.yellow('WARNING')}] ${line}`)
         .join('\n'),
@@ -25,7 +25,7 @@ export const logger = {
 
   error(message: string): void {
     console.error(
-      message
+      String(message)
         .split('\n')
         .map(line => `[${chalk.red('ERROR')}] ${line}`)
         .join('\n'),

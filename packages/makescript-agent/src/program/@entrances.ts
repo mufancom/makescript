@@ -1,5 +1,6 @@
 /* eslint-disable @mufan/explicit-return-type */
 import entrance from 'entrance-decorator';
+import {Tiva} from 'tiva';
 
 import {
   RPCService,
@@ -12,18 +13,18 @@ import {Config} from './config';
 export class Entrances {
   readonly ready = Promise.all([this.scriptService.ready]);
 
-  constructor(private config: Config) {
+  constructor(private tiva: Tiva, private config: Config) {
     this.rpcService.up();
   }
 
   @entrance
   get socketService() {
-    return new SocketService(this.config);
+    return new SocketService(this.config, this.ready);
   }
 
   @entrance
   get scriptService() {
-    return new ScriptService(this.config);
+    return new ScriptService(this.tiva, this.config);
   }
 
   @entrance

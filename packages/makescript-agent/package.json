@@ -35,8 +35,6 @@
   "devDependencies": {
     "@makeflow/types": "^0.1.26",
     "@types/archiver": "^3.1.1",
-    "@types/hapi__hapi": "^20.0.2",
-    "@types/hapi__joi": "^17.1.6",
     "@types/node-fetch": "^2.5.7",
     "@types/rimraf": "^3.0.0",
     "@types/uuid": "^7.0.0"

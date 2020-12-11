@@ -2,6 +2,7 @@ import * as CP from 'child_process';
 import * as FS from 'fs';
 import * as Path from 'path';
 
+import {Tiva} from 'tiva';
 import * as villa from 'villa';
 
 import {Config} from '../config';
@@ -9,32 +10,26 @@ import {logger} from '../shared';
 import {ScriptDefinition, ScriptsDefinition} from '../types';
 
 const SCRIPTS_DIRECTORY_NAME = 'scripts';
-const SCRIPTS_CONFIG_FILE_NAME = 'makescript.json';
+const SCRIPTS_CONFIG_FILE_NAME_JSON = 'makescript.json';
 
 export class ScriptService {
   readonly ready: Promise<void>;
+
+  private _scriptsDefinition: ScriptsDefinition | undefined;
 
   private get scriptsPath(): string {
     return Path.join(this.config.workspace, SCRIPTS_DIRECTORY_NAME);
   }
 
   private get scriptsDefinitionPath(): string {
-    return Path.join(this.scriptsPath, SCRIPTS_CONFIG_FILE_NAME);
+    return Path.join(this.scriptsPath, SCRIPTS_CONFIG_FILE_NAME_JSON);
   }
 
   get scriptsDefinition(): ScriptsDefinition | undefined {
-    if (!FS.existsSync(this.scriptsDefinitionPath)) {
-      return undefined;
-    }
-
-    try {
-      return JSON.parse(FS.readFileSync(this.scriptsDefinitionPath).toString());
-    } catch {}
-
-    return undefined;
+    return this._scriptsDefinition;
   }
 
-  constructor(private config: Config) {
+  constructor(private tiva: Tiva, private config: Config) {
     this.ready = this.initialize();
   }
 
@@ -61,17 +56,7 @@ export class ScriptService {
       throw new Error(`Failed to sync scripts: ${error.message}`);
     }
 
-    if (!FS.existsSync(this.scriptsDefinitionPath)) {
-      throw new Error(
-        `Scripts definition not found in scripts repo "${this.config.scriptsRepoURL}"`,
-      );
-    }
-
-    let scriptsDefinition = this.scriptsDefinition;
-
-    if (!scriptsDefinition) {
-      throw new Error(`Cannot to parse scripts definition`);
-    }
+    let scriptsDefinition = await this.parseScriptsDefinition();
 
     if (scriptsDefinition.initialize) {
       try {
@@ -96,5 +81,49 @@ export class ScriptService {
 
   private async initialize(): Promise<void> {
     await this.syncScripts();
+  }
+
+  private async parseScriptsDefinition(): Promise<ScriptsDefinition> {
+    if (!FS.existsSync(this.scriptsPath)) {
+      throw new Error(`Scripts repo not cloned`);
+    }
+
+    if (!FS.existsSync(this.scriptsDefinitionPath)) {
+      throw new Error(
+        'Scripts definition not found: \n' +
+          `please ensure the definition file "${SCRIPTS_CONFIG_FILE_NAME_JSON}" is existing in scripts repo.`,
+      );
+    }
+
+    logger.info('Checking scripts definition file ...');
+
+    let scriptsDefinitionBuffer = await villa.async(FS.readFile)(
+      this.scriptsDefinitionPath,
+    );
+    let scriptsDefinitionContent = scriptsDefinitionBuffer.toString();
+
+    let parsedDefinition = JSON.parse(scriptsDefinitionContent);
+
+    try {
+      await this.tiva.validate(
+        {
+          module: '@makeflow/makescript-agent',
+          type: 'ScriptsDefinition',
+        },
+        parsedDefinition,
+      );
+    } catch (error) {
+      if (error.diagnostics) {
+        logger.error(
+          `The structure of the scripts definition file "${this.scriptsDefinitionPath}" not matched: \n` +
+            `    ${error.diagnostics}`,
+        );
+        process.exit(1);
+      } else {
+        throw error;
+      }
+    }
+
+    return parsedDefinition;
   }
 }

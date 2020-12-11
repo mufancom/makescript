@@ -95,7 +95,7 @@ export default class extends Command {
 
       let config = transformConfig(configFileContent, workspace.fullName);
 
-      await main(config);
+      await main(tiva, config);
     } catch (error) {
       if (error.diagnostics) {
         logger.error(
