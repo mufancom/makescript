@@ -5,21 +5,19 @@ export class AuthorizationService {
     await fetchAPI('/api/check');
   }
 
-  async login(username: string, password: string): Promise<void> {
+  async login(password: string | undefined): Promise<void> {
     await fetchAPI('/api/login', {
       method: 'post',
       body: JSON.stringify({
-        username,
         password,
       }),
     });
   }
 
-  async initialize(username: string, password: string): Promise<void> {
+  async initialize(password: string | undefined): Promise<void> {
     await fetchAPI('/api/initialize', {
       method: 'POST',
       body: JSON.stringify({
-        username,
         password,
       }),
     });

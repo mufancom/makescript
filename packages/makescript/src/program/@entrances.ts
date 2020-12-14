@@ -4,14 +4,13 @@ import entrance from 'entrance-decorator';
 
 import {
   AgentService,
+  AppService,
   DBService,
   MakeflowService,
-  RPCService,
   RecordService,
   RunningService,
   SocketService,
   TokenService,
-  UserService,
 } from './@services';
 import {Config} from './config';
 
@@ -23,7 +22,7 @@ export class Entrances {
   }
 
   up(): void {
-    this.rpcService.up();
+    this.appService.up();
   }
 
   @entrance
@@ -63,11 +62,6 @@ export class Entrances {
   }
 
   @entrance
-  get userService(): UserService {
-    return new UserService(this.dbService);
-  }
-
-  @entrance
   get tokenService(): TokenService {
     return new TokenService(this.dbService);
   }
@@ -78,11 +72,12 @@ export class Entrances {
   }
 
   @entrance
-  get rpcService(): RPCService {
-    return new RPCService(
+  get appService(): AppService {
+    return new AppService(
       this.agentService,
       this.makeflowService,
       this.socketService,
+      this.dbService,
       this.config,
     );
   }

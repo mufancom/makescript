@@ -2,7 +2,7 @@ import Cookie from '@hapi/cookie';
 import Hapi from '@hapi/hapi';
 import type {Dict} from 'tslang';
 
-import {UserService} from '../../@services';
+import {AppService} from '../../@services';
 
 export const COOKIE_NAME = 'makescript';
 export const COOKIE_PASSWORD = 'makescript-cookie-password-secret';
@@ -10,7 +10,7 @@ export const COOKIE_PASSWORD = 'makescript-cookie-password-secret';
 export const SESSION_AUTH_STRATEGY = 'session';
 
 export async function setupAuth(
-  userService: UserService,
+  appService: AppService,
   server: Hapi.Server,
 ): Promise<void> {
   await server.register(Cookie);
@@ -21,17 +21,13 @@ export async function setupAuth(
       password: COOKIE_PASSWORD,
       isSecure: false,
     },
-    redirectTo: () => (userService.hasAnyUser ? '/login' : '/initialize'),
+    redirectTo: () => (appService.initialized ? '/login' : '/initialize'),
     validateFunc: async (_, session) => {
-      let authedUser = userService.getUserById(
-        (session as Dict<string>)?.userId,
-      );
-
-      if (!authedUser) {
-        return {valid: false};
+      if (appService.noAuthRequired || (session as Dict<unknown>).authed) {
+        return {valid: true};
       }
 
-      return {valid: true, credentials: authedUser};
+      return {valid: false};
     },
   });
 

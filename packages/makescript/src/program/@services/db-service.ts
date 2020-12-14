@@ -3,21 +3,19 @@ import * as Path from 'path';
 import Lowdb from 'lowdb';
 import FileAsync from 'lowdb/adapters/FileAsync';
 
-import {Model} from '../@core';
+import {MODEL_VERSION, Model} from '../@core';
 import {Config} from '../config';
 
 const DB_FILE_NAME = 'db.json';
 
 const DB_MODEL_DEFAULT: Model = {
-  version: 1,
+  version: MODEL_VERSION,
   makeflow: {
     loginToken: undefined,
     powerAppVersion: '0.1.0',
   },
-  settings: {
-    scriptsRepoURL: undefined,
-  },
-  users: [],
+  initialized: false,
+  passwordHash: undefined,
   tokens: [],
   records: [],
 };

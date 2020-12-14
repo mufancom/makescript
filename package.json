@@ -6,6 +6,7 @@
   "scripts": {
     "start:makescript": "node packages/makescript/bld/program/@cli.js",
     "start:agent": "node packages/makescript-agent/bld/program/@cli.js",
+    "watch:web": "yarn workspace @makeflow/makescript watch:web",
     "build": "rimraf packages/*/bld && tsc --build",
     "lint": "eslint .",
     "lint-prettier": "prettier --check .",

@@ -32,32 +32,19 @@ export interface InitializeViewProps
 @observer
 export class InitializeView extends Component<InitializeViewProps> {
   @observable
-  private username: string | undefined;
-
-  @observable
   private password: string | undefined;
 
   @computed
   private get formAvailable(): boolean {
-    let username = this.username;
     let password = this.password;
 
-    return !!username && !!password && password.length >= 6;
+    return !!password && password.length >= 6;
   }
 
   render(): ReactNode {
     return (
       <Wrapper>
         <Card title="初始化" summary="请输入密码以初始化应用">
-          <Input
-            className="input"
-            size="large"
-            type="text"
-            placeholder="输入用户名"
-            value={this.username}
-            onChange={this.onUsernameChange}
-            onKeyDown={this.onInputKeyDown}
-          />
           <Input
             className="input"
             size="large"
@@ -77,12 +64,6 @@ export class InitializeView extends Component<InitializeViewProps> {
       </Wrapper>
     );
   }
-
-  private onUsernameChange = ({
-    currentTarget: {value},
-  }: ChangeEvent<HTMLInputElement>): void => {
-    this.username = value;
-  };
 
   private onPasswordChange = ({
     currentTarget: {value},
@@ -106,10 +87,9 @@ export class InitializeView extends Component<InitializeViewProps> {
     }
 
     try {
-      let username = this.username!;
       let password = this.password!;
 
-      await ENTRANCES.authorizationService.initialize(username, password);
+      await ENTRANCES.authorizationService.initialize(password);
       route.home.$push();
     } catch (error) {
       console.error(error);

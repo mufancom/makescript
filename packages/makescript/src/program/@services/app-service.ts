@@ -15,19 +15,32 @@ import {Socket} from 'socket.io';
 import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
+import {calculateHash} from '../@utils';
 import {Config} from '../config';
 
 import {AgentService} from './agent-service';
+import {DBService} from './db-service';
 import {MakeflowService} from './makeflow-service';
 import {SocketService} from './socket-service';
 
+const USER_PASSWORD_HASH_SALT = 'makescript-user-password-hash-salt';
+
 const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
-export class RPCService {
+export class AppService {
+  get initialized(): boolean {
+    return this.dbService.db.get('initialized').value();
+  }
+
+  get noAuthRequired(): boolean {
+    return !this.dbService.db.get('passwordHash').value();
+  }
+
   constructor(
     private agentService: AgentService,
     private makeflowService: MakeflowService,
     private socketService: SocketService,
+    private dbService: DBService,
     private config: Config,
   ) {}
 
@@ -41,6 +54,29 @@ export class RPCService {
         logger,
       );
     });
+  }
+
+  async initialize(password: string): Promise<void> {
+    if (this.initialized) {
+      throw new Error('The application has already been initialized');
+    }
+
+    let passwordHash = password && calculatePasswordHash(password);
+
+    await this.dbService.db
+      .assign({
+        initialized: true,
+        passwordHash,
+      })
+      .write();
+  }
+
+  validatePassword(password: string | undefined): boolean {
+    let passwordHashToValidate = password && calculatePasswordHash(password);
+
+    let passwordHash = this.dbService.db.get('passwordHash').value();
+
+    return passwordHashToValidate === passwordHash;
   }
 }
 
@@ -95,4 +131,8 @@ class RPC implements MakescriptRPC {
   async updateOutput(id: string, output: string): Promise<void> {
     await this.makeflowService.updatePowerItem({id, description: output});
   }
+}
+
+function calculatePasswordHash(password: string): string {
+  return calculateHash(password, USER_PASSWORD_HASH_SALT);
 }

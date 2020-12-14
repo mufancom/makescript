@@ -22,9 +22,9 @@ export async function serveWeb(
 ): Promise<void> {
   await server.register(Inert);
 
-  await setupAuth(entrances.userService, server);
+  await setupAuth(entrances.appService, server);
 
-  routeAuthorization(entrances.userService, server);
+  routeAuthorization(entrances.appService, server);
   routeAgent(
     entrances.agentService,
     entrances.runningService,

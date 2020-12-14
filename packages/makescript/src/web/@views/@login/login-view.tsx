@@ -31,9 +31,6 @@ export interface LoginViewProps extends RouteComponentProps<Router['login']> {}
 @observer
 export class LoginView extends Component<LoginViewProps> {
   @observable
-  private username: string | undefined;
-
-  @observable
   private password: string | undefined;
 
   render(): ReactNode {
@@ -43,37 +40,19 @@ export class LoginView extends Component<LoginViewProps> {
           <Input
             className="input"
             size="large"
-            type="text"
-            placeholder="输入用户名"
-            value={this.username}
-            onChange={this.onUsernameChange}
-            onKeyDown={this.onInputKeyDown}
-          />
-          <Input
-            className="input"
-            size="large"
             type="password"
             placeholder="输入密码"
             value={this.password}
             onChange={this.onPasswordChange}
             onKeyDown={this.onInputKeyDown}
           />
-          <Button
-            disabled={!this.username || !this.password}
-            onClick={this.onLoginButtonClick}
-          >
+          <Button disabled={!this.password} onClick={this.onLoginButtonClick}>
             进入
           </Button>
         </Card>
       </Wrapper>
     );
   }
-
-  private onUsernameChange = ({
-    currentTarget: {value},
-  }: ChangeEvent<HTMLInputElement>): void => {
-    this.username = value;
-  };
 
   private onPasswordChange = ({
     currentTarget: {value},
@@ -92,15 +71,14 @@ export class LoginView extends Component<LoginViewProps> {
   };
 
   private async tryToLogin(): Promise<void> {
-    let username = this.username;
     let password = this.password;
 
-    if (!username || !password) {
+    if (!password) {
       return;
     }
 
     try {
-      await ENTRANCES.authorizationService.login(username, password);
+      await ENTRANCES.authorizationService.login(password);
       route.home.$push();
     } catch (error) {
       if (error.code === 'PASSWORD_MISMATCH') {

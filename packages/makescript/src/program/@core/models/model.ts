@@ -1,14 +1,14 @@
 import {MakeflowInfoModal} from './makeflow';
 import {RunningRecordModel} from './running-record';
-import {SettingsModel} from './settings';
 import {TokenModel} from './token';
-import {UserModel} from './user';
+
+export const MODEL_VERSION = 1;
 
 export interface Model {
   version: number;
   makeflow: MakeflowInfoModal;
-  settings: SettingsModel;
-  users: UserModel[];
+  initialized: boolean;
+  passwordHash: string | undefined;
   tokens: TokenModel[];
   records: RunningRecordModel[];
 }
