@@ -58,6 +58,8 @@ export class ScriptService {
 
     let scriptsDefinition = await this.parseScriptsDefinition();
 
+    this._scriptsDefinition = scriptsDefinition;
+
     if (scriptsDefinition.initialize) {
       try {
         await villa.awaitable(CP.spawn(scriptsDefinition.initialize));

@@ -1,4 +1,4 @@
-import {bridgeRPC} from '../shared';
+import {bridgeRPC, logger} from '../shared';
 import {
   MakescriptAgentRPC,
   MakescriptAgentRPCRunScriptOptions,
@@ -18,7 +18,7 @@ export class RPCService implements MakescriptAgentRPC {
   ) {}
 
   up(): void {
-    bridgeRPC(this, this.socketService.socket);
+    bridgeRPC(this, this.socketService.socket, logger);
   }
 
   async syncScripts(): Promise<void> {

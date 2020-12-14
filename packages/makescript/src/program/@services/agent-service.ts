@@ -40,7 +40,7 @@ export class AgentService {
     let agentRPC = this.registeredRPCMap.get(namespace);
 
     if (!agentRPC) {
-      logger.info(`Agent for ${namespace} not found.`);
+      logger.error(`Agent for ${namespace} not found.`);
       throw new ExpectedError('NAMESPACE_NOT_REGISTERED');
     }
 

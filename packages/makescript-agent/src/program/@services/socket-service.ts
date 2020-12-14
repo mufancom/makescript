@@ -26,7 +26,7 @@ export class SocketService {
 
     let socket = this.socket;
 
-    this.makescriptRPC = wrapSocketToRPC(socket);
+    this.makescriptRPC = wrapSocketToRPC(socket, logger);
 
     socket.on('connect', () => {
       logger.info(`Connected to ${makescriptSecretURL}`);

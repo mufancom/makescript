@@ -38,13 +38,17 @@ export class RPCService {
       bridgeRPC(
         new RPC(this.agentService, this.makeflowService, socket, this.config),
         socket as any,
+        logger,
       );
     });
   }
 }
 
 class RPC implements MakescriptRPC {
-  private agentRPC = wrapSocketToRPC<MakescriptAgentRPC>(this.socket as any);
+  private agentRPC = wrapSocketToRPC<MakescriptAgentRPC>(
+    this.socket as any,
+    logger,
+  );
 
   constructor(
     private agentService: AgentService,

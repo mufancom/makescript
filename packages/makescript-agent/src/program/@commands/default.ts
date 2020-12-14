@@ -3,8 +3,8 @@ import * as OS from 'os';
 import * as Path from 'path';
 
 import {Castable, Command, Options, command, metadata, option} from 'clime';
+import prompts from 'prompts';
 import {Tiva} from 'tiva';
-import {v4 as uuidv4} from 'uuid';
 import YAML from 'yaml';
 
 import {ConfigFile, generateYamlConfig, transformConfig} from '../config';
@@ -18,18 +18,6 @@ const WORKSPACE_PATH_DEFAULT = Path.resolve(
   'agent',
 );
 const GENERATE_CONFIG_DEFAULT = false;
-
-// TODO: Type safe
-const YAML_CONFIG_CONTENT_DEFAULT = (): string =>
-  generateYamlConfig({
-    'makescript-secret-url': '',
-    'scripts-repo-url': '',
-    namespace: 'makescript-agent',
-    port: 8902,
-    host: '0.0.0.0',
-    token: uuidv4(),
-    proxy: undefined,
-  });
 
 const CONFIG_FILE_NAME = 'agent.yaml';
 
@@ -72,7 +60,41 @@ export default class extends Command {
         FS.mkdirSync(dirname);
       }
 
-      FS.writeFileSync(configFilePath, YAML_CONFIG_CONTENT_DEFAULT());
+      let answer = await prompts([
+        {
+          type: 'text',
+          name: 'hostURL',
+          message: 'Please enter the makescript host secret url to join',
+          validate: value => /^https?:\/\/.+$/.test(value),
+        },
+        {
+          type: 'text',
+          name: 'namespace',
+          message: 'What namespace do you want to register as',
+        },
+        {
+          type: 'text',
+          name: 'repoURL',
+          message: 'Please enter the git repo url of the scripts',
+          validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
+        },
+      ]);
+
+      // There is a bug (or unhandled behavior) with 'prompts'.
+      // When user press CTRL + C , program will continue to execute with empty answers.
+      // https://github.com/terkelg/prompts/issues/252
+      if (!answer.hostURL || !answer.namespace || !answer.repoURL) {
+        return;
+      }
+
+      let yamlConfigContent = generateYamlConfig({
+        'makescript-secret-url': answer.hostURL,
+        'scripts-repo-url': answer.repoURL,
+        namespace: answer.namespace,
+        proxy: undefined,
+      });
+
+      FS.writeFileSync(configFilePath, yamlConfigContent);
     }
 
     if (generateConfigOnly) {

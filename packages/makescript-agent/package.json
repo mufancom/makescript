@@ -21,6 +21,7 @@
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",
     "node-fetch": "^2.6.1",
+    "prompts": "^2.4.0",
     "rimraf": "^3.0.2",
     "socket.io-client": "^3.0.3",
     "sqlite": "^4.0.15",
@@ -36,6 +37,7 @@
     "@makeflow/types": "^0.1.26",
     "@types/archiver": "^3.1.1",
     "@types/node-fetch": "^2.5.7",
+    "@types/prompts": "^2.0.9",
     "@types/rimraf": "^3.0.0",
     "@types/uuid": "^7.0.0"
   }

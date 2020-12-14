@@ -7,9 +7,6 @@ export interface Config {
   makescriptSecretURL: string;
   scriptsRepoURL: string;
   namespace: string;
-  port: number;
-  host: string;
-  token: string;
   workspace: string;
   proxy:
     | {
@@ -27,20 +24,7 @@ export interface ConfigFile {
   'makescript-secret-url': string;
   'scripts-repo-url': string;
   namespace: string;
-  /**
-   * The port to listen on
-   */
-  port: number;
-  /**
-   * The host to listen on
-   */
-  host: string;
-  /**
-   * @uuid
-   *
-   * The token to authenticate
-   */
-  token: string;
+
   proxy:
     | {
         url: string;
@@ -61,9 +45,6 @@ export function transformConfig(config: ConfigFile, workspace: string): Config {
     makescriptSecretURL: config['makescript-secret-url'],
     scriptsRepoURL: config['scripts-repo-url'],
     namespace: config.namespace,
-    port: config.port,
-    host: config.host,
-    token: config.token,
     proxy: config.proxy ?? undefined,
     workspace,
   };
