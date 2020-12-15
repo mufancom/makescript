@@ -25,6 +25,23 @@ export class AgentService {
     );
   }
 
+  async requireScriptDefinition(
+    namespace: string,
+    name: string,
+  ): Promise<BriefScriptDefinition> {
+    let definitions = await this.registeredRPCMap.get(namespace)?.getScripts();
+
+    let definition = definitions?.find(definition => definition.name === name);
+
+    if (!definition) {
+      throw new Error(
+        `The script definition of type "${name}" in "${name}" not found`,
+      );
+    }
+
+    return definition;
+  }
+
   async runScript(
     namespace: string,
     {

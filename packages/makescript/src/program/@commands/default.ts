@@ -98,13 +98,15 @@ export default class extends Command {
 
     let configFileContent: ConfigFile = YAML.parse(yamlConfigContent);
 
-    let tiva = new Tiva();
+    let tiva = new Tiva({
+      project: Path.join(__dirname, '../../../src/program'),
+    });
 
     logger.info('Checking config file ...');
 
     try {
       await tiva.validate(
-        {module: '@makeflow/makescript/bld/program/config', type: 'ConfigFile'},
+        {module: './config', type: 'ConfigFile'},
         configFileContent,
       );
 

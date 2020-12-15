@@ -48,7 +48,7 @@ export interface ScriptDefinitionDetailedParameter {
   name: string;
   displayName: string;
   required: boolean;
-  field?: ScriptDefinitionDetailedParameterField;
+  field?: string | ScriptDefinitionDetailedParameterField;
 }
 
 export interface ScriptDefinitionDetailedParameterField {

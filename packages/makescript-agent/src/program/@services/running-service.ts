@@ -119,7 +119,9 @@ export class RunningService {
   }
 
   private requireScriptDefinition(name: string): ScriptDefinition {
-    let scriptDefinition = this.scriptService.getScriptDefinitionByName(name);
+    let scriptDefinition = this.scriptService.getDefaultValueFilledScriptDefinitionByName(
+      name,
+    );
 
     if (!scriptDefinition) {
       throw new Error(`Script definition "${name}" not found`);

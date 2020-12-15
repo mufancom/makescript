@@ -9,6 +9,7 @@ import {RunningRecord, RunningRecordMakeflowInfo} from '../types';
 
 import {AgentService} from './agent-service';
 import {DBService} from './db-service';
+import {RunningService} from './running-service';
 
 export class RecordService {
   get runningRecords(): RunningRecord[] {
@@ -19,6 +20,7 @@ export class RecordService {
 
   constructor(
     private agentService: AgentService,
+    private runningService: RunningService,
     private dbService: DBService,
   ) {}
 
@@ -35,10 +37,17 @@ export class RecordService {
     triggerTokenLabel: string;
     makeflowTask: RunningRecordModelMakeflowInfo | undefined;
   }): Promise<void> {
+    let definition = await this.agentService.requireScriptDefinition(
+      namespace,
+      name,
+    );
+
+    let recordId = uuidv4();
+
     await this.dbService.db
       .get('records')
       .unshift({
-        id: uuidv4(),
+        id: recordId,
         namespace,
         name,
         parameters,
@@ -60,6 +69,10 @@ export class RecordService {
       logger.error(
         `Error to trigger hook "postTrigger" for script "${name}": ${error.message}`,
       );
+    }
+
+    if (!definition.manual && !definition.needsPassword) {
+      await this.runningService.runScript(recordId, undefined);
     }
   }
 }

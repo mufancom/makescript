@@ -38,7 +38,7 @@ export class ScriptService {
 
     return scriptsDefinition.scripts.map(scriptDefinition =>
       convertScriptDefinitionToBriefScriptDefinition(
-        fillScriptDefinition(scriptDefinition, scriptsDefinition!),
+        fillScriptDefinitionDefaultValue(scriptDefinition, scriptsDefinition!),
       ),
     );
   }
@@ -85,7 +85,9 @@ export class ScriptService {
     }
   }
 
-  getScriptDefinitionByName(name: string): ScriptDefinition | undefined {
+  getDefaultValueFilledScriptDefinitionByName(
+    name: string,
+  ): ScriptDefinition | undefined {
     let scriptsDefinition = this.scriptsDefinition;
 
     if (!scriptsDefinition) {
@@ -100,7 +102,7 @@ export class ScriptService {
       return undefined;
     }
 
-    return fillScriptDefinition(definition, scriptsDefinition);
+    return fillScriptDefinitionDefaultValue(definition, scriptsDefinition);
   }
 
   resolveSource(script: ScriptDefinition): string {
@@ -135,7 +137,7 @@ export class ScriptService {
     try {
       await this.tiva.validate(
         {
-          module: '@makeflow/makescript-agent',
+          module: './types',
           type: 'ScriptsDefinition',
         },
         parsedDefinition,
@@ -156,13 +158,14 @@ export class ScriptService {
   }
 }
 
-function fillScriptDefinition(
+function fillScriptDefinitionDefaultValue(
   definition: ScriptDefinition,
   scriptsDefinition: ScriptsDefinition,
 ): ScriptDefinition {
   return {
     ...definition,
     passwordHash: definition.passwordHash ?? scriptsDefinition.passwordHash,
+    manual: definition.manual === true,
     hooks: {
       ...scriptsDefinition.hooks,
       ...definition.hooks,
@@ -177,7 +180,7 @@ function convertScriptDefinitionToBriefScriptDefinition(
     displayName: definition.displayName,
     name: definition.name,
     type: definition.type,
-    manual: !!definition.manual,
+    manual: definition.manual === true,
     parameters: definition.parameters ?? [],
     needsPassword: !!definition.passwordHash,
     hooks: {
