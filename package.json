@@ -5,6 +5,7 @@
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "scripts": {
     "lerna:publish": "yarn build && lerna publish prerelease --registry=https://registry.npmjs.org",
+    "lerna:publish-only": "lerna publish prerelease --registry=https://registry.npmjs.org",
     "start:makescript": "node packages/makescript/bld/program/@cli.js",
     "start:agent": "node packages/makescript-agent/bld/program/@cli.js",
     "watch:web": "yarn workspace @makeflow/makescript watch:web",
