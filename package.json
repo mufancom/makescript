@@ -4,10 +4,11 @@
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "scripts": {
+    "lerna:publish": "yarn build && lerna publish prerelease --registry=https://registry.npmjs.org",
     "start:makescript": "node packages/makescript/bld/program/@cli.js",
     "start:agent": "node packages/makescript-agent/bld/program/@cli.js",
     "watch:web": "yarn workspace @makeflow/makescript watch:web",
-    "build": "rimraf packages/*/bld && tsc --build",
+    "build": "rimraf packages/*/bld && tsc --build && yarn workspace @makeflow/makescript pack:web",
     "lint": "eslint .",
     "lint-prettier": "prettier --check .",
     "test": "yarn lint-prettier && yarn build && yarn lint"
@@ -20,6 +21,7 @@
     "@mufan/code": "^0.2.5",
     "@mufan/eslint-plugin": "^0.1.36",
     "eslint": "^7.13.0",
+    "lerna": "^3.22.1",
     "prettier": "^2.1.2",
     "rimraf": "^3.0.2",
     "typescript": "^4.0.5"

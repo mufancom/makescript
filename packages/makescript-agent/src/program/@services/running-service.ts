@@ -25,7 +25,7 @@ import {SocketService} from './socket-service';
 
 const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
-const OUTPUT_FLUSH_CHARACTER = '\033c';
+const OUTPUT_FLUSH_CHARACTER = '\x1Bc';
 
 export class RunningService {
   private adapterMap = new Map<string, IAdapter>();

@@ -4,7 +4,7 @@
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "bin": {
-    "makescript": "bld/server/@cli.js"
+    "makescript": "bld/program/@cli.js"
   },
   "files": [
     "src/**/*.ts",
@@ -14,7 +14,7 @@
     "pack:web": "rimraf bld/web && parcel build src/web/index.html --out-dir bld/web/",
     "watch:web": "parcel watch src/web/index.html --out-dir bld/web/",
     "build:web": "rimraf .bld-cache/web && tsc --project src/web/tsconfig.json",
-    "build": "rimraf bld/program && tsc --project src/program/tsconfig.json"
+    "build": "rimraf bld/program && tsc --project src/program/tsconfig.json && yarn build:web"
   },
   "dependencies": {
     "@hapi/cookie": "^11.0.2",
