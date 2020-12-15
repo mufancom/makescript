@@ -7,7 +7,11 @@ import * as villa from 'villa';
 
 import {Config} from '../config';
 import {logger} from '../shared';
-import {ScriptDefinition, ScriptsDefinition} from '../types';
+import {
+  BriefScriptDefinition,
+  ScriptDefinition,
+  ScriptsDefinition,
+} from '../types';
 
 const SCRIPTS_DIRECTORY_NAME = 'scripts';
 const SCRIPTS_CONFIG_FILE_NAME_JSON = 'makescript.json';
@@ -15,9 +19,9 @@ const SCRIPTS_CONFIG_FILE_NAME_JSON = 'makescript.json';
 export class ScriptService {
   readonly ready: Promise<void>;
 
-  private _scriptsDefinition: ScriptsDefinition | undefined;
+  private scriptsDefinition: ScriptsDefinition | undefined;
 
-  private get scriptsPath(): string {
+  get scriptsPath(): string {
     return Path.join(this.config.workspace, SCRIPTS_DIRECTORY_NAME);
   }
 
@@ -25,8 +29,18 @@ export class ScriptService {
     return Path.join(this.scriptsPath, SCRIPTS_CONFIG_FILE_NAME_JSON);
   }
 
-  get scriptsDefinition(): ScriptsDefinition | undefined {
-    return this._scriptsDefinition;
+  get briefScriptDefinitions(): BriefScriptDefinition[] {
+    let scriptsDefinition = this.scriptsDefinition;
+
+    if (!scriptsDefinition) {
+      return [];
+    }
+
+    return scriptsDefinition.scripts.map(scriptDefinition =>
+      convertScriptDefinitionToBriefScriptDefinition(
+        fillScriptDefinition(scriptDefinition, scriptsDefinition!),
+      ),
+    );
   }
 
   constructor(private tiva: Tiva, private config: Config) {
@@ -58,7 +72,7 @@ export class ScriptService {
 
     let scriptsDefinition = await this.parseScriptsDefinition();
 
-    this._scriptsDefinition = scriptsDefinition;
+    this.scriptsDefinition = scriptsDefinition;
 
     if (scriptsDefinition.initialize) {
       try {
@@ -72,13 +86,25 @@ export class ScriptService {
   }
 
   getScriptDefinitionByName(name: string): ScriptDefinition | undefined {
-    return this.scriptsDefinition?.scripts.find(
+    let scriptsDefinition = this.scriptsDefinition;
+
+    if (!scriptsDefinition) {
+      return;
+    }
+
+    let definition = scriptsDefinition.scripts.find(
       definition => definition.name === name,
     );
+
+    if (!definition) {
+      return undefined;
+    }
+
+    return fillScriptDefinition(definition, scriptsDefinition);
   }
 
   resolveSource(script: ScriptDefinition): string {
-    return Path.join(this.config.workspace, 'scripts', script.source);
+    return Path.join(this.scriptsPath, script.source);
   }
 
   private async initialize(): Promise<void> {
@@ -128,4 +154,34 @@ export class ScriptService {
 
     return parsedDefinition;
   }
+}
+
+function fillScriptDefinition(
+  definition: ScriptDefinition,
+  scriptsDefinition: ScriptsDefinition,
+): ScriptDefinition {
+  return {
+    ...definition,
+    passwordHash: definition.passwordHash ?? scriptsDefinition.passwordHash,
+    hooks: {
+      ...scriptsDefinition.hooks,
+      ...definition.hooks,
+    },
+  };
+}
+
+function convertScriptDefinitionToBriefScriptDefinition(
+  definition: ScriptDefinition,
+): BriefScriptDefinition {
+  return {
+    displayName: definition.displayName,
+    name: definition.name,
+    type: definition.type,
+    manual: !!definition.manual,
+    parameters: definition.parameters ?? [],
+    needsPassword: !!definition.passwordHash,
+    hooks: {
+      postTrigger: !!definition.hooks?.postTrigger,
+    },
+  };
 }

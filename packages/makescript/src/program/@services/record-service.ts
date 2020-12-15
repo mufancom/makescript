@@ -1,9 +1,13 @@
-import {ScriptRunningArgumentParameters} from '@makeflow/makescript-agent';
+import {
+  ScriptRunningArgumentParameters,
+  logger,
+} from '@makeflow/makescript-agent';
 import {v4 as uuidv4} from 'uuid';
 
 import {RunningRecordModel, RunningRecordModelMakeflowInfo} from '../@core';
 import {RunningRecord, RunningRecordMakeflowInfo} from '../types';
 
+import {AgentService} from './agent-service';
 import {DBService} from './db-service';
 
 export class RecordService {
@@ -13,7 +17,10 @@ export class RecordService {
     return runningRecordModels.map(model => convertRecordModelToRecord(model));
   }
 
-  constructor(private dbService: DBService) {}
+  constructor(
+    private agentService: AgentService,
+    private dbService: DBService,
+  ) {}
 
   async enqueueRunningRecord({
     namespace,
@@ -27,9 +34,8 @@ export class RecordService {
     parameters: ScriptRunningArgumentParameters;
     triggerTokenLabel: string;
     makeflowTask: RunningRecordModelMakeflowInfo | undefined;
-  }): Promise<string> {
-    // TODO: Filter parameters
-    let insertedRecords = await this.dbService.db
+  }): Promise<void> {
+    await this.dbService.db
       .get('records')
       .unshift({
         id: uuidv4(),
@@ -46,7 +52,15 @@ export class RecordService {
       })
       .write();
 
-    return insertedRecords[0].id;
+    try {
+      await this.agentService.registeredRPCMap
+        .get(namespace)
+        ?.triggerHook(name, 'postTrigger');
+    } catch (error) {
+      logger.error(
+        `Error to trigger hook "postTrigger" for script "${name}": ${error.message}`,
+      );
+    }
   }
 }
 

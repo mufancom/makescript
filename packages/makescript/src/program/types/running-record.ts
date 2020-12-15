@@ -21,7 +21,10 @@ export interface RunningRecordMakeflowInfo {
   taskUrl: string;
   numericId: number;
   brief: string;
-  assignee: unknown;
+  assignee: {
+    displayName: string;
+    id: string;
+  };
 }
 
 export interface RunningRecordOutput {

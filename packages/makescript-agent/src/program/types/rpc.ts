@@ -1,5 +1,8 @@
 import {ScriptRunningArgumentParameters, ScriptRunningResult} from './running';
-import {ScriptDefinition} from './script-definition';
+import {
+  BriefScriptDefinition,
+  ScriptDefinitionHooks,
+} from './script-definition';
 
 export interface IRPC {}
 
@@ -8,14 +11,19 @@ export interface MakescriptAgentRPCRunScriptOptions {
   name: string;
   parameters: ScriptRunningArgumentParameters;
   resourcesBaseURL: string;
+  password: string | undefined;
 }
 
 export interface MakescriptAgentRPC extends IRPC {
   syncScripts(): Promise<void>;
-  getScripts(): Promise<ScriptDefinition[]>;
+  getScripts(): Promise<BriefScriptDefinition[]>;
   runScript(
     options: MakescriptAgentRPCRunScriptOptions,
   ): Promise<ScriptRunningResult>;
+  triggerHook(
+    scriptName: string,
+    hookName: keyof ScriptDefinitionHooks,
+  ): Promise<void>;
 }
 
 export interface MakescriptRPC extends IRPC {

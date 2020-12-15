@@ -1,24 +1,18 @@
 import {CaretRightFilled} from '@ant-design/icons';
 import {
-  ScriptDefinition,
+  BriefScriptDefinition,
   ScriptDefinitionDetailedParameter,
 } from '@makeflow/makescript-agent';
 import {Input, Modal, Tooltip, message} from 'antd';
-import {RouteComponentProps} from 'boring-router-react';
 import {computed} from 'mobx';
 import {observer} from 'mobx-react';
 import React, {Component, ReactNode} from 'react';
 import styled from 'styled-components';
 import {Dict} from 'tslang';
 
-import {ENTRANCES} from '../../@constants';
-import {Router} from '../../@routes';
-
 import {ExecuteButton, Item, Label, Title} from './@common';
 
 const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
-
-type ScriptNameMatch = Router['scripts']['management']['namespace']['scriptName'];
 
 const Wrapper = styled.div`
   flex: 1;
@@ -49,46 +43,30 @@ const RequiredItemStar = styled.div`
   color: hsl(11, 97%, 55%);
 `;
 
-const OptionKey = styled.div`
-  color: hsl(0, 0%, 20%);
-  margin-right: 20px;
-`;
-
-const OptionValue = styled.div`
-  color: hsl(0, 0%, 40%);
-`;
-
 const ParameterInfo = styled.div`
   margin-left: 5px;
   color: #666;
   font-size: 0.8em;
 `;
 
-export interface ScriptDefinitionViewerViewProps
-  extends RouteComponentProps<ScriptNameMatch> {}
+export interface ScriptDefinitionViewerProps {
+  scriptDefinition: BriefScriptDefinition;
+}
 
 @observer
-export class ScriptDefinitionViewerView extends Component<
-  ScriptDefinitionViewerViewProps
+export class ScriptDefinitionViewer extends Component<
+  ScriptDefinitionViewerProps
 > {
   @computed
-  private get scriptDefinition(): ScriptDefinition | undefined {
-    let {
-      match: {
-        $params: {namespace, scriptName},
-      },
-    } = this.props;
+  private get scriptDefinition(): BriefScriptDefinition {
+    let {scriptDefinition} = this.props;
 
-    return ENTRANCES.agentService.scriptDefinitionsMap
-      .get(namespace)
-      ?.find(script => script.name === scriptName);
+    return scriptDefinition;
   }
 
   @computed
   private get parametersRendering(): ReactNode {
-    let scriptDefinition = this.scriptDefinition;
-
-    let parameters = scriptDefinition?.parameters;
+    let parameters = this.scriptDefinition?.parameters;
 
     if (!parameters || !parameters.length) {
       return (
@@ -122,29 +100,6 @@ export class ScriptDefinitionViewerView extends Component<
     );
   }
 
-  @computed
-  private get optionsRendering(): ReactNode {
-    let command = this.scriptDefinition;
-
-    let options = command && command.options;
-
-    if (!options || !Object.keys(options).length) {
-      return undefined;
-    }
-
-    return (
-      <>
-        <Label>脚本选项</Label>
-        {options.map(option => (
-          <Item key={option.name}>
-            <OptionKey>{option.name}</OptionKey>
-            <OptionValue>{JSON.stringify(option)}</OptionValue>
-          </Item>
-        ))}
-      </>
-    );
-  }
-
   render(): ReactNode {
     let scriptDefinition = this.scriptDefinition;
 
@@ -152,7 +107,7 @@ export class ScriptDefinitionViewerView extends Component<
       return <div>脚本未找到</div>;
     }
 
-    let {type, name, source, manual} = scriptDefinition;
+    let {type, name, manual} = scriptDefinition;
 
     return (
       <Wrapper>
@@ -161,21 +116,22 @@ export class ScriptDefinitionViewerView extends Component<
             {type}: {name}
           </Title>
           <Label>源文件</Label>
-          <Item>{source}</Item>
           <Label>需手动执行</Label>
           <Item>{manual ? '是' : '否'}</Item>
           {this.parametersRendering}
-          {this.optionsRendering}
         </Content>
 
-        <Tooltip
-          title="手动触发并执行该脚本"
-          mouseEnterDelay={TOOLTIP_MOUSE_ENTER_DELAY}
-        >
-          <ExecuteButton onClick={this.onExecuteButtonClick}>
-            <CaretRightFilled />
-          </ExecuteButton>
-        </Tooltip>
+        {/* TODO: */}
+        {false ? (
+          <Tooltip
+            title="手动触发并执行该脚本"
+            mouseEnterDelay={TOOLTIP_MOUSE_ENTER_DELAY}
+          >
+            <ExecuteButton onClick={this.onExecuteButtonClick}>
+              <CaretRightFilled />
+            </ExecuteButton>
+          </Tooltip>
+        ) : undefined}
       </Wrapper>
     );
   }
@@ -194,7 +150,7 @@ export class ScriptDefinitionViewerView extends Component<
         onOk: async () => {
           // TODO:
           // await ENTRANCES.scriptsService.executeCommand(command, {});
-          await message.success('执行成功');
+          void message.success('执行成功');
         },
       });
     } else {

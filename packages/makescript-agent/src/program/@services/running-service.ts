@@ -1,7 +1,9 @@
+import * as CP from 'child_process';
 import * as FS from 'fs';
 import * as OS from 'os';
 import * as Path from 'path';
 
+import Bcrypt from 'bcrypt';
 import rimraf from 'rimraf';
 import {Dict} from 'tslang';
 import {v4 as uuidv4} from 'uuid';
@@ -13,6 +15,7 @@ import {
   AdapterRunScriptArgument,
   IAdapter,
   ScriptDefinition,
+  ScriptDefinitionHooks,
   ScriptRunningArgument,
   ScriptRunningResult,
 } from '../types';
@@ -22,7 +25,7 @@ import {SocketService} from './socket-service';
 
 const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
-const OUTPUT_FLUSH_CHARACTER = '\r';
+const OUTPUT_FLUSH_CHARACTER = '\033c';
 
 export class RunningService {
   private adapterMap = new Map<string, IAdapter>();
@@ -32,6 +35,27 @@ export class RunningService {
     private socketService: SocketService,
   ) {}
 
+  async triggerHook(
+    scriptName: string,
+    hookName: keyof ScriptDefinitionHooks,
+  ): Promise<void> {
+    let definition = this.requireScriptDefinition(scriptName);
+
+    let hookContent = definition.hooks?.[hookName];
+
+    if (!hookContent) {
+      throw new Error(
+        `The hook "${hookName}" of script "${scriptName}" is not configured.`,
+      );
+    }
+
+    let cp = CP.exec(hookContent, {
+      cwd: this.scriptService.scriptsPath,
+    });
+
+    await villa.awaitable(cp);
+  }
+
   async runScript(
     argument: ScriptRunningArgument,
   ): Promise<ScriptRunningResult> {
@@ -40,6 +64,9 @@ export class RunningService {
     logger.info(`Running record "${argument.id}" of script "${argument.name}"`);
 
     let definition = this.requireScriptDefinition(name);
+
+    await this.validatePassword(definition, argument);
+
     let source = this.resolveSource(definition);
     let adapter = this.requireAdapter(definition);
     let options = this.resolveOptions(definition);
@@ -95,11 +122,27 @@ export class RunningService {
     let scriptDefinition = this.scriptService.getScriptDefinitionByName(name);
 
     if (!scriptDefinition) {
-      // TODO:
-      throw new Error();
+      throw new Error(`Script definition "${name}" not found`);
     }
 
     return scriptDefinition;
+  }
+
+  private async validatePassword(
+    scriptDefinition: ScriptDefinition,
+    {password}: ScriptRunningArgument,
+  ): Promise<void> {
+    if (!scriptDefinition.passwordHash) {
+      return;
+    }
+
+    let result = await Bcrypt.compare(password, scriptDefinition.passwordHash);
+
+    if (!result) {
+      throw new Error(
+        `Password error: the password provided to running "${scriptDefinition.name}" is not match`,
+      );
+    }
   }
 
   private resolveSource(scriptDefinition: ScriptDefinition): string {

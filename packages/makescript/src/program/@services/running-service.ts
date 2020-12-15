@@ -13,7 +13,7 @@ export class RunningService {
     private config: Config,
   ) {}
 
-  async runScript(id: string): Promise<void> {
+  async runScript(id: string, password: string | undefined): Promise<void> {
     let record = this.dbService.db.get('records').find({id}).value();
 
     if (!record) {
@@ -27,6 +27,7 @@ export class RunningService {
       name: record.name,
       parameters: record.parameters,
       resourcesBaseURL,
+      password,
     });
 
     let {parameters, deniedParameters, result, output} = runningResult;

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "archiver": "^5.0.2",
+    "bcrypt": "^5.0.0",
     "chalk": "^4.1.0",
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@makeflow/types": "^0.1.26",
     "@types/archiver": "^3.1.1",
+    "@types/bcrypt": "^3.0.0",
     "@types/node-fetch": "^2.5.7",
     "@types/prompts": "^2.0.9",
     "@types/rimraf": "^3.0.0",

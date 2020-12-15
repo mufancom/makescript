@@ -62,7 +62,7 @@ export class Entrances {
     });
 
     route.scripts.management.$beforeEnter(() => {
-      this.agentService.fetchScriptsDefinition().catch(console.error);
+      this.agentService.fetchScriptDefinitionsMap().catch(console.error);
     });
 
     route.tokens.$beforeEnter(() => {

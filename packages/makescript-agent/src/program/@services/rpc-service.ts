@@ -1,8 +1,9 @@
 import {bridgeRPC, logger} from '../shared';
 import {
+  BriefScriptDefinition,
   MakescriptAgentRPC,
   MakescriptAgentRPCRunScriptOptions,
-  ScriptDefinition,
+  ScriptDefinitionHooks,
   ScriptRunningResult,
 } from '../types';
 
@@ -25,8 +26,8 @@ export class RPCService implements MakescriptAgentRPC {
     await this.scriptService.syncScripts();
   }
 
-  async getScripts(): Promise<ScriptDefinition[]> {
-    return this.scriptService.scriptsDefinition?.scripts ?? [];
+  async getScripts(): Promise<BriefScriptDefinition[]> {
+    return this.scriptService.briefScriptDefinitions;
   }
 
   async runScript({
@@ -34,12 +35,21 @@ export class RPCService implements MakescriptAgentRPC {
     name,
     parameters,
     resourcesBaseURL,
+    password,
   }: MakescriptAgentRPCRunScriptOptions): Promise<ScriptRunningResult> {
     return this.runningService.runScript({
       id,
       name,
       parameters,
       resourcesBaseURL,
+      password,
     });
+  }
+
+  async triggerHook(
+    scriptName: string,
+    hookName: keyof ScriptDefinitionHooks,
+  ): Promise<void> {
+    await this.runningService.triggerHook(scriptName, hookName);
   }
 }

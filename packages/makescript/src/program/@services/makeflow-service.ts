@@ -1,5 +1,5 @@
 import {
-  ScriptDefinition,
+  BriefScriptDefinition,
   ScriptDefinitionParameter,
 } from '@makeflow/makescript-agent';
 import type {
@@ -139,7 +139,7 @@ export class MakeflowService {
         taskUrl: taskURL as string,
         numericId: taskNumericId as number,
         brief: taskBrief as string,
-        assignee: taskAssignee,
+        assignee: taskAssignee as any,
         powerItemToken,
       },
     });
@@ -239,7 +239,7 @@ export class MakeflowService {
 }
 
 function convertCommandConfigsToPowerItemDefinitions(
-  scriptDefinitionsMap: Map<string, ScriptDefinition[]>,
+  scriptDefinitionsMap: Map<string, BriefScriptDefinition[]>,
 ): PowerItem.Definition[] {
   return Array.from(scriptDefinitionsMap)
     .map(([namespace, scriptDefinitions]): PowerItem.Definition[] => {

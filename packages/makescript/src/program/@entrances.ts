@@ -68,7 +68,7 @@ export class Entrances {
 
   @entrance
   get recordService(): RecordService {
-    return new RecordService(this.dbService);
+    return new RecordService(this.agentService, this.dbService);
   }
 
   @entrance

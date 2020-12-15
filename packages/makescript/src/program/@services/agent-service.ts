@@ -1,6 +1,6 @@
 import {
+  BriefScriptDefinition,
   MakescriptAgentRPC,
-  ScriptDefinition,
   ScriptRunningArgumentParameters,
   ScriptRunningResult,
   logger,
@@ -12,7 +12,9 @@ import {ExpectedError} from '../@core';
 export class AgentService {
   registeredRPCMap = new Map<string, MakescriptAgentRPC>();
 
-  async getScriptDefinitionsMap(): Promise<Map<string, ScriptDefinition[]>> {
+  async getScriptDefinitionsMap(): Promise<
+    Map<string, BriefScriptDefinition[]>
+  > {
     return new Map(
       await villa.map(
         Array.from(this.registeredRPCMap),
@@ -30,11 +32,13 @@ export class AgentService {
       name,
       parameters,
       resourcesBaseURL,
+      password,
     }: {
       id: string;
       name: string;
       parameters: ScriptRunningArgumentParameters;
       resourcesBaseURL: string;
+      password: string | undefined;
     },
   ): Promise<ScriptRunningResult> {
     let agentRPC = this.registeredRPCMap.get(namespace);
@@ -51,6 +55,7 @@ export class AgentService {
       name,
       parameters,
       resourcesBaseURL,
+      password,
     });
 
     logger.info(

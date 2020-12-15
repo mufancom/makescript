@@ -1,13 +1,10 @@
-import {ScriptDefinition} from '@makeflow/makescript-agent';
+import {BriefScriptDefinition} from '@makeflow/makescript-agent';
 import {observable} from 'mobx';
 
 import {RunningRecord} from '../../program/types';
 import {fetchAPI} from '../@helpers';
 
 export class AgentService {
-  @observable
-  scriptDefinitionsMap = new Map<string, ScriptDefinition[]>();
-
   @observable
   runningRecords: RunningRecord[] = [];
 
@@ -23,10 +20,12 @@ export class AgentService {
     return this.runningRecords.find(item => item.id === id);
   }
 
-  async fetchScriptsDefinition(): Promise<void> {
+  async fetchScriptDefinitionsMap(): Promise<
+    Map<string, BriefScriptDefinition[]>
+  > {
     let {definitionsDict} = await fetchAPI('/api/scripts');
 
-    this.scriptDefinitionsMap = new Map(Object.entries(definitionsDict));
+    return new Map(Object.entries(definitionsDict));
   }
 
   async fetchRunningRecords(): Promise<void> {
@@ -44,10 +43,10 @@ export class AgentService {
     };
   }
 
-  async runScript(id: string): Promise<void> {
+  async runScript(id: string, password: string | undefined): Promise<void> {
     await fetchAPI('/api/records/run', {
       method: 'POST',
-      body: JSON.stringify({id}),
+      body: JSON.stringify({id, password}),
     });
 
     await this.fetchRunningRecords();

@@ -52,9 +52,12 @@ export function routeAgent(
     method: 'POST',
     path: '/api/records/run',
     async handler(request) {
-      let {id} = request.payload as {id: string};
+      let {id, password} = request.payload as {
+        id: string;
+        password: string | undefined;
+      };
 
-      await runningService.runScript(id);
+      await runningService.runScript(id, password);
 
       return {};
     },
@@ -62,6 +65,7 @@ export function routeAgent(
       validate: {
         payload: Joi.object({
           id: Joi.string(),
+          password: Joi.string().optional(),
         }) as any,
       },
     },

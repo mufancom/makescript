@@ -10,7 +10,6 @@ import {
   wrapSocketToRPC,
 } from '@makeflow/makescript-agent';
 import extractZip from 'extract-zip';
-import rimraf from 'rimraf';
 import {Socket} from 'socket.io';
 import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
@@ -117,15 +116,14 @@ class RPC implements MakescriptRPC {
       FS.mkdirSync(MAKESCRIPT_TMPDIR);
     }
 
-    await villa.async(FS.writeFile)(temporaryPath, buffer, {
-      encoding: 'binary',
-    });
+    await villa.async(FS.writeFile)(temporaryPath, buffer);
 
     await extractZip(temporaryPath, {
       dir: Path.join(this.config.resourcesPath, id),
     });
 
-    await villa.async(rimraf)(temporaryPath);
+    // TODO: It will throw an error and failed to extract zip file in previous step.
+    // await villa.async(rimraf)(temporaryPath);
   }
 
   async updateOutput(id: string, output: string): Promise<void> {

@@ -1,8 +1,9 @@
 import {CaretRightFilled, RedoOutlined} from '@ant-design/icons';
-import {Modal, Tooltip, message} from 'antd';
+import {AdapterRunScriptResult} from '@makeflow/makescript-agent';
+import {Input, Modal, Tooltip, message} from 'antd';
 import {RouteComponentProps} from 'boring-router-react';
-import {computed} from 'mobx';
-import {observer} from 'mobx-react';
+import {computed, observable} from 'mobx';
+import {Observer, observer} from 'mobx-react';
 import React, {Component, ReactNode} from 'react';
 import styled from 'styled-components';
 
@@ -14,6 +15,18 @@ import {DictContent, ExecuteButton, Item, Label, Title} from './@common';
 import {OutputPanel} from './@output-panel';
 
 const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
+
+const RESULT_DISPLAY_NAME_DICT: {
+  [TKey in AdapterRunScriptResult['result']]: {
+    color: string;
+    displayName: string;
+  };
+} = {
+  done: {color: 'green', displayName: '执行成功'},
+  'options-error': {color: 'green', displayName: '脚本配置错误错误'},
+  'parameters-error': {color: 'green', displayName: '脚本参数错误'},
+  'unknown-error': {color: 'green', displayName: '未知错误'},
+};
 
 type RecordIdMatch = Router['scripts']['records']['recordId'];
 
@@ -30,6 +43,10 @@ const Content = styled.div`
   height: 100%;
   padding: 60px;
   overflow: auto;
+`;
+
+const PasswordInput = styled(Input)`
+  margin-top: 10px;
 `;
 
 export interface RunningRecordViewerViewProps
@@ -76,6 +93,49 @@ export class RunningRecordViewerView extends Component<
     );
   }
 
+  @computed
+  private get runningResultRendering(): ReactNode {
+    let record = this.runningRecord;
+
+    if (!record || !record.result) {
+      return;
+    }
+
+    let resultInfo = RESULT_DISPLAY_NAME_DICT[record.result.result];
+
+    return (
+      <>
+        <Label>执行结果</Label>
+        <Item style={{color: resultInfo.color}}>
+          {resultInfo.displayName}
+          {record.result.message ? `: ${record.result.message}` : undefined}
+        </Item>
+      </>
+    );
+  }
+
+  @computed
+  private get makeflowInfoRendering(): ReactNode {
+    let record = this.runningRecord;
+
+    if (!record || !record.makeflow) {
+      return undefined;
+    }
+
+    return (
+      <>
+        <Label>触发用户（Makeflow）</Label>
+        <Item>{record.makeflow.assignee.displayName}</Item>
+        <Label>任务链接（Makeflow）</Label>
+        <Item>
+          <a href={record.makeflow.taskUrl} target="_blank">
+            #{record.makeflow.numericId}: {record.makeflow.brief}
+          </a>
+        </Item>
+      </>
+    );
+  }
+
   render(): ReactNode {
     let record = this.runningRecord;
 
@@ -90,6 +150,7 @@ export class RunningRecordViewerView extends Component<
       <Wrapper>
         <Content>
           <Title>{record.name}</Title>
+          {this.makeflowInfoRendering}
           <Label>触发时间</Label>
           <Item>{new Date(record.createdAt).toLocaleString()}</Item>
           <Label>使用 Token</Label>
@@ -103,6 +164,7 @@ export class RunningRecordViewerView extends Component<
           <DictContent label="执行参数" dict={record.parameters} />
           <DictContent label="被拒绝参数" dict={record.deniedParameters} />
           {this.runningOutputRendering}
+          {this.runningResultRendering}
         </Content>
 
         <Tooltip
@@ -132,15 +194,58 @@ export class RunningRecordViewerView extends Component<
       confirmationMessage = '请确保已检查脚本参数';
     }
 
+    let scriptsMap = await ENTRANCES.agentService.fetchScriptDefinitionsMap();
+
+    let definition = scriptsMap
+      .get(record.namespace)
+      ?.find(definition => definition.name === record?.name);
+
+    if (!definition) {
+      await message.error(
+        '未找到该记录所对应的脚本定义。请检查代理注册信息及每个代理的脚本列表。',
+      );
+      return;
+    }
+
+    let inputValueObservable = observable.box<string>(undefined);
+
+    let modalContent: ReactNode;
+
+    if (definition.needsPassword) {
+      modalContent = (
+        <Observer>
+          {() => {
+            return (
+              <div>
+                执行该脚本需要提供一个密码：
+                <PasswordInput
+                  value={inputValueObservable.get()}
+                  placeholder="输入密码以执行脚本"
+                  onChange={({currentTarget: {value}}) => {
+                    inputValueObservable.set(value);
+                  }}
+                />
+              </div>
+            );
+          }}
+        </Observer>
+      );
+    } else {
+      modalContent = confirmationMessage;
+    }
+
     Modal.confirm({
       title: '确认执行',
-      content: confirmationMessage,
+      content: modalContent,
       onOk: async () => {
         try {
-          await ENTRANCES.agentService.runScript(record!.id);
-          await message.success('执行成功');
+          await ENTRANCES.agentService.runScript(
+            record!.id,
+            inputValueObservable.get(),
+          );
+          void message.success('执行成功');
         } catch (error) {
-          await message.error('执行失败');
+          void message.error('执行失败');
         }
       },
     });

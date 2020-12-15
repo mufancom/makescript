@@ -1,11 +1,17 @@
 import {ArrowLeftOutlined} from '@ant-design/icons';
+import {BriefScriptDefinition} from '@makeflow/makescript-agent';
 import {Empty} from 'antd';
 import {Route, RouteComponentProps} from 'boring-router-react';
 import classNames from 'classnames';
 import memorize from 'memorize-decorator';
-import {computed} from 'mobx';
+import {computed, observable} from 'mobx';
 import {observer} from 'mobx-react';
-import React, {Component, MouseEventHandler, ReactNode} from 'react';
+import React, {
+  Component,
+  MouseEventHandler,
+  ReactElement,
+  ReactNode,
+} from 'react';
 import styled from 'styled-components';
 
 import {ENTRANCES} from '../../@constants';
@@ -20,7 +26,7 @@ import {
   ScriptType,
   Wrapper,
 } from './@common';
-import {ScriptDefinitionViewerView} from './@script-definition-viewer-view';
+import {ScriptDefinitionViewer} from './@script-definition-viewer-view';
 
 type ScriptsManagementMatch = Router['scripts']['management'];
 
@@ -61,8 +67,13 @@ export interface ScriptsManagementViewProps
 export class ScriptsManagementView extends Component<
   ScriptsManagementViewProps
 > {
+  @observable
+  private scriptDefinitionsMap:
+    | Map<string, BriefScriptDefinition[]>
+    | undefined;
+
   @computed
-  private get activeScriptName(): string | undefined {
+  private get activeScriptName(): [string, string] | undefined {
     let {
       match: {
         namespace: {scriptName: scriptNameMatch},
@@ -73,12 +84,41 @@ export class ScriptsManagementView extends Component<
       return undefined;
     }
 
-    return scriptNameMatch.$params.scriptName;
+    return [
+      scriptNameMatch.$params.namespace,
+      scriptNameMatch.$params.scriptName,
+    ];
+  }
+
+  @computed
+  private get activeScriptDefinition(): BriefScriptDefinition | undefined {
+    let activeScriptName = this.activeScriptName;
+
+    if (!activeScriptName) {
+      return undefined;
+    }
+
+    return this.scriptDefinitionsMap
+      ?.get(activeScriptName[0])
+      ?.find(
+        scriptDefinition => scriptDefinition.name === activeScriptName![1],
+      );
   }
 
   @computed
   private get scriptsListRendering(): ReactNode {
-    let scriptDefinitionsMap = ENTRANCES.agentService.scriptDefinitionsMap;
+    let scriptDefinitionsMap = this.scriptDefinitionsMap;
+
+    if (!scriptDefinitionsMap) {
+      return (
+        <EmptyPanel>
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="正在加载..."
+          />
+        </EmptyPanel>
+      );
+    }
 
     if (!scriptDefinitionsMap.size) {
       return (
@@ -88,7 +128,7 @@ export class ScriptsManagementView extends Component<
       );
     }
 
-    let activeName = this.activeScriptName;
+    let [activeNamespace, activeScriptName] = this.activeScriptName ?? [];
 
     return Array.from(scriptDefinitionsMap).map(
       ([namespace, scriptDefinitions]) => (
@@ -97,7 +137,10 @@ export class ScriptsManagementView extends Component<
           {scriptDefinitions.map(({type, name, displayName}) => (
             <BriefItem
               key={name}
-              className={classNames({active: name === activeName})}
+              className={classNames({
+                active:
+                  namespace === activeNamespace && name === activeScriptName,
+              })}
               onClick={this.getOnScriptItemClick(namespace, name)}
             >
               <ScriptType>{type}</ScriptType>
@@ -148,13 +191,32 @@ export class ScriptsManagementView extends Component<
         <ViewerPanel>
           <Route
             match={match.namespace.scriptName}
-            component={ScriptDefinitionViewerView}
+            component={this.scriptDefinitionViewerView}
           />
           {this.notSelectedPanelRendering}
         </ViewerPanel>
       </Wrapper>
     );
   }
+
+  componentDidMount(): void {
+    ENTRANCES.agentService
+      .fetchScriptDefinitionsMap()
+      .then(scriptDefinitionsMap => {
+        this.scriptDefinitionsMap = scriptDefinitionsMap;
+      })
+      .catch(console.error);
+  }
+
+  private scriptDefinitionViewerView = (): ReactElement => {
+    let activeScriptDefinition = this.activeScriptDefinition;
+
+    if (!activeScriptDefinition) {
+      return <></>;
+    }
+
+    return <ScriptDefinitionViewer scriptDefinition={activeScriptDefinition} />;
+  };
 
   private onBackButtonClick = (): void => {
     route.scripts.records.$push();

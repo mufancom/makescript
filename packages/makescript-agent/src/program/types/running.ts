@@ -7,6 +7,7 @@ export interface ScriptRunningArgument {
   name: string;
   parameters: ScriptRunningArgumentParameters;
   resourcesBaseURL: string;
+  password: string | undefined;
 }
 
 export type ScriptRunningArgumentParameters = Dict<unknown>;
