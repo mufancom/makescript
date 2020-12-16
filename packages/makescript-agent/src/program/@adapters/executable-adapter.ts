@@ -1,5 +1,6 @@
 import * as CP from 'child_process';
 
+import NPMWhich from 'npm-which';
 import * as villa from 'villa';
 
 import {
@@ -19,8 +20,12 @@ export class ExecutableAdapter implements IAdapter {
     onOutput,
     onError,
   }: AdapterRunScriptArgument): Promise<AdapterRunScriptResult> {
+    const which = NPMWhich(cwd);
+
     try {
-      let cp = CP.spawn(source, {
+      let commandPath = await villa.call(which, source);
+
+      let cp = CP.spawn(commandPath, {
         env: {
           ...process.env,
           RESOURCE_PATH: resourcePath,

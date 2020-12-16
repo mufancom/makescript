@@ -122,7 +122,7 @@ export class MakeflowView extends Component<MakeflowViewProps> {
               title: '发布失败',
               content: (
                 <div>
-                  命令列表暂未初始化, 请进入
+                  脚本列表暂未初始化, 请进入
                   <Link to={route.scripts.management}>脚本管理界面</Link>
                   进行初始化.
                 </div>
@@ -142,7 +142,12 @@ export class MakeflowView extends Component<MakeflowViewProps> {
   private onPreviewModalConfirm = async (): Promise<void> => {
     try {
       await ENTRANCES.makeflowService.publishApp();
-      await message.success('发布成功');
+      await message.success(
+        <>
+          应用发布成功，安装时可到 <Link to={route.tokens}>Token 管理界面</Link>{' '}
+          创建 Token
+        </>,
+      );
     } catch (error) {
       if (error instanceof ExpectedError) {
         switch (error.code) {

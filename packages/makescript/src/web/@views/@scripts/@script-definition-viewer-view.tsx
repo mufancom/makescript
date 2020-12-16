@@ -145,8 +145,8 @@ export class ScriptDefinitionViewer extends Component<
 
     if (!command.parameters?.length) {
       Modal.confirm({
-        title: '手动执行命令',
-        content: `即使是需要手动执行的命令在触发后也会立即执行，确定要手动触发并执行 "${command.name}" 命令吗？`,
+        title: '手动执行脚本',
+        content: `即使是需要手动执行的脚本在触发后也会立即执行，确定要手动触发并执行 "${command.name}" 脚本吗？`,
         onOk: async () => {
           // TODO:
           // await ENTRANCES.scriptsService.executeCommand(command, {});

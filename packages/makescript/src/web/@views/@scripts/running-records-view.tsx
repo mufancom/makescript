@@ -71,7 +71,7 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
           let tooltipMessage = '';
 
           if (notExecuted) {
-            tooltipMessage = '该命令暂未执行';
+            tooltipMessage = '该脚本暂未执行';
           }
 
           if (hasError) {
@@ -129,14 +129,14 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
         <ScriptList>
           <ScriptListLabel>
             <ActionButton
-              data-title="返回命令历史"
+              data-title="返回脚本执行记录"
               onClick={this.onBackButtonClick}
             >
               <ArrowLeftOutlined />
             </ActionButton>
-            命令执行记录
+            脚本执行记录
             <Tooltip
-              title="管理命令"
+              title="可执行脚本列表"
               mouseEnterDelay={TOOLTIP_MOUSE_ENTER_DELAY}
             >
               <ActionButton onClick={this.onManageButtonClick}>

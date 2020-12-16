@@ -143,7 +143,7 @@ export class RunningRecordViewerView extends Component<
       return <div>脚本未找到</div>;
     }
 
-    let executionButtonTitle = record.ranAt ? '重新执行该命令' : '执行该命令';
+    let executionButtonTitle = record.ranAt ? '重新执行该脚本' : '执行该脚本';
     let icon = record.ranAt ? <RedoOutlined /> : <CaretRightFilled />;
 
     return (

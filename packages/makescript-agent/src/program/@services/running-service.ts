@@ -27,6 +27,8 @@ const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
 const OUTPUT_FLUSH_CHARACTER = '\x1Bc';
 
+const OUTPUT_FLUSH_INTERVAL_TIME = 1000;
+
 export class RunningService {
   private adapterMap = new Map<string, IAdapter>();
 
@@ -83,6 +85,7 @@ export class RunningService {
     );
 
     let result = await adapter.runScript({
+      cwd: this.scriptService.scriptsPath,
       source,
       parameters: allowedParameters,
       options,
@@ -236,32 +239,35 @@ export class RunningService {
 
     let lastFlushedText: string | undefined;
 
+    let flushOutput = (): void => {
+      if (error) {
+        return;
+      }
+
+      let textToFlush = getTextToFlush(output);
+
+      if (!textToFlush || textToFlush === lastFlushedText) {
+        return;
+      }
+
+      // TODO: Ensure sequence in time
+      this.socketService.makescriptRPC
+        .updateOutput(argument.id, textToFlush)
+        .catch(logger.error);
+    };
+
+    let timer = setInterval(() => {
+      flushOutput();
+    }, OUTPUT_FLUSH_INTERVAL_TIME);
+
     return {
       onOutput: data => {
         output += data;
-
-        let textToFlush = getTextToFlush(output);
-
-        if (!textToFlush || textToFlush === lastFlushedText) {
-          return;
-        }
-
-        if (!error) {
-          return;
-        }
-
-        this.socketService.makescriptRPC
-          .updateOutput(argument.id, textToFlush)
-          .catch(logger.error);
       },
       done: async () => {
-        let textToFlush = getTextToFlush(output, true);
+        clearInterval(timer);
 
-        if (!error && textToFlush && textToFlush !== lastFlushedText) {
-          await this.socketService.makescriptRPC
-            .updateOutput(argument.id, textToFlush)
-            .catch(logger.error);
-        }
+        flushOutput();
 
         return output;
       },
@@ -326,14 +332,12 @@ function validateParameters(
   return [filteredParameters, deniedParameters];
 }
 
-function getTextToFlush(text: string, immediate = false): string | undefined {
-  if (!immediate && !text.includes(OUTPUT_FLUSH_CHARACTER)) {
-    return undefined;
+function getTextToFlush(text: string): string | undefined {
+  if (!text.includes(OUTPUT_FLUSH_CHARACTER)) {
+    return text;
   }
 
   let splitTexts = text.split(OUTPUT_FLUSH_CHARACTER);
 
-  let offsetForward = immediate ? 0 : 1;
-
-  return splitTexts[splitTexts.length - offsetForward - 1];
+  return splitTexts[splitTexts.length - 1];
 }

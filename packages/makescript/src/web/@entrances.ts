@@ -1,6 +1,7 @@
 import {Modal} from 'antd';
 import entrance from 'entrance-decorator';
 
+import {ENTRANCES} from './@constants';
 /* eslint-disable @mufan/explicit-return-type */
 import {route} from './@routes';
 import {
@@ -39,7 +40,13 @@ export class Entrances {
 
   up() {
     // Route services
-    route.$beforeUpdate(() => Modal.destroyAll());
+    route.$beforeEnterOrUpdate(match => {
+      if (match.$exact) {
+        ENTRANCES.agentService.fetchRunningRecords().catch(console.error);
+      }
+
+      Modal.destroyAll();
+    });
 
     route.status.$beforeEnterOrUpdate(() => {
       this.agentService.fetchStatus().catch(console.error);

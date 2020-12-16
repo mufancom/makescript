@@ -11,6 +11,7 @@ export interface IAdapter<TOptions = AdapterRunScriptArgumentOptions> {
 export interface AdapterRunScriptArgument<
   TOptions = AdapterRunScriptArgumentOptions
 > {
+  cwd: string;
   source: string;
   resourcesPath: string;
   resourcesBaseURL: string;

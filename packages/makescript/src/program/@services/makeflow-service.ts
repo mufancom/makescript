@@ -185,7 +185,7 @@ export class MakeflowService {
         {
           field: 'password',
           name: 'token' as PowerAppConfig.Name,
-          displayName: '用于执行 Gateway 命令的 Token',
+          displayName: '用于执行 MakeScript 脚本的 Token',
           required: true,
         },
       ],
@@ -305,7 +305,7 @@ function convertCommandConfigsToPowerItemDefinitions(
             actions: [
               {
                 name: name as PowerItem.ActionName,
-                displayName: '执行命令',
+                displayName: '执行脚本',
               },
             ],
           };

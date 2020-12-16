@@ -1,9 +1,11 @@
 import {Link as _Link, RouteComponentProps} from 'boring-router-react';
+import {computed} from 'mobx';
 import {observer} from 'mobx-react';
 import React, {Component, ReactNode} from 'react';
 import styled from 'styled-components';
 
 import {Button, Card} from '../../@components';
+import {ENTRANCES} from '../../@constants';
 import {Router, route} from '../../@routes';
 
 const Wrapper = styled.div`
@@ -36,26 +38,41 @@ const Link = styled(_Link)`
   }
 `;
 
+const ScriptsButton = styled(Button)`
+  background-color: rgb(128, 203, 93);
+`;
+
 export interface HomeViewProps extends RouteComponentProps<Router> {}
 
 @observer
 export class HomeView extends Component<HomeViewProps> {
+  @computed
+  private get scriptsQuantityToExecute(): number {
+    return ENTRANCES.agentService.runningRecords.filter(record => !record.ranAt)
+      .length;
+  }
+
   render(): ReactNode {
     return (
       <Wrapper>
         <Card title="开始" summary="选择一个操作开始使用">
           <CardContent>
             <Link to={route.scripts}>
-              <Button>脚本记录</Button>
+              <ScriptsButton>
+                脚本执行
+                {this.scriptsQuantityToExecute
+                  ? ` (${this.scriptsQuantityToExecute})`
+                  : ''}
+              </ScriptsButton>
             </Link>
             <Link to={route.tokens}>
-              <Button>管理 Token</Button>
+              <Button>Token 管理</Button>
             </Link>
             <Link to={route.makeflow}>
-              <Button>Makefow</Button>
+              <Button>Makefow 集成</Button>
             </Link>
             <Link to={route.status}>
-              <Button>系统状态</Button>
+              <Button>节点管理</Button>
             </Link>
           </CardContent>
         </Card>
