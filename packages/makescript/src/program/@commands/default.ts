@@ -84,7 +84,7 @@ export default class extends Command {
       });
 
       if (!FS.existsSync(dirname)) {
-        FS.mkdirSync(dirname);
+        FS.mkdirSync(dirname, {recursive: true});
       }
 
       FS.writeFileSync(configFilePath, yamlConfigContent);

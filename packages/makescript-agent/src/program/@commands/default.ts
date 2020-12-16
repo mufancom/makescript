@@ -57,7 +57,7 @@ export default class extends Command {
       let dirname = workspace.fullName;
 
       if (!FS.existsSync(dirname)) {
-        FS.mkdirSync(dirname);
+        FS.mkdirSync(dirname, {recursive: true});
       }
 
       let answer = await prompts([
