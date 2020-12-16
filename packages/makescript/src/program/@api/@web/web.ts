@@ -43,10 +43,10 @@ export async function serveWeb(
       let path = request.params.path;
 
       if (/.+\..+/.test(path)) {
-        return h.file(Path.join(WEB_STATIC_PATH, path));
+        return h.file(Path.join(WEB_STATIC_PATH, path), {confine: false});
       }
 
-      return h.file(WEB_STATIC_PATH_INDEX);
+      return h.file(WEB_STATIC_PATH_INDEX, {confine: false});
     },
     options: {
       auth: false,

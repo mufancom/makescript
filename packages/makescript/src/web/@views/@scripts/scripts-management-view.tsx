@@ -51,7 +51,9 @@ const ViewerPanel = styled.div`
   flex-direction: column;
 `;
 
-const ScriptDefinitionsWrapper = styled.div``;
+const ScriptDefinitionsWrapper = styled.div`
+  overflow-y: auto;
+`;
 
 const Namespace = styled.div`
   font-size: 14px;

@@ -76,7 +76,11 @@ export class ScriptService {
 
     if (scriptsDefinition.initialize) {
       try {
+        logger.info('Initializing scripts ...');
+
         await villa.awaitable(CP.spawn(scriptsDefinition.initialize));
+
+        logger.info('Scripts initialized');
       } catch (error) {
         throw new Error(
           `Cannot to initial script repo with \`${scriptsDefinition.initialize}\`: ${error.message}`,
@@ -153,6 +157,8 @@ export class ScriptService {
         throw error;
       }
     }
+
+    logger.info('The scripts definition file is correct');
 
     return parsedDefinition;
   }

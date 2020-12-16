@@ -59,6 +59,7 @@ export const ScriptListLabel = styled.div`
   padding: 20px;
   display: flex;
   justify-content: space-between;
+  flex-shrink: 0;
 `;
 
 export const ScriptBriefItem = styled.div`
