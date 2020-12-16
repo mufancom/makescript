@@ -1,6 +1,6 @@
 {
   "name": "@makeflow/makescript",
-  "version": "0.1.1-alpha.6",
+  "version": "0.1.1-alpha.7",
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "bin": {
