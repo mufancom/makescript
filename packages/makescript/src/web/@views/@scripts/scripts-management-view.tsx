@@ -55,6 +55,10 @@ const ScriptDefinitionsWrapper = styled.div`
   overflow-y: auto;
 `;
 
+const ScriptDefinitionsForANamespace = styled.div`
+  margin-top: 20px;
+`;
+
 const Namespace = styled.div`
   font-size: 14px;
   color: #fff;
@@ -132,26 +136,31 @@ export class ScriptsManagementView extends Component<
 
     let [activeNamespace, activeScriptName] = this.activeScriptName ?? [];
 
-    return Array.from(scriptDefinitionsMap).map(
-      ([namespace, scriptDefinitions]) => (
-        <ScriptDefinitionsWrapper key={namespace}>
-          <Namespace>{namespace}</Namespace>
-          {scriptDefinitions.map(({type, name, displayName}) => (
-            <BriefItem
-              key={name}
-              className={classNames({
-                active:
-                  namespace === activeNamespace && name === activeScriptName,
-              })}
-              onClick={this.getOnScriptItemClick(namespace, name)}
-            >
-              <ScriptType>{type}</ScriptType>
-              {displayName}
-              <ScriptName>({name})</ScriptName>
-            </BriefItem>
-          ))}
-        </ScriptDefinitionsWrapper>
-      ),
+    return (
+      <ScriptDefinitionsWrapper>
+        {Array.from(scriptDefinitionsMap).map(
+          ([namespace, scriptDefinitions]) => (
+            <ScriptDefinitionsForANamespace key={namespace}>
+              <Namespace>{namespace}</Namespace>
+              {scriptDefinitions.map(({type, name, displayName}) => (
+                <BriefItem
+                  key={name}
+                  className={classNames({
+                    active:
+                      namespace === activeNamespace &&
+                      name === activeScriptName,
+                  })}
+                  onClick={this.getOnScriptItemClick(namespace, name)}
+                >
+                  <ScriptType>{type}</ScriptType>
+                  {displayName}
+                  <ScriptName>({name})</ScriptName>
+                </BriefItem>
+              ))}
+            </ScriptDefinitionsForANamespace>
+          ),
+        )}
+      </ScriptDefinitionsWrapper>
     );
   }
 
