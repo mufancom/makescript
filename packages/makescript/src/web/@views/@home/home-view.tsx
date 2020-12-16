@@ -36,7 +36,7 @@ const Link = styled(_Link)`
   }
 `;
 
-export interface HomeViewProps extends RouteComponentProps<Router['home']> {}
+export interface HomeViewProps extends RouteComponentProps<Router> {}
 
 @observer
 export class HomeView extends Component<HomeViewProps> {

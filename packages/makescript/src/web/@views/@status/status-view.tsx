@@ -1,4 +1,4 @@
-import {Tooltip, message} from 'antd';
+import {Empty, Tooltip, message} from 'antd';
 import {Link, RouteComponentProps} from 'boring-router-react';
 import ClipboardJS from 'clipboard';
 import {observer} from 'mobx-react';
@@ -82,22 +82,40 @@ export class StatusView extends Component<StatusProps> {
             </Tooltip>
           </Item>
           <Label>已注册代理</Label>
-          {status?.registeredAgents.map(registeredAgent => (
-            <Tooltip
-              key={registeredAgent.namespace}
-              title={`代理 ${registeredAgent.namespace} 共有 ${registeredAgent.scriptQuantity} 个脚本`}
-            >
-              <RegisteredAgentWrapper>
-                <RegisteredAgentNamespace key={registeredAgent.namespace}>
-                  {registeredAgent.namespace}
-                </RegisteredAgentNamespace>
-                <RegisteredAgentScriptQuantity>
-                  {registeredAgent.scriptQuantity}
-                </RegisteredAgentScriptQuantity>
-              </RegisteredAgentWrapper>
-            </Tooltip>
-          ))}
-          <Link to={route.home}>
+          {status?.registeredAgents.length ? (
+            status.registeredAgents.map(registeredAgent => (
+              <Tooltip
+                key={registeredAgent.namespace}
+                title={`代理 ${registeredAgent.namespace} 共有 ${registeredAgent.scriptQuantity} 个脚本`}
+              >
+                <RegisteredAgentWrapper>
+                  <RegisteredAgentNamespace key={registeredAgent.namespace}>
+                    {registeredAgent.namespace}
+                  </RegisteredAgentNamespace>
+                  <RegisteredAgentScriptQuantity>
+                    {registeredAgent.scriptQuantity}
+                  </RegisteredAgentScriptQuantity>
+                </RegisteredAgentWrapper>
+              </Tooltip>
+            ))
+          ) : (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <>
+                  没有已注册的代理，请到{' '}
+                  <a
+                    href="https://github.com/makeflow/makescript"
+                    target="_blank"
+                  >
+                    GitHub
+                  </a>{' '}
+                  查看如何使用代理。
+                </>
+              }
+            />
+          )}
+          <Link to={route}>
             <BackButton>返回</BackButton>
           </Link>
         </Card>

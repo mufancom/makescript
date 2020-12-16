@@ -41,12 +41,6 @@ export class Entrances {
     // Route services
     route.$beforeUpdate(() => Modal.destroyAll());
 
-    route.notFound.$beforeEnter(match => {
-      if (match.$exact) {
-        route.home.$push();
-      }
-    });
-
     route.status.$beforeEnterOrUpdate(() => {
       this.agentService.fetchStatus().catch(console.error);
     });
@@ -70,7 +64,7 @@ export class Entrances {
     });
 
     route.notFound.$beforeEnterOrUpdate(() => {
-      route.home.$replace();
+      route.$replace();
     });
   }
 }

@@ -79,7 +79,7 @@ export class LoginView extends Component<LoginViewProps> {
 
     try {
       await ENTRANCES.authorizationService.login(password);
-      route.home.$push();
+      route.$push();
     } catch (error) {
       if (error.code === 'PASSWORD_MISMATCH') {
         await message.error('密码错误, 请重试');

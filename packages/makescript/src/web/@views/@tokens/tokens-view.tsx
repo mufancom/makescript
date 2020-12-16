@@ -139,7 +139,7 @@ export class TokensView extends Component<TokensViewProps> {
   };
 
   private onBackButtonClick = (): void => {
-    route.home.$push();
+    route.$push();
   };
 
   @memorize()

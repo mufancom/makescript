@@ -90,7 +90,7 @@ export class InitializeView extends Component<InitializeViewProps> {
       let password = this.password!;
 
       await ENTRANCES.authorizationService.initialize(password);
-      route.home.$push();
+      route.$push();
     } catch (error) {
       console.error(error);
 

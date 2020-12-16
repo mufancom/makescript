@@ -24,7 +24,7 @@ export class App extends Component {
       <Wrapper>
         <Route match={route.initialize} component={InitializeView} />
         <Route match={route.login} component={LoginView} />
-        <Route match={route.home} component={HomeView} />
+        <Route exact match={route} component={HomeView} />
         <Route match={route.scripts.records} component={RunningRecordsView} />
         <Route
           match={route.scripts.management}

@@ -153,7 +153,7 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
   }
 
   private onBackButtonClick = (): void => {
-    route.home.$push();
+    route.$push();
   };
 
   private onManageButtonClick = (): void => {

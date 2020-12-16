@@ -70,7 +70,7 @@ export class MakeflowView extends Component<MakeflowViewProps> {
               <Button>登录到 Makeflow</Button>
             </Link>
           )}
-          <Link to={route.home}>
+          <Link to={route}>
             <Button>返回</Button>
           </Link>
         </Card>

@@ -8,7 +8,6 @@ import {BrowserHistory} from 'boring-router-react';
 
 export const routeSchema = schema({
   $children: {
-    home: true,
     scripts: {
       $exact: true,
       $children: {
