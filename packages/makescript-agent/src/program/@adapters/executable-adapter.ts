@@ -13,6 +13,7 @@ export class ExecutableAdapter implements IAdapter {
   type = 'executable';
 
   async runScript({
+    cwd,
     source,
     parameters,
     resourcesPath: resourcePath,
