@@ -1,17 +1,87 @@
-import {ExpectedError} from '../@core';
+import {EventEmitter} from 'events';
+
+import {
+  ScriptRunningArgumentParameters,
+  logger,
+} from '@makeflow/makescript-agent';
+import {v4 as uuidv4} from 'uuid';
+
+import {
+  ExpectedError,
+  RunningRecordModel,
+  RunningRecordModelMakeflowInfo,
+} from '../@core';
 import {Config} from '../config';
+import {RunningRecord, RunningRecordMakeflowInfo} from '../types';
 
 import {AgentService} from './agent-service';
 import {DBService} from './db-service';
-import {MakeflowService} from './makeflow-service';
 
 export class RunningService {
+  get runningRecords(): RunningRecord[] {
+    let runningRecordModels = this.dbService.db.get('records').value();
+
+    return runningRecordModels.map(model => convertRecordModelToRecord(model));
+  }
+
   constructor(
     private agentService: AgentService,
-    private makeflowService: MakeflowService,
     private dbService: DBService,
+    private eventEmitter: EventEmitter,
     private config: Config,
   ) {}
+
+  async enqueueRunningRecord({
+    namespace,
+    name,
+    parameters,
+    triggerTokenLabel,
+    makeflowTask,
+  }: {
+    namespace: string;
+    name: string;
+    parameters: ScriptRunningArgumentParameters;
+    triggerTokenLabel: string;
+    makeflowTask: RunningRecordModelMakeflowInfo | undefined;
+  }): Promise<void> {
+    let definition = await this.agentService.requireScriptDefinition(
+      namespace,
+      name,
+    );
+
+    let recordId = uuidv4();
+
+    await this.dbService.db
+      .get('records')
+      .unshift({
+        id: recordId,
+        namespace,
+        name,
+        parameters,
+        deniedParameters: {},
+        triggerTokenLabel,
+        makeflow: makeflowTask,
+        result: undefined,
+        output: undefined,
+        createdAt: Date.now(),
+        ranAt: undefined,
+      })
+      .write();
+
+    try {
+      await this.agentService.registeredRPCMap
+        .get(namespace)
+        ?.triggerHook(name, 'postTrigger');
+    } catch (error) {
+      logger.error(
+        `Error to trigger hook "postTrigger" for script "${name}": ${error.message}`,
+      );
+    }
+
+    if (!definition.manual && !definition.needsPassword) {
+      await this.runScript(recordId, undefined);
+    }
+  }
 
   async runScript(id: string, password: string | undefined): Promise<void> {
     let record = this.dbService.db.get('records').find({id}).value();
@@ -44,11 +114,25 @@ export class RunningService {
       })
       .write();
 
-    await this.makeflowService.updatePowerItem({
-      id,
-      stage: 'done',
-      description: undefined,
-      outputs: undefined,
-    });
+    this.eventEmitter.emit('script-running-completed', {id});
   }
+}
+
+function convertRecordModelToRecord(
+  recordModel: RunningRecordModel,
+): RunningRecord {
+  let {makeflow, ...rest} = recordModel;
+
+  let convertedMakeflow: RunningRecordMakeflowInfo | undefined;
+
+  if (makeflow) {
+    let {powerItemToken, ...restMakeflow} = makeflow;
+
+    convertedMakeflow = restMakeflow;
+  }
+
+  return {
+    ...rest,
+    makeflow: convertedMakeflow,
+  };
 }

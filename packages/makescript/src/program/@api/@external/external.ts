@@ -11,7 +11,7 @@ export async function serveExternalAPI(
   entrances: Entrances,
 ): Promise<void> {
   routeMakeflow(entrances.makeflowService, server);
-  routeRunning(entrances.recordService, server);
+  routeRunning(entrances.runningService, server);
 
   await server.start();
 

@@ -28,7 +28,6 @@ export async function serveWeb(
   routeAgent(
     entrances.agentService,
     entrances.runningService,
-    entrances.recordService,
     server,
     entrances.config,
   );

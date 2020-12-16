@@ -1,6 +1,9 @@
+import {EventEmitter} from 'events';
+
 import {
   BriefScriptDefinition,
   ScriptDefinitionParameter,
+  logger,
 } from '@makeflow/makescript-agent';
 import type {
   PowerApp,
@@ -18,7 +21,7 @@ import {MFUserCandidate} from '../types/makeflow';
 
 import {AgentService} from './agent-service';
 import {DBService} from './db-service';
-import {RecordService} from './record-service';
+import {RunningService} from './running-service';
 import {TokenService} from './token-service';
 
 const TASK_NUMERIC_ID_INPUT_NAME = 'taskNumericId' as PowerAppInput.Name;
@@ -33,11 +36,17 @@ const TASK_URL_VARIABLE = 'task_url';
 export class MakeflowService {
   constructor(
     private agentService: AgentService,
-    private recordService: RecordService,
+    private runningService: RunningService,
     private tokenService: TokenService,
     private dbService: DBService,
+    private eventEmitter: EventEmitter,
     private config: Config,
-  ) {}
+  ) {
+    // TODO: Type safe
+    this.eventEmitter.on('script-running-completed', ({id}) => {
+      this.updatePowerItem({id, stage: 'done'}).catch(logger.error);
+    });
+  }
 
   async listUserCandidates(
     username: string,
@@ -130,7 +139,7 @@ export class MakeflowService {
       ...parameters
     } = inputs;
 
-    await this.recordService.enqueueRunningRecord({
+    await this.runningService.enqueueRunningRecord({
       namespace,
       name,
       triggerTokenLabel: tokenLabel,

@@ -149,7 +149,9 @@ export class RunningRecordViewerView extends Component<
     return (
       <Wrapper>
         <Content>
-          <Title>{record.name}</Title>
+          <Title>
+            {record.namespace} : {record.name}
+          </Title>
           {this.makeflowInfoRendering}
           <Label>触发时间</Label>
           <Item>{new Date(record.createdAt).toLocaleString()}</Item>

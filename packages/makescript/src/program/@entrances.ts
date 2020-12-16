@@ -1,3 +1,4 @@
+import {EventEmitter} from 'events';
 import {Server} from 'http';
 
 import entrance from 'entrance-decorator';
@@ -7,7 +8,6 @@ import {
   AppService,
   DBService,
   MakeflowService,
-  RecordService,
   RunningService,
   SocketService,
   TokenService,
@@ -25,6 +25,12 @@ export class Entrances {
     this.appService.up();
   }
 
+  // TODO: Type limit
+  @entrance
+  get eventEmitter(): EventEmitter {
+    return new EventEmitter();
+  }
+
   @entrance
   get dbService(): DBService {
     return new DBService(this.config);
@@ -39,9 +45,10 @@ export class Entrances {
   get makeflowService(): MakeflowService {
     return new MakeflowService(
       this.agentService,
-      this.recordService,
+      this.runningService,
       this.tokenService,
       this.dbService,
+      this.eventEmitter,
       this.config,
     );
   }
@@ -55,8 +62,8 @@ export class Entrances {
   get runningService(): RunningService {
     return new RunningService(
       this.agentService,
-      this.makeflowService,
       this.dbService,
+      this.eventEmitter,
       this.config,
     );
   }
@@ -64,15 +71,6 @@ export class Entrances {
   @entrance
   get tokenService(): TokenService {
     return new TokenService(this.dbService);
-  }
-
-  @entrance
-  get recordService(): RecordService {
-    return new RecordService(
-      this.agentService,
-      this.runningService,
-      this.dbService,
-    );
   }
 
   @entrance

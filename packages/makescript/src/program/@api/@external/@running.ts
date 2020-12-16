@@ -2,10 +2,10 @@ import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
 import type {Dict} from 'tslang';
 
-import {RecordService} from '../../@services';
+import {RunningService} from '../../@services';
 
 export function routeRunning(
-  recordService: RecordService,
+  runningService: RunningService,
   server: Hapi.Server,
 ): void {
   server.route({
@@ -21,7 +21,7 @@ export function routeRunning(
       // TODO: Add auth
       let tokenLabel = request.auth.credentials.tokenLabel as string;
 
-      await recordService.enqueueRunningRecord({
+      await runningService.enqueueRunningRecord({
         namespace,
         name,
         parameters,

@@ -1,13 +1,12 @@
 import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
 
-import {AgentService, RecordService, RunningService} from '../../@services';
+import {AgentService, RunningService} from '../../@services';
 import {Config} from '../../config';
 
 export function routeAgent(
   agentService: AgentService,
   runningService: RunningService,
-  recordService: RecordService,
   server: Hapi.Server,
   config: Config,
 ): void {
@@ -44,7 +43,7 @@ export function routeAgent(
     method: 'GET',
     path: '/api/scripts/running-records',
     handler() {
-      return {records: recordService.runningRecords};
+      return {records: runningService.runningRecords};
     },
   });
 

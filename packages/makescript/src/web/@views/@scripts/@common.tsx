@@ -94,8 +94,12 @@ export const ScriptType = styled.div`
 `;
 
 export const Title = styled.div`
-  color: hsl(0, 0%, 40%);
+  color: hsl(0, 0%, 100%);
   font-size: 16px;
+  background-color: hsl(221, 100%, 58%);
+  border-radius: 5px;
+  padding: 5px 10px;
+  width: fit-content;
 `;
 
 export const Label = styled.div`
