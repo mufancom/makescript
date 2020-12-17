@@ -55,6 +55,6 @@ export async function serveWeb(
   await server.start();
 
   logger.info(
-    `Makescript web ui is running on port ${entrances.config.webAdmin.port}`,
+    `MakeScript web ui is running on port ${entrances.config.webAdmin.port}`,
   );
 }

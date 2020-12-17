@@ -1,6 +1,7 @@
 import {Empty, Tooltip, message} from 'antd';
 import {Link, RouteComponentProps} from 'boring-router-react';
 import ClipboardJS from 'clipboard';
+import {observable} from 'mobx';
 import {observer} from 'mobx-react';
 import React, {Component, ReactNode} from 'react';
 import styled from 'styled-components';
@@ -8,6 +9,7 @@ import styled from 'styled-components';
 import {Button, Card} from '../../@components';
 import {ENTRANCES} from '../../@constants';
 import {Router, route} from '../../@routes';
+import {AgentsStatus} from '../../@services';
 
 type StatusMatch = Router['status'];
 
@@ -65,56 +67,62 @@ export interface StatusProps extends RouteComponentProps<StatusMatch> {}
 
 @observer
 export class StatusView extends Component<StatusProps> {
-  render(): ReactNode {
-    let status = ENTRANCES.agentService.status;
+  @observable
+  private status: AgentsStatus | undefined;
 
-    if (!status) {
-      return <></>;
-    }
+  render(): ReactNode {
+    let status = this.status;
 
     return (
       <Wrapper>
-        <Card title="系统状态" summary="代理加入链接及已注册代理">
-          <Label>代理加入链接</Label>
-          <Item>
-            <Tooltip title="点击复制到剪切板">
-              <JoinLink id="join-link">{status?.joinLink}</JoinLink>
-            </Tooltip>
-          </Item>
-          <Label>已注册代理</Label>
-          {status?.registeredAgents.length ? (
-            status.registeredAgents.map(registeredAgent => (
-              <Tooltip
-                key={registeredAgent.namespace}
-                title={`代理 ${registeredAgent.namespace} 共有 ${registeredAgent.scriptQuantity} 个脚本`}
-              >
-                <RegisteredAgentWrapper>
-                  <RegisteredAgentNamespace key={registeredAgent.namespace}>
-                    {registeredAgent.namespace}
-                  </RegisteredAgentNamespace>
-                  <RegisteredAgentScriptQuantity>
-                    {registeredAgent.scriptQuantity}
-                  </RegisteredAgentScriptQuantity>
-                </RegisteredAgentWrapper>
-              </Tooltip>
-            ))
-          ) : (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <>
-                  没有已注册的代理，请到{' '}
-                  <a
-                    href="https://github.com/makeflow/makescript"
-                    target="_blank"
+        <Card title="节点管理" summary="代理加入链接及已注册代理">
+          {status ? (
+            <>
+              <Label>代理加入链接</Label>
+              <Item>
+                <Tooltip title="点击复制到剪切板">
+                  <JoinLink id="join-link">{status.joinLink}</JoinLink>
+                </Tooltip>
+              </Item>
+              <Label>已注册代理</Label>
+              {status.registeredAgents.length ? (
+                status.registeredAgents.map(registeredAgent => (
+                  <Tooltip
+                    key={registeredAgent.namespace}
+                    title={`代理 ${registeredAgent.namespace} 共有 ${registeredAgent.scriptQuantity} 个脚本`}
                   >
-                    GitHub
-                  </a>{' '}
-                  查看如何使用代理。
-                </>
-              }
-            />
+                    <RegisteredAgentWrapper>
+                      <RegisteredAgentNamespace key={registeredAgent.namespace}>
+                        {registeredAgent.namespace}
+                      </RegisteredAgentNamespace>
+                      <RegisteredAgentScriptQuantity>
+                        {registeredAgent.scriptQuantity}
+                      </RegisteredAgentScriptQuantity>
+                    </RegisteredAgentWrapper>
+                  </Tooltip>
+                ))
+              ) : (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={
+                    <>
+                      没有已注册的代理，请到{' '}
+                      <a
+                        href="https://github.com/makeflow/makescript"
+                        target="_blank"
+                      >
+                        GitHub
+                      </a>{' '}
+                      查看如何使用代理。
+                    </>
+                  }
+                />
+              )}
+            </>
+          ) : (
+            <Empty description="正在加载..." />
           )}
+
           <Link to={route}>
             <BackButton>返回</BackButton>
           </Link>
@@ -124,16 +132,25 @@ export class StatusView extends Component<StatusProps> {
   }
 
   componentDidMount(): void {
-    let clipboard = new ClipboardJS('#join-link', {
-      target: () => document.querySelector('#join-link')!,
-    });
+    ENTRANCES.agentService
+      .fetchStatus()
+      .then(status => {
+        this.status = status;
 
-    clipboard.on('success', () => {
-      void message.success('已成功复制剪切板');
-    });
+        setTimeout(() => {
+          let clipboard = new ClipboardJS('#join-link', {
+            target: () => document.querySelector('#join-link')!,
+          });
 
-    clipboard.on('error', async () => {
-      void message.error(`操作失败，请手动复制`);
-    });
+          clipboard.on('success', () => {
+            void message.success('已成功复制剪切板');
+          });
+
+          clipboard.on('error', async () => {
+            void message.error(`操作失败，请手动复制`);
+          });
+        });
+      })
+      .catch(console.error);
   }
 }

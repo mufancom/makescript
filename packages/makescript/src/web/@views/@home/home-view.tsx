@@ -40,6 +40,10 @@ const Link = styled(_Link)`
 
 const ScriptsButton = styled(Button)`
   background-color: rgb(128, 203, 93);
+
+  &:hover {
+    background-color: rgb(100, 180, 80);
+  }
 `;
 
 export interface HomeViewProps extends RouteComponentProps<Router> {}

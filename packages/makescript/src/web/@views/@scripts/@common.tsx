@@ -65,7 +65,8 @@ export const ScriptListLabel = styled.div`
 export const ScriptBriefItem = styled.div`
   font-size: 13px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.3s;

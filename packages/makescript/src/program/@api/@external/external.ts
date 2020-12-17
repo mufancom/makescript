@@ -15,5 +15,5 @@ export async function serveExternalAPI(
 
   await server.start();
 
-  logger.info(`Makescript api is running on port ${entrances.config.api.port}`);
+  logger.info(`MakeScript api is running on port ${entrances.config.api.port}`);
 }

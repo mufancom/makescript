@@ -26,5 +26,5 @@ export async function main(tiva: Tiva, config: Config): Promise<void> {
     entrances.runningService.registerAdapter(adapter.type, adapter);
   }
 
-  logger.info('Makescript agent started.');
+  logger.info('MakeScript agent started.');
 }

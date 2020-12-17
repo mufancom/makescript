@@ -4,17 +4,17 @@ import {observable} from 'mobx';
 import {RunningRecord} from '../../program/types';
 import {fetchAPI} from '../@helpers';
 
+export interface AgentsStatus {
+  joinLink: string;
+  registeredAgents: {
+    namespace: string;
+    scriptQuantity: number;
+  }[];
+}
+
 export class AgentService {
   @observable
   runningRecords: RunningRecord[] = [];
-
-  @observable
-  status:
-    | {
-        joinLink: string;
-        registeredAgents: {namespace: string; scriptQuantity: number}[];
-      }
-    | undefined;
 
   getRunningRecord(id: string): RunningRecord | undefined {
     return this.runningRecords.find(item => item.id === id);
@@ -34,13 +34,8 @@ export class AgentService {
     this.runningRecords = records;
   }
 
-  async fetchStatus(): Promise<void> {
-    let {joinLink, registeredAgents} = await fetchAPI('/api/status');
-
-    this.status = {
-      joinLink,
-      registeredAgents,
-    };
+  async fetchStatus(): Promise<AgentsStatus> {
+    return fetchAPI('/api/status');
   }
 
   async runScript(id: string, password: string | undefined): Promise<void> {

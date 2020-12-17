@@ -30,6 +30,17 @@ const ActionButton = styled.div`
   cursor: pointer;
 `;
 
+const ScriptBriefItemNamespace = styled.div`
+  color: #888;
+`;
+
+const ScriptBriefItemName = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+`;
+
 export interface RunningRecordsViewProps
   extends RouteComponentProps<CommandsHistoryMatch> {}
 
@@ -49,6 +60,15 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
   }
 
   @computed
+  private get toShowNamespaceInList(): boolean {
+    return (
+      new Set(
+        ENTRANCES.agentService.runningRecords.map(record => record.namespace),
+      ).size > 1
+    );
+  }
+
+  @computed
   private get recordsRendering(): ReactNode {
     let runningRecords = ENTRANCES.agentService.runningRecords;
 
@@ -64,7 +84,7 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
 
     return (
       <ScriptListContent>
-        {runningRecords.map(({id, name, ranAt, output}) => {
+        {runningRecords.map(({id, namespace, name, ranAt, output}) => {
           let notExecuted = !ranAt;
           let hasError = !!output?.error;
 
@@ -93,8 +113,13 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
                 })}
                 onClick={this.getOnRunningRecordClick(id)}
               >
+                {this.toShowNamespaceInList ? (
+                  <ScriptBriefItemNamespace>
+                    {namespace}
+                  </ScriptBriefItemNamespace>
+                ) : undefined}
                 {/* TODO: Display name ? */}
-                {name}
+                <ScriptBriefItemName>{name}</ScriptBriefItemName>
               </ScriptBriefItem>
             </Tooltip>
           );

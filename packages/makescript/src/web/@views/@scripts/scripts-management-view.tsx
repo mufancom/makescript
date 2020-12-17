@@ -30,11 +30,6 @@ import {ScriptDefinitionViewer} from './@script-definition-viewer-view';
 
 type ScriptsManagementMatch = Router['scripts']['management'];
 
-const BriefItem = styled(ScriptBriefItem)`
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
 const ScriptName = styled.div`
   color: #666;
   font-size: 0.8em;
@@ -63,7 +58,7 @@ const Namespace = styled.div`
   font-size: 14px;
   color: #fff;
   padding: 10px;
-  background-color: hsl(221, 100%, 58%);
+  background-color: hsl(101, 51%, 58%);
 `;
 
 export interface ScriptsManagementViewProps
@@ -111,6 +106,20 @@ export class ScriptsManagementView extends Component<
       );
   }
 
+  private scriptDefinitionViewerView = observer(
+    (): ReactElement => {
+      let activeScriptDefinition = this.activeScriptDefinition;
+
+      if (!activeScriptDefinition) {
+        return <></>;
+      }
+
+      return (
+        <ScriptDefinitionViewer scriptDefinition={activeScriptDefinition} />
+      );
+    },
+  );
+
   @computed
   private get scriptsListRendering(): ReactNode {
     let scriptDefinitionsMap = this.scriptDefinitionsMap;
@@ -118,10 +127,7 @@ export class ScriptsManagementView extends Component<
     if (!scriptDefinitionsMap) {
       return (
         <EmptyPanel>
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="正在加载..."
-          />
+          <Empty description="正在加载..." />
         </EmptyPanel>
       );
     }
@@ -143,7 +149,7 @@ export class ScriptsManagementView extends Component<
             <ScriptDefinitionsForANamespace key={namespace}>
               <Namespace>{namespace}</Namespace>
               {scriptDefinitions.map(({type, name, displayName}) => (
-                <BriefItem
+                <ScriptBriefItem
                   key={name}
                   className={classNames({
                     active:
@@ -155,7 +161,7 @@ export class ScriptsManagementView extends Component<
                   <ScriptType>{type}</ScriptType>
                   {displayName}
                   <ScriptName>({name})</ScriptName>
-                </BriefItem>
+                </ScriptBriefItem>
               ))}
             </ScriptDefinitionsForANamespace>
           ),
@@ -218,16 +224,6 @@ export class ScriptsManagementView extends Component<
       })
       .catch(console.error);
   }
-
-  private scriptDefinitionViewerView = (): ReactElement => {
-    let activeScriptDefinition = this.activeScriptDefinition;
-
-    if (!activeScriptDefinition) {
-      return <></>;
-    }
-
-    return <ScriptDefinitionViewer scriptDefinition={activeScriptDefinition} />;
-  };
 
   private onBackButtonClick = (): void => {
     route.scripts.records.$push();

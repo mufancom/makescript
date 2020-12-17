@@ -43,12 +43,6 @@ const RequiredItemStar = styled.div`
   color: hsl(11, 97%, 55%);
 `;
 
-const ParameterInfo = styled.div`
-  margin-left: 5px;
-  color: #666;
-  font-size: 0.8em;
-`;
-
 export interface ScriptDefinitionViewerProps {
   scriptDefinition: BriefScriptDefinition;
 }
@@ -89,10 +83,6 @@ export class ScriptDefinitionViewer extends Component<
               {item.required ? (
                 <RequiredItemStar>*</RequiredItemStar>
               ) : undefined}
-              <ParameterInfo>
-                ( {item.name}
-                {item.field ? ` | ${JSON.stringify(item.field)}` : ''} )
-              </ParameterInfo>
             </Item>
           ),
         )}
