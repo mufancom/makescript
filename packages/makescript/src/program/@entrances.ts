@@ -55,7 +55,7 @@ export class Entrances {
 
   @entrance
   get agentService(): AgentService {
-    return new AgentService();
+    return new AgentService(this.config);
   }
 
   @entrance

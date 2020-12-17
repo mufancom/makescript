@@ -8,9 +8,16 @@ import {
 import * as villa from 'villa';
 
 import {ExpectedError} from '../@core';
+import {Config} from '../config';
 
 export class AgentService {
   registeredRPCMap = new Map<string, MakescriptAgentRPC>();
+
+  get joinLink(): string {
+    return `${this.config.api.url}/join/${this.config.joinToken}`;
+  }
+
+  constructor(private config: Config) {}
 
   async getScriptDefinitionsMap(): Promise<
     Map<string, BriefScriptDefinition[]>

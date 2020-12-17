@@ -2,13 +2,11 @@ import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
 
 import {AgentService, RunningService} from '../../@services';
-import {Config} from '../../config';
 
 export function routeAgent(
   agentService: AgentService,
   runningService: RunningService,
   server: Hapi.Server,
-  config: Config,
 ): void {
   server.route({
     method: 'GET',
@@ -17,7 +15,7 @@ export function routeAgent(
       let scriptDefinitionsMap = await agentService.getScriptDefinitionsMap();
 
       return {
-        joinLink: `${config.api.url}/join/${config.joinToken}`,
+        joinLink: agentService.joinLink,
         registeredAgents: Array.from(scriptDefinitionsMap).map(
           ([namespace, definitions]) => {
             return {namespace, scriptQuantity: definitions.length};

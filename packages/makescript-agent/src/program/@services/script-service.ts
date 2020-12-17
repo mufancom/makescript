@@ -16,6 +16,8 @@ import {
 const SCRIPTS_DIRECTORY_NAME = 'scripts';
 const SCRIPTS_CONFIG_FILE_NAME_JSON = 'makescript.json';
 
+const AGENT_MODULE_DEFAULT = '../types';
+
 export class ScriptService {
   readonly ready: Promise<void>;
 
@@ -141,7 +143,7 @@ export class ScriptService {
     try {
       await this.tiva.validate(
         {
-          module: './types',
+          module: this.config.agentModule ?? AGENT_MODULE_DEFAULT,
           type: 'ScriptsDefinition',
         },
         parsedDefinition,

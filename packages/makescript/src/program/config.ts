@@ -28,6 +28,12 @@ export interface Config {
     };
   };
 
+  defaultAgent:
+    | {
+        scriptsRepoURL: string;
+      }
+    | undefined;
+
   resourcesPath: string;
 
   workspace: string;
@@ -61,6 +67,10 @@ export interface ConfigFile {
   'join-token': string;
 
   'resources-path': string;
+
+  'default-agent'?: {
+    'scripts-repo-url': string;
+  };
 
   /**
    * Not yet implemented
@@ -100,6 +110,10 @@ export function transformConfig(
         description: configFile.makeflow['power-app'].description,
       },
     },
+
+    defaultAgent: configFile['default-agent']
+      ? {scriptsRepoURL: configFile['default-agent']['scripts-repo-url']}
+      : undefined,
 
     joinToken: configFile['join-token'],
 

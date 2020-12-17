@@ -8,6 +8,11 @@ export interface Config {
   scriptsRepoURL: string;
   namespace: string;
   workspace: string;
+  /**
+   * Makescript agent module name, be used for type validation.
+   * Usually its value should be "@makeflow/makescript-agent".
+   */
+  agentModule: string | undefined;
   proxy:
     | {
         url: string;
@@ -46,6 +51,7 @@ export function transformConfig(config: ConfigFile, workspace: string): Config {
     scriptsRepoURL: config['scripts-repo-url'],
     namespace: config.namespace,
     proxy: config.proxy ?? undefined,
+    agentModule: undefined,
     workspace,
   };
 }
