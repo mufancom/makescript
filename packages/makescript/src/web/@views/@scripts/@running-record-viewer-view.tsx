@@ -204,7 +204,7 @@ export class RunningRecordViewerView extends Component<
 
     if (!definition) {
       await message.error(
-        '未找到该记录所对应的脚本定义。请检查代理注册信息及每个代理的脚本列表。',
+        '未找到该记录所对应的脚本定义。请检查节点注册信息及对应节点的脚本列表。',
       );
       return;
     }

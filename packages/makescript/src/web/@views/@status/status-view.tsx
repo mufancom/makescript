@@ -75,21 +75,21 @@ export class StatusView extends Component<StatusProps> {
 
     return (
       <Wrapper>
-        <Card title="节点管理" summary="代理加入链接及已注册代理">
+        <Card title="节点管理" summary="节点加入链接及已注册节点">
           {status ? (
             <>
-              <Label>代理加入链接</Label>
+              <Label>节点加入链接</Label>
               <Item>
                 <Tooltip title="点击复制到剪切板">
                   <JoinLink id="join-link">{status.joinLink}</JoinLink>
                 </Tooltip>
               </Item>
-              <Label>已注册代理</Label>
+              <Label>已注册节点</Label>
               {status.registeredAgents.length ? (
                 status.registeredAgents.map(registeredAgent => (
                   <Tooltip
                     key={registeredAgent.namespace}
-                    title={`代理 ${registeredAgent.namespace} 共有 ${registeredAgent.scriptQuantity} 个脚本`}
+                    title={`节点 ${registeredAgent.namespace} 共有 ${registeredAgent.scriptQuantity} 个脚本`}
                   >
                     <RegisteredAgentWrapper>
                       <RegisteredAgentNamespace key={registeredAgent.namespace}>
@@ -106,14 +106,14 @@ export class StatusView extends Component<StatusProps> {
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                   description={
                     <>
-                      没有已注册的代理，请到{' '}
+                      没有已注册的节点，请到{' '}
                       <a
                         href="https://github.com/makeflow/makescript"
                         target="_blank"
                       >
                         GitHub
                       </a>{' '}
-                      查看如何使用代理。
+                      查看如何使用节点。
                     </>
                   }
                 />
