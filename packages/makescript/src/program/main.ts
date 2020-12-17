@@ -15,7 +15,7 @@ import {Entrances} from './@entrances';
 import {Config} from './config';
 
 const DEFAULT_AGENT_NAMESPACE = 'default';
-const DEFAULT_AGENT_RELATIVE_PATH = 'agent';
+const DEFAULT_AGENT_RELATIVE_PATH = 'default-agent';
 
 const AGENT_MODULE = '@makeflow/makescript-agent';
 
