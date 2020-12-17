@@ -2,6 +2,7 @@ import * as CP from 'child_process';
 import * as FS from 'fs';
 import * as Path from 'path';
 
+import rimraf from 'rimraf';
 import {Tiva} from 'tiva';
 import * as villa from 'villa';
 
@@ -16,7 +17,7 @@ import {
 const SCRIPTS_DIRECTORY_NAME = 'scripts';
 const SCRIPTS_CONFIG_FILE_NAME_JSON = 'makescript.json';
 
-const AGENT_MODULE_DEFAULT = '../types';
+const AGENT_MODULE_DEFAULT = './types';
 
 export class ScriptService {
   readonly ready: Promise<void>;
@@ -54,11 +55,39 @@ export class ScriptService {
 
     try {
       if (FS.existsSync(this.scriptsPath)) {
-        await villa.awaitable(
-          CP.spawn('git', ['pull'], {
-            cwd: this.scriptsPath,
-          }),
-        );
+        let cp = CP.spawn('git', ['remote', 'get-url', 'origin'], {
+          cwd: this.scriptsPath,
+        });
+
+        let remoteURL = '';
+
+        cp.stdout.on('data', (buffer: Buffer) => {
+          remoteURL += buffer.toString();
+        });
+
+        await villa.awaitable(cp);
+
+        if (remoteURL.trim() !== this.config.scriptsRepoURL.trim()) {
+          logger.info(
+            'Scripts repo url changed, start to sync from the new url',
+          );
+
+          await villa.call(rimraf, this.scriptsPath);
+
+          await villa.awaitable(
+            CP.spawn('git', [
+              'clone',
+              this.config.scriptsRepoURL,
+              this.scriptsPath,
+            ]),
+          );
+        } else {
+          await villa.awaitable(
+            CP.spawn('git', ['pull'], {
+              cwd: this.scriptsPath,
+            }),
+          );
+        }
       } else {
         await villa.awaitable(
           CP.spawn('git', [
