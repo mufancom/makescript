@@ -17,6 +17,7 @@
     "build": "rimraf bld/program && tsc --project src/program/tsconfig.json && yarn build:web"
   },
   "dependencies": {
+    "@hapi/boom": "^9.1.1",
     "@hapi/cookie": "^11.0.2",
     "@hapi/hapi": "^20.0.2",
     "@hapi/inert": "^6.0.3",

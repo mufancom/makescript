@@ -52,7 +52,9 @@ export interface ScriptDefinitionDetailedParameter {
   name: string;
   displayName: string;
   required?: boolean;
-  field?: string | ScriptDefinitionDetailedParameterField;
+  field?:
+    | ProcedureField.BuiltInProcedureFieldType
+    | ScriptDefinitionDetailedParameterField;
 }
 
 export interface ScriptDefinitionDetailedParameterField {

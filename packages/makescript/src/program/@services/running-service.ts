@@ -43,7 +43,7 @@ export class RunningService {
     parameters: ScriptRunningArgumentParameters;
     triggerTokenLabel: string;
     makeflowTask: RunningRecordModelMakeflowInfo | undefined;
-  }): Promise<void> {
+  }): Promise<string> {
     let definition = await this.agentService.requireScriptDefinition(
       namespace,
       name,
@@ -81,6 +81,8 @@ export class RunningService {
     if (!definition.manual && !definition.needsPassword) {
       await this.runScript(recordId, undefined);
     }
+
+    return recordId;
   }
 
   async runScript(id: string, password: string | undefined): Promise<void> {

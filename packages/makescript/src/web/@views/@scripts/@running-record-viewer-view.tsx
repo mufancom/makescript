@@ -23,9 +23,9 @@ const RESULT_DISPLAY_NAME_DICT: {
   };
 } = {
   done: {color: 'green', displayName: '执行成功'},
-  'options-error': {color: 'green', displayName: '脚本配置错误错误'},
-  'parameters-error': {color: 'green', displayName: '脚本参数错误'},
-  'unknown-error': {color: 'green', displayName: '未知错误'},
+  'options-error': {color: 'red', displayName: '脚本配置错误错误'},
+  'parameters-error': {color: 'red', displayName: '脚本参数错误'},
+  'unknown-error': {color: 'red', displayName: '未知错误'},
 };
 
 type RecordIdMatch = Router['scripts']['records']['recordId'];

@@ -105,7 +105,6 @@ export class ScriptDefinitionViewer extends Component<
           <Title>
             {type}: {name}
           </Title>
-          <Label>源文件</Label>
           <Label>需手动执行</Label>
           <Item>{manual ? '是' : '否'}</Item>
           {this.parametersRendering}

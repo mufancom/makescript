@@ -1,3 +1,5 @@
+#!bin/sh
+
 mkdir -p $RESOURCE_PATH
 
 EXPIRES_AT=$(($(date +"%s"000) + 60000))

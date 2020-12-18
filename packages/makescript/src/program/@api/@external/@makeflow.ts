@@ -44,6 +44,7 @@ export function routeMakeflow(
           inputs: Joi.object().optional(),
         }) as any,
       },
+      auth: false,
     },
   });
 
@@ -54,6 +55,9 @@ export function routeMakeflow(
     handler() {
       return {};
     },
+    options: {
+      auth: false,
+    },
   });
 
   // To fit app installation related api
@@ -62,6 +66,9 @@ export function routeMakeflow(
     path: '/api/makeflow/installation/{action}',
     handler() {
       return {};
+    },
+    options: {
+      auth: false,
     },
   });
 }

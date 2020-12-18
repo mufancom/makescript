@@ -25,7 +25,8 @@ import {SocketService} from './socket-service';
 
 const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 
-const OUTPUT_FLUSH_CHARACTER = '\x1Bc';
+const OUTPUT_CLEAR_CHARACTER = '\x1Bc';
+const OUTPUT_CLEAR_DISPLAY_CHARACTER = '\n\n-- clear --\n\n';
 
 const OUTPUT_FLUSH_INTERVAL_TIME = 1000;
 
@@ -73,6 +74,7 @@ export class RunningService {
     let adapter = this.requireAdapter(definition);
     let options = this.resolveOptions(definition);
     let resourcesPath = this.generateRandomResourcesPath();
+
     let [allowedParameters, deniedParameters] = validateParameters(
       parameters,
       definition,
@@ -269,7 +271,10 @@ export class RunningService {
 
         flushOutput();
 
-        return output;
+        return output.replace(
+          OUTPUT_CLEAR_CHARACTER,
+          OUTPUT_CLEAR_DISPLAY_CHARACTER,
+        );
       },
     };
   }
@@ -333,11 +338,11 @@ function validateParameters(
 }
 
 function getTextToFlush(text: string): string | undefined {
-  if (!text.includes(OUTPUT_FLUSH_CHARACTER)) {
+  if (!text.includes(OUTPUT_CLEAR_CHARACTER)) {
     return text;
   }
 
-  let splitTexts = text.split(OUTPUT_FLUSH_CHARACTER);
+  let splitTexts = text.split(OUTPUT_CLEAR_CHARACTER);
 
   return splitTexts[splitTexts.length - 1];
 }

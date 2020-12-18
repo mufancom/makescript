@@ -1,7 +1,7 @@
 {
   "passwordHash": "$2b$10$Qqz.Lqa1WwtvdFXgHM3pAu/sbzwpKo94zUCYwMiipDJZq.67QB/wW",
   "hooks": {
-    "install": "yarn",
+    "install": "echo \"This will run while scripts repo cloned.\"",
     "postTrigger": "sh ./example-scripts/post-trigger-hook.sh"
   },
   "scripts": [

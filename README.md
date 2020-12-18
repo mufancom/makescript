@@ -12,6 +12,14 @@ yarn global add @makeflow/makescript
 
 安装完成后在终端执行 `makescript` 命令，在第一个问题中输入 `y`，在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车。
 
+![get-started-makescript.png](images/get-started-makescript.png)
+
+然后等待片刻，看到控制台输出了 `get-started-initialization.png` 字样后即代表 MakeScript 启动成功。（因为会从 GitHub clone 仓库，如果网络环境不好可能会等待较长时间）。
+
+MakeScript 启动成功后，在浏览器中访问 [`http://localhost:8900`](http://localhost:8900) 即可进入 MakeScript 的管理界面。第一次进入时会要求输入一个密码进行初始化，以后再次进入需要提供初始化时输入的密码进行身份验证。
+
+<img src="images/get-started-initialization.png" alt="get-started-initialization.png" width="450" align="center">
+
 ## 文档
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

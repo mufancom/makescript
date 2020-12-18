@@ -1,1 +1,1 @@
-console.log(`${process.env['message'] ?? 'No message!'}`);
+console.log(`${process.env['message'] || 'No message!'}`);

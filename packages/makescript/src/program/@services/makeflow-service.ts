@@ -10,6 +10,7 @@ import type {
   PowerAppConfig,
   PowerAppInput,
   PowerItem,
+  ProcedureField,
 } from '@makeflow/types';
 import fetch from 'node-fetch';
 import semver from 'semver';
@@ -333,23 +334,28 @@ function convertCommandConfigParamaterToPowerItemActionInput(
 function convertCommandConfigParameterToPowerItemField(
   parameter: ScriptDefinitionParameter,
 ): PowerItem.PowerItemFieldDefinition | undefined {
-  let field =
-    typeof parameter === 'object' && typeof parameter.field === 'object'
-      ? parameter.field
-      : undefined;
+  let type: ProcedureField.BuiltInProcedureFieldType;
+  let data: unknown;
 
-  if (!field) {
-    return undefined;
+  if (typeof parameter !== 'object' || !parameter.field) {
+    return;
+  }
+
+  if (typeof parameter.field === 'object') {
+    type = parameter.field.type;
+    data = parameter.field.data;
+  } else {
+    type = parameter.field;
   }
 
   let [name, displayName] = getNameAndDisplayNameOfParameter(parameter);
 
   return {
     id: name as PowerItem.PowerItemFieldId,
-    type: field.type,
+    type,
     output: name,
     displayName,
-    data: field.data,
+    data,
   };
 }
 
