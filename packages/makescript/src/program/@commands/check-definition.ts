@@ -1,13 +1,12 @@
-import * as Path from 'path';
-
+import {logger} from '@makeflow/makescript-agent';
 import {Castable, Command, command, metadata, param} from 'clime';
 import {Tiva} from 'tiva';
-
-import {logger} from '../shared';
 
 export const description = 'Check scripts definition';
 
 export const brief = 'check scripts definition';
+
+export const PATH_DEFAULT = 'makescript.json';
 
 @command()
 export default class extends Command {
@@ -15,27 +14,26 @@ export default class extends Command {
   async execute(
     @param({
       description: 'The file path fo the scripts definition.',
-      required: true,
+      required: false,
+      default: PATH_DEFAULT,
     })
     path: Castable.File,
   ): Promise<void> {
-    logger.info('Checking scripts definition');
-
-    let tiva = new Tiva({
-      project: Path.join(__dirname, '../../../src/program'),
-    });
-
-    if (!path.exists()) {
+    if (!(await path.exists())) {
       logger.error(`The file "${path.fullName}" not found`);
       process.exit(1);
     }
+
+    logger.info(`Checking scripts definition "${path.baseName}"`);
+
+    let tiva = new Tiva();
 
     let content = await path.json();
 
     try {
       await tiva.validate(
         {
-          module: './types',
+          module: '@makeflow/makescript-agent',
           type: 'ScriptsDefinition',
         },
         content,

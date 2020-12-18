@@ -21,8 +21,8 @@ const AGENT_MODULE = '@makeflow/makescript-agent';
 
 export async function main(tiva: Tiva, config: Config): Promise<void> {
   let webServer = Hapi.server({
-    host: config.webAdmin.host,
-    port: config.webAdmin.port,
+    host: config.web.host,
+    port: config.web.port,
   });
 
   let externalAPIServer = Hapi.server({

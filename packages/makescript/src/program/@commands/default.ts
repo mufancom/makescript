@@ -64,6 +64,13 @@ export default class extends Command {
         initial: true,
       });
 
+      // There is a bug (or unhandled behavior) with 'prompts'.
+      // When user press CTRL + C , program will continue to execute with empty answers.
+      // https://github.com/terkelg/prompts/issues/252
+      if (withDefaultAgent === undefined) {
+        process.exit(0);
+      }
+
       let defaultAgentScriptsRepoURL: string | undefined;
 
       if (withDefaultAgent) {
@@ -74,11 +81,18 @@ export default class extends Command {
           validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
         });
 
+        // There is a bug (or unhandled behavior) with 'prompts'.
+        // When user press CTRL + C , program will continue to execute with empty answers.
+        // https://github.com/terkelg/prompts/issues/252
+        if (!repoURL) {
+          process.exit(0);
+        }
+
         defaultAgentScriptsRepoURL = repoURL;
       }
 
       let yamlConfigContent = generateYamlConfig({
-        'web-admin': {
+        web: {
           host: 'localhost',
           port: 8900,
           url: `http://${ip.address()}:8900`,

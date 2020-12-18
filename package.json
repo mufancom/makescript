@@ -12,7 +12,8 @@
     "build": "rimraf packages/*/bld && tsc --build && yarn workspace @makeflow/makescript pack:web",
     "lint": "eslint .",
     "lint-prettier": "prettier --check .",
-    "test": "yarn lint-prettier && yarn build && yarn lint"
+    "test": "yarn lint-prettier && yarn build && yarn lint",
+    "doc:update": "doctoc README.mds"
   },
   "workspaces": [
     "packages/makescript-agent",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@mufan/code": "^0.2.5",
     "@mufan/eslint-plugin": "^0.1.36",
+    "doctoc": "^2.0.0",
     "eslint": "^7.13.0",
     "lerna": "^3.22.1",
     "prettier": "^2.1.2",

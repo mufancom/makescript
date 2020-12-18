@@ -1,0 +1,53 @@
+{
+  "passwordHash": "$2b$10$Qqz.Lqa1WwtvdFXgHM3pAu/sbzwpKo94zUCYwMiipDJZq.67QB/wW",
+  "hooks": {
+    "install": "yarn",
+    "postTrigger": "sh ./example-scripts/post-trigger-hook.sh"
+  },
+  "scripts": [
+    {
+      "displayName": "Echo Message",
+      "name": "echo-message",
+      "type": "executable",
+      "source": "example-scripts/echo-message.js",
+      "parameters": ["message"],
+      "manual": false
+    },
+    {
+      "displayName": "Generate Resources",
+      "name": "generate-resources",
+      "type": "executable",
+      "source": "example-scripts/generate-resources.sh",
+      "parameters": [
+        {
+          "displayName": "Text",
+          "name": "text",
+          "required": true
+        }
+      ],
+      "manual": true
+    },
+    {
+      "displayName": "Operate Sqlite",
+      "name": "operate-sqlite",
+      "type": "sqlite",
+      "source": "example-scripts/operate-sqlite.sql",
+      "parameters": [
+        {
+          "displayName": "Message",
+          "name": "message",
+          "required": true
+        }
+      ],
+      "manual": true,
+      "options": [
+        {"name": "path", "type": "value", "value": "/tmp/database.sqlite3"},
+        {"name": "password", "type": "env", "env": "SQLITE_PASSWORD"}
+      ],
+      "passwordHash": "$2b$10$WTept7/7AbSZ4hL0mBo92OK9hn6criSZ9bUjSxI4TyueV8BT3DEJ2",
+      "hooks": {
+        "postTrigger": "sh example-scripts/post-trigger-hook-for-a-single-script.sh"
+      }
+    }
+  ]
+}

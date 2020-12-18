@@ -5,7 +5,7 @@ import YAML from 'yaml';
  */
 
 export interface Config {
-  webAdmin: {
+  web: {
     host: string;
     port: number;
     url: string;
@@ -43,7 +43,7 @@ export interface Config {
  * The config type use for config file
  */
 export interface ConfigFile {
-  'web-admin': {
+  web: {
     host: string;
     port: number;
     url: string;
@@ -99,7 +99,7 @@ export function transformConfig(
   workspace: string,
 ): Config {
   return {
-    webAdmin: configFile['web-admin'],
+    web: configFile['web'],
     api: configFile.api,
 
     makeflow: {

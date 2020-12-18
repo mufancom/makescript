@@ -15,10 +15,12 @@ export interface BriefScriptDefinition {
 export interface ScriptsDefinition {
   // TODO: Add version for migration
   scripts: ScriptDefinition[];
-  // TODO: Move to hooks "postInitial"
-  initialize?: string;
   passwordHash?: string;
-  hooks?: ScriptDefinitionHooks;
+  hooks?: ScriptsDefinitionHooks;
+}
+
+export interface ScriptsDefinitionHooks extends ScriptDefinitionHooks {
+  install: string;
 }
 
 export interface ScriptDefinition {

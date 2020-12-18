@@ -105,19 +105,19 @@ export class ScriptService {
 
     this.scriptsDefinition = scriptsDefinition;
 
-    if (scriptsDefinition.initialize) {
+    if (scriptsDefinition.hooks?.install) {
       try {
         logger.info('Initializing scripts ...');
 
-        await villa.awaitable(CP.spawn(scriptsDefinition.initialize));
-
-        logger.info('Scripts initialized');
+        await villa.awaitable(CP.spawn(scriptsDefinition.hooks.install));
       } catch (error) {
         throw new Error(
-          `Cannot to initial script repo with \`${scriptsDefinition.initialize}\`: ${error.message}`,
+          `Cannot to initial script repo with \`${scriptsDefinition.hooks.install}\`: ${error.message}`,
         );
       }
     }
+
+    logger.info('Scripts initialized');
   }
 
   getDefaultValueFilledScriptDefinitionByName(

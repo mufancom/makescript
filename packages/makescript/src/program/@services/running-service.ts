@@ -90,7 +90,7 @@ export class RunningService {
       throw new ExpectedError('SCRIPT_RUNNING_RECORD_NOT_FOUND');
     }
 
-    let resourcesBaseURL = `${this.config.webAdmin.url}/resources/${id}`;
+    let resourcesBaseURL = `${this.config.web.url}/resources/${id}`;
 
     let runningResult = await this.agentService.runScript(record.namespace, {
       id: record.id,
