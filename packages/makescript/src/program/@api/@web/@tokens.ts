@@ -39,6 +39,8 @@ export function routeTokens(
       let {id} = request.payload as {id: string};
 
       await tokenService.disableToken(id);
+
+      return {};
     },
     options: {
       validate: {

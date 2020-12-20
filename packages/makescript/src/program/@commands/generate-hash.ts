@@ -1,7 +1,6 @@
+import {logger} from '@makeflow/makescript-agent';
 import Bcrypt from 'bcrypt';
 import {Command, command, metadata, param} from 'clime';
-
-import {logger} from '../shared';
 
 const PASSWORD_SALT_ROUNDS = 10;
 

@@ -101,7 +101,9 @@ export class MakeflowView extends Component<MakeflowViewProps> {
             />
           </PreviewWrapper>
         ),
+        okText: '确认发布',
         onOk: this.onPreviewModalConfirm,
+        cancelText: '取消',
       });
     } catch (error) {
       if (error instanceof ExpectedError) {
@@ -142,7 +144,7 @@ export class MakeflowView extends Component<MakeflowViewProps> {
   private onPreviewModalConfirm = async (): Promise<void> => {
     try {
       await ENTRANCES.makeflowService.publishApp();
-      await message.success(
+      void message.success(
         <>
           应用发布成功，安装时可到 <Link to={route.tokens}>Token 管理界面</Link>{' '}
           创建 Token
@@ -152,17 +154,17 @@ export class MakeflowView extends Component<MakeflowViewProps> {
       if (error instanceof ExpectedError) {
         switch (error.code) {
           case 'PERMISSION_DENIED':
-            await message.error(
+            void message.error(
               '尚未登录到 Makeflow 或登录会话已过期, 请先登录',
             );
             route.makeflow.login.$push();
             break;
           default:
-            await message.error('发布失败');
+            void message.error('发布失败');
             break;
         }
       } else {
-        await message.error('发布失败');
+        void message.error('发布失败');
       }
     }
   };

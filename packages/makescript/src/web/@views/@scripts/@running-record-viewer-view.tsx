@@ -239,6 +239,8 @@ export class RunningRecordViewerView extends Component<
     Modal.confirm({
       title: '确认执行',
       content: modalContent,
+      okText: '执行',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await ENTRANCES.agentService.runScript(

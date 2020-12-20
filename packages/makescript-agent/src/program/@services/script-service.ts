@@ -109,7 +109,11 @@ export class ScriptService {
       try {
         logger.info('Initializing scripts ...');
 
-        await villa.awaitable(CP.spawn(scriptsDefinition.hooks.install));
+        await villa.awaitable(
+          CP.exec(scriptsDefinition.hooks.install, {
+            cwd: this.scriptsPath,
+          }),
+        );
       } catch (error) {
         throw new Error(
           `Cannot to initial script repo with \`${scriptsDefinition.hooks.install}\`: ${error.message}`,

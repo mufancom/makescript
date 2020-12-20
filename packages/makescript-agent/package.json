@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "archiver": "^5.0.2",
-    "bcrypt": "^5.0.0",
     "chalk": "^4.1.0",
     "clime": "^0.5.14",
     "entrance-decorator": "^0.1.0",

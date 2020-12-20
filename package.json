@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "lint-prettier": "prettier --check .",
     "test": "yarn lint-prettier && yarn build && yarn lint",
-    "doc:update": "doctoc README.mds"
+    "doc:update": "doctoc README.md"
   },
   "workspaces": [
     "packages/makescript-agent",
