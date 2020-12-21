@@ -16,6 +16,10 @@ import {OutputPanel} from './@output-panel';
 
 const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
 
+// TODO: Cannot import `OUTPUT_CLEAR_CHARACTER` from '@makeflow/makescript-agent' ?
+const OUTPUT_CLEAR_CHARACTER = '\x1Bc';
+const SHOWABLE_CLEAR_CHARACTER = '-- clear --';
+
 const RESULT_DISPLAY_NAME_DICT: {
   [TKey in AdapterRunScriptResult['result']]: {
     color: string;
@@ -87,8 +91,20 @@ export class RunningRecordViewerView extends Component<
     return (
       <>
         <Label>脚本输出</Label>
-        {error && <OutputPanel type="error" label="错误" output={error} />}
-        {output && <OutputPanel type="info" label="输出" output={output} />}
+        {error && (
+          <OutputPanel
+            type="error"
+            label="错误"
+            output={replaceClearCharacter(error)}
+          />
+        )}
+        {output && (
+          <OutputPanel
+            type="info"
+            label="输出"
+            output={replaceClearCharacter(output)}
+          />
+        )}
       </>
     );
   }
@@ -254,4 +270,8 @@ export class RunningRecordViewerView extends Component<
       },
     });
   };
+}
+
+function replaceClearCharacter(text: string): string {
+  return text.replace(OUTPUT_CLEAR_CHARACTER, SHOWABLE_CLEAR_CHARACTER);
 }

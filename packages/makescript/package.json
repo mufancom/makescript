@@ -11,7 +11,7 @@
     "bld"
   ],
   "scripts": {
-    "pack:web": "rimraf bld/web && parcel build src/web/index.html --out-dir bld/web/",
+    "pack:web": "rimraf bld/web && parcel build src/web/index.html --no-minify --out-dir bld/web/",
     "watch:web": "parcel watch src/web/index.html --out-dir bld/web/",
     "build:web": "rimraf .bld-cache/web && tsc --project src/web/tsconfig.json",
     "build": "rimraf bld/program && tsc --project src/program/tsconfig.json && yarn build:web"

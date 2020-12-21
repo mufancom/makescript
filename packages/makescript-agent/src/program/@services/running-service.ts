@@ -10,6 +10,7 @@ import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
 import {zip} from '../@utils';
+import {OUTPUT_CLEAR_CHARACTER} from '../constants';
 import {logger} from '../shared';
 import {
   AdapterRunScriptArgument,
@@ -24,9 +25,6 @@ import {ScriptService} from './script-service';
 import {SocketService} from './socket-service';
 
 const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
-
-const OUTPUT_CLEAR_CHARACTER = '\x1Bc';
-const OUTPUT_CLEAR_DISPLAY_CHARACTER = '\n\n-- clear --\n\n';
 
 const OUTPUT_FLUSH_INTERVAL_TIME = 1000;
 
@@ -271,10 +269,7 @@ export class RunningService {
 
         flushOutput();
 
-        return output.replace(
-          OUTPUT_CLEAR_CHARACTER,
-          OUTPUT_CLEAR_DISPLAY_CHARACTER,
-        );
+        return output;
       },
     };
   }

@@ -18,7 +18,7 @@ import {
   ScriptListLabel,
   Wrapper,
 } from './@common';
-import {ScriptDefinitionViewer} from './@script-definition-viewer-view';
+import {ScriptDefinitionViewer} from './@script-definition-viewer';
 
 type ScriptsManagementMatch = Router['scripts']['management'];
 
@@ -30,6 +30,14 @@ const ViewerPanel = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+const ScriptsWrapper = styled.div`
+  overflow-y: auto;
+
+  .ant-menu-item {
+    padding-left: 30px !important;
+  }
 `;
 
 export interface ScriptsManagementViewProps
@@ -114,33 +122,35 @@ export class ScriptsManagementView extends Component<
     let [activeNamespace, activeScriptName] = this.activeScriptName ?? [];
 
     return (
-      <Menu
-        mode="inline"
-        defaultOpenKeys={activeNamespace ? [activeNamespace] : []}
-        selectedKeys={[`${activeNamespace}:${activeScriptName}`]}
-        onClick={({key}) => {
-          let {match} = this.props;
+      <ScriptsWrapper>
+        <Menu
+          mode="inline"
+          defaultOpenKeys={activeNamespace ? [activeNamespace] : []}
+          selectedKeys={[`${activeNamespace}:${activeScriptName}`]}
+          onClick={({key}) => {
+            let {match} = this.props;
 
-          let [namespace, scriptName] = String(key).split(':');
+            let [namespace, scriptName] = String(key).split(':');
 
-          match.namespace.scriptName.$push({
-            namespace,
-            scriptName,
-          });
-        }}
-      >
-        {Array.from(scriptDefinitionsMap).map(
-          ([namespace, scriptDefinitions]) => (
-            <SubMenu key={namespace} title={namespace}>
-              {scriptDefinitions.map(({name, displayName}) => (
-                <Menu.Item key={`${namespace}:${name}`}>
-                  {displayName}
-                </Menu.Item>
-              ))}
-            </SubMenu>
-          ),
-        )}
-      </Menu>
+            match.namespace.scriptName.$push({
+              namespace,
+              scriptName,
+            });
+          }}
+        >
+          {Array.from(scriptDefinitionsMap).map(
+            ([namespace, scriptDefinitions]) => (
+              <SubMenu key={namespace} title={namespace}>
+                {scriptDefinitions.map(({name, displayName}) => (
+                  <Menu.Item key={`${namespace}:${name}`}>
+                    {displayName}
+                  </Menu.Item>
+                ))}
+              </SubMenu>
+            ),
+          )}
+        </Menu>
+      </ScriptsWrapper>
     );
   }
 
