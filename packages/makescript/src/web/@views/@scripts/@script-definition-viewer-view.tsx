@@ -3,7 +3,7 @@ import {
   BriefScriptDefinition,
   ScriptDefinitionDetailedParameter,
 } from '@makeflow/makescript-agent';
-import {Input, Modal, Tooltip, message} from 'antd';
+import {Input, Modal, Table, Tooltip, message} from 'antd';
 import {computed} from 'mobx';
 import {observer} from 'mobx-react';
 import React, {Component, ReactNode} from 'react';
@@ -13,6 +13,8 @@ import {Dict} from 'tslang';
 import {ExecuteButton, Item, Label, Title} from './@common';
 
 const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
+
+const JSON_INDENTATION = 2;
 
 const Wrapper = styled.div`
   flex: 1;
@@ -37,10 +39,6 @@ const InputItem = styled.div`
 
 const RequiredTip = styled.div`
   color: red;
-`;
-
-const RequiredItemStar = styled.div`
-  color: hsl(11, 97%, 55%);
 `;
 
 export interface ScriptDefinitionViewerProps {
@@ -74,18 +72,24 @@ export class ScriptDefinitionViewer extends Component<
     return (
       <>
         <Label>脚本参数</Label>
-        {parameters.map((item, index) =>
-          typeof item !== 'object' ? (
-            <Item key={index}>{item}</Item>
-          ) : (
-            <Item key={index}>
-              {item.displayName}
-              {item.required ? (
-                <RequiredItemStar>*</RequiredItemStar>
-              ) : undefined}
-            </Item>
-          ),
-        )}
+        <Table
+          pagination={false}
+          dataSource={parameters.map((item, index) => {
+            let name = typeof item === 'string' ? item : item.name;
+
+            return {
+              key: name,
+              name,
+              definition: (
+                <pre>{JSON.stringify(item, undefined, JSON_INDENTATION)}</pre>
+              ),
+            };
+          })}
+          columns={[
+            {title: '参数名', dataIndex: 'name', key: 'name'},
+            {title: '参数定义', dataIndex: 'definition', key: 'definition'},
+          ]}
+        />
       </>
     );
   }

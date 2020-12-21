@@ -1,17 +1,11 @@
 import {ArrowLeftOutlined} from '@ant-design/icons';
 import {BriefScriptDefinition} from '@makeflow/makescript-agent';
-import {Empty} from 'antd';
+import {Empty, Menu} from 'antd';
+import SubMenu from 'antd/lib/menu/SubMenu';
 import {Route, RouteComponentProps} from 'boring-router-react';
-import classNames from 'classnames';
-import memorize from 'memorize-decorator';
 import {computed, observable} from 'mobx';
 import {observer} from 'mobx-react';
-import React, {
-  Component,
-  MouseEventHandler,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import React, {Component, ReactElement, ReactNode} from 'react';
 import styled from 'styled-components';
 
 import {ENTRANCES} from '../../@constants';
@@ -20,7 +14,6 @@ import {Router, route} from '../../@routes';
 import {
   EmptyPanel,
   NotSelectedPanel,
-  ScriptBriefItem,
   ScriptList,
   ScriptListLabel,
   ScriptType,
@@ -44,21 +37,6 @@ const ViewerPanel = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-`;
-
-const ScriptDefinitionsWrapper = styled.div`
-  overflow-y: auto;
-`;
-
-const ScriptDefinitionsForANamespace = styled.div`
-  margin-top: 20px;
-`;
-
-const Namespace = styled.div`
-  font-size: 14px;
-  color: #fff;
-  padding: 10px;
-  background-color: hsl(101, 51%, 58%);
 `;
 
 export interface ScriptsManagementViewProps
@@ -143,30 +121,33 @@ export class ScriptsManagementView extends Component<
     let [activeNamespace, activeScriptName] = this.activeScriptName ?? [];
 
     return (
-      <ScriptDefinitionsWrapper>
+      <Menu
+        mode="inline"
+        defaultOpenKeys={activeNamespace ? [activeNamespace] : []}
+        selectedKeys={[`${activeNamespace}:${activeScriptName}`]}
+        onClick={({key}) => {
+          let {match} = this.props;
+
+          let [namespace, scriptName] = String(key).split(':');
+
+          match.namespace.scriptName.$push({
+            namespace,
+            scriptName,
+          });
+        }}
+      >
         {Array.from(scriptDefinitionsMap).map(
           ([namespace, scriptDefinitions]) => (
-            <ScriptDefinitionsForANamespace key={namespace}>
-              <Namespace>{namespace}</Namespace>
-              {scriptDefinitions.map(({type, name, displayName}) => (
-                <ScriptBriefItem
-                  key={name}
-                  className={classNames({
-                    active:
-                      namespace === activeNamespace &&
-                      name === activeScriptName,
-                  })}
-                  onClick={this.getOnScriptItemClick(namespace, name)}
-                >
-                  <ScriptType>{type}</ScriptType>
+            <SubMenu key={namespace} title={namespace}>
+              {scriptDefinitions.map(({name, displayName}) => (
+                <Menu.Item key={`${namespace}:${name}`}>
                   {displayName}
-                  <ScriptName>({name})</ScriptName>
-                </ScriptBriefItem>
+                </Menu.Item>
               ))}
-            </ScriptDefinitionsForANamespace>
+            </SubMenu>
           ),
         )}
-      </ScriptDefinitionsWrapper>
+      </Menu>
     );
   }
 
@@ -228,16 +209,4 @@ export class ScriptsManagementView extends Component<
   private onBackButtonClick = (): void => {
     route.scripts.records.$push();
   };
-
-  @memorize()
-  private getOnScriptItemClick(
-    namespace: string,
-    name: string,
-  ): MouseEventHandler {
-    return () => {
-      let {match} = this.props;
-
-      match.namespace.scriptName.$push({namespace, scriptName: name});
-    };
-  }
 }
