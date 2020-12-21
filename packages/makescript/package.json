@@ -1,6 +1,6 @@
 {
   "name": "@makeflow/makescript",
-  "version": "0.1.1-alpha.10",
+  "version": "0.1.1-alpha.11",
   "license": "MIT",
   "author": "Chengdu Mufan Technology Co., Ltd.",
   "bin": {
@@ -22,7 +22,7 @@
     "@hapi/hapi": "^20.0.2",
     "@hapi/inert": "^6.0.3",
     "@hapi/joi": "^17.1.1",
-    "@makeflow/makescript-agent": "^0.1.1-alpha.10",
+    "@makeflow/makescript-agent": "^0.1.1-alpha.11",
     "bcrypt": "^5.0.0",
     "chalk": "^4.1.0",
     "clime": "^0.5.14",
