@@ -16,18 +16,11 @@ import {
   NotSelectedPanel,
   ScriptList,
   ScriptListLabel,
-  ScriptType,
   Wrapper,
 } from './@common';
 import {ScriptDefinitionViewer} from './@script-definition-viewer-view';
 
 type ScriptsManagementMatch = Router['scripts']['management'];
-
-const ScriptName = styled.div`
-  color: #666;
-  font-size: 0.8em;
-  margin-top: 5px;
-`;
 
 const BackButton = styled.div`
   cursor: pointer;

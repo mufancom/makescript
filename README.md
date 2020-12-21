@@ -111,11 +111,11 @@ npm install @makeflow/makescript --global
 
 MakeScript 提供了一个 Web 管理界面，启动 MakeScript 后使用浏览器进入 [`http://localhost:8900`](http://localhost:8900) 来访问。第一次访问时会提示输入密码进行初始化：
 
-![MakeScript initialize](images/makescript-initialize.png)
+<p align="center"><img src="images/makescript-initialize.png" alt="get-started-initialization.png" width="450"></p>
 
 输入密码成功初始化后，即会进入 MakeScript 的管理主界面。该界面中，包含了 `脚本执行`、`Token 管理`、`Makeflow 集成` 和 `管理节点` 四个选项：
 
-![MakeScript home](images/makescript-home.png)
+<p align="center"><img src="images/makescript-home.png" alt="get-started-initialization.png" width="450"></p>
 
 - `脚本执行`: 在 `脚本执行` 界面中，可以查看历史执行记录、执行需要手动执行的脚本、查看所有可执行的脚本。
 - `Token 管理`: 在 `Token 管理` 界面中，可以创建和停用 Token。
@@ -153,8 +153,8 @@ npm install @makeflow/makescript-agent --global
 ![agent-initialize.png](images/agent-initialize.png)
 
 1. 首先需要提供的是 MakeScript 管理节点提供的节点注册链接，该链接在 MakeScript 管理界面的 “节点管理” 界面里可以查看到并复制：
-   ![makescript-home-with-agents-management-notation.png](images/makescript-home-with-agents-management-notation.png)
-   ![makescript-agents-management-with-join-link-notation.png](images/makescript-agents-management-with-join-link-notation.png)
+<p align="center"><img src="images/makescript-home-with-agents-management-notation.png" alt="get-started-initialization.png" width="450"></p>
+<p align="center"><img src="images/makescript-agents-management-with-join-link-notation.png" alt="get-started-initialization.png" width="450"></p>
 2. 需要提供的第二个信息是一个名称空间，该名称空间用于区分不同的节点，不同节点的名称空间不能重复。
 3. 需要提供的第三个信息是一个脚本仓库的地址，这个脚本仓库中的脚本均可以在该节点上执行。
 

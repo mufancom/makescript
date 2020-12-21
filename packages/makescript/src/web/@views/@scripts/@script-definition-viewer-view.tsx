@@ -74,7 +74,7 @@ export class ScriptDefinitionViewer extends Component<
         <Label>脚本参数</Label>
         <Table
           pagination={false}
-          dataSource={parameters.map((item, index) => {
+          dataSource={parameters.map(item => {
             let name = typeof item === 'string' ? item : item.name;
 
             return {
