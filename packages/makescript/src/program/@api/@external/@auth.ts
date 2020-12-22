@@ -6,7 +6,7 @@ import {TokenService} from '../../@services';
 const TOKEN_AUTHORIZATION_REGEX = /^Token ([\w\-]+)$/i;
 
 const TOKEN_AUTH_SCHEME_NAME = 'token';
-const TOKEN_AUTH_STRATEGY_NAME = 'token';
+export const TOKEN_AUTH_STRATEGY_NAME = 'token';
 
 export function setupAuth(
   tokenService: TokenService,
@@ -46,5 +46,4 @@ export function setupAuth(
   );
 
   server.auth.strategy(TOKEN_AUTH_STRATEGY_NAME, TOKEN_AUTH_SCHEME_NAME);
-  server.auth.default(TOKEN_AUTH_STRATEGY_NAME);
 }

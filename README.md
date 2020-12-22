@@ -10,7 +10,7 @@ MakeScript 是一个可以将脚本执行集成到 [Makeflow](https://www.makefl
 yarn global add @makeflow/makescript
 ```
 
-安装完成后在终端执行 `makescript` 命令，在第一个问题中输入 `y`，在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车。
+安装完成后在终端执行 `makescript` 命令，在第一个问题中输入 `Y`，在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车。
 
 ![get-started-makescript.png](images/get-started-makescript.png)
 
@@ -52,19 +52,21 @@ Authorization: Token the-token-created-before
   - [安装 MakeScript](#%E5%AE%89%E8%A3%85-makescript)
   - [启动 MakeScript](#%E5%90%AF%E5%8A%A8-makescript)
   - [MakeScript 管理界面](#makescript-%E7%AE%A1%E7%90%86%E7%95%8C%E9%9D%A2)
+  - [MakeScript 配置文件](#makescript-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
 - [Agent](#agent)
-  - [安装节点工具](#%E5%AE%89%E8%A3%85%E8%8A%82%E7%82%B9%E5%B7%A5%E5%85%B7)
-  - [初始化节点](#%E5%88%9D%E5%A7%8B%E5%8C%96%E8%8A%82%E7%82%B9)
+  - [安装 Agent](#%E5%AE%89%E8%A3%85-agent)
+  - [初始化 Agent](#%E5%88%9D%E5%A7%8B%E5%8C%96-agent)
+  - [Agent 配置文件](#agent-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
 - [脚本仓库](#%E8%84%9A%E6%9C%AC%E4%BB%93%E5%BA%93)
   - [`hooks`](#hooks)
   - [`passwordHash`](#passwordhash)
   - [`scripts`](#scripts)
-- [MakeScript 配置文件](#makescript-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
-- [Agent 配置文件](#agent-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
 - [How To](#how-to)
   - [如何在有脚本被触发时发送通知？](#%E5%A6%82%E4%BD%95%E5%9C%A8%E6%9C%89%E8%84%9A%E6%9C%AC%E8%A2%AB%E8%A7%A6%E5%8F%91%E6%97%B6%E5%8F%91%E9%80%81%E9%80%9A%E7%9F%A5)
   - [如何实现脚本执行时需要密码验证？](#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%84%9A%E6%9C%AC%E6%89%A7%E8%A1%8C%E6%97%B6%E9%9C%80%E8%A6%81%E5%AF%86%E7%A0%81%E9%AA%8C%E8%AF%81)
   - [如何与 Makeflow 进行集成](#%E5%A6%82%E4%BD%95%E4%B8%8E-makeflow-%E8%BF%9B%E8%A1%8C%E9%9B%86%E6%88%90)
+  - [如何在内网环境内使用 MakeScript](#%E5%A6%82%E4%BD%95%E5%9C%A8%E5%86%85%E7%BD%91%E7%8E%AF%E5%A2%83%E5%86%85%E4%BD%BF%E7%94%A8-makescript)
+  - [如何在同一台服务器上启动多个 MakeScript (Agent)](#%E5%A6%82%E4%BD%95%E5%9C%A8%E5%90%8C%E4%B8%80%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E5%90%AF%E5%8A%A8%E5%A4%9A%E4%B8%AA-makescript-agent)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -99,9 +101,9 @@ npm install @makeflow/makescript --global
 
 安装 MakeScript 后，直接在控制台中输入 `makescript` 命令即可启动。首次启动时会要求输入一些必要信息：
 
-1. 首先会询问是否启用默认[节点](#agent)，输入 `Y` 或直接回车为启用，输入 `n` 为不启用：
+1. 首先会询问是否启用默认 [Agent](#agent)，输入 `Y` 或直接回车为启用，输入 `n` 为不启用：
    ![MakeScript default agent prompts](images/makescript-default-agent-prompts.png)
-   如果仅在当前操作机器上使用 MakeScript 或当前机器需要执行脚本，则可以启用默认节点。如果当前机器仅作为 API 端，或仅与 Makeflow 进行桥接，而执具体的脚本会在其他机器上执行，则可以不启用默认节点。
+   如果需要在启动 MakeScript 的本机上执行脚本，则可以启用默认 Agent。如果当前机器仅作为 API 端，或仅与 Makeflow 进行桥接，而执具体的脚本会在其他机器上执行，则可以不启用默认节点。
 
 2. 如果启用了默认节点，则会提示输入 [脚本仓库](#脚本仓库) 的地址，MakeScript 在每次启动时将会同步该仓库：
    ![MakeScript scripts repo url prompts](images/makescript-scripts-repo-url-prompts.png)
@@ -122,17 +124,52 @@ MakeScript 提供了一个 Web 管理界面，启动 MakeScript 后使用浏览�
 - `Makeflow 集成`: 在 `Makeflow 集成` 界面中，可以登录到 Makeflow 后将脚本列表以超级应用的形式发布到 Makeflow 。
 - `节点管理`: 在 `节点管理` 界面中，可以查看节点注册链接和已注册的节点及所有节点的脚本数量。
 
+### MakeScript 配置文件
+
+在 MakeScript 初始化后，可以通过编辑配置文件来修改 MakeScript 的一些配置。该配置文件的路径默认在 `~/.config/makescript/makescript.json`。其可编辑的项及解释如下：
+
+```ts
+type MakeScriptConfigFile = {
+  // 要监听的 Host
+  host: string;
+  // 要监听的端口
+  port: number;
+  // 可访问到 makescript 的 url（一般为绑定的域名）
+  url: string;
+
+  // 用于生成 Agent 加入链接的 Token
+  joinToken: string;
+
+  // Makeflow 相关配置
+  makeflow: {
+    baseURL: string;
+    powerApp: {
+      name: string;
+      displayName: string;
+      description: string;
+    };
+  };
+
+  // 默认 Agent 相关配置
+  defaultAgent:
+    | {
+        // 默认 Agent 所使用的脚本仓库
+        scriptsRepoURL: string;
+      }
+    | undefined;
+
+  // 脚本生成的资源文件的存放位置
+  resourcesPath: string;
+};
+```
+
 ## Agent
 
-MakeScript 身只做集成与提供管理界面等工作，本身不提供脚本执行的功能。而脚本执行的功能是交给节点（Agent）去完成的。
+MakeScript 默认会在本地执行脚本（启用了默认 Agent 时），但在实际情况中有可能会在不同的环境中有不同的脚本要执行。而分别管理各个服务器会比较麻烦，所以 MakeScript 提供了只用于执行脚本的 Agent。不同的 Agent 可以连接到一个 MakeScript 主节点，脚本的管理和集成等在 MakeScript 主节点上进行统一操作，各个 Agent 只负责执行脚本并返回结果。
 
-一个 MakeScript 中可以注册多个节点，一个节点中可以包含多个脚本。MakeScript 启动时也可以选择启动一个默认节点。
+### 安装 Agent
 
-MakeScript 将多个节点的脚本列表进行聚合，然后统一与 Makeflow 集成或提供 API。在脚本执行时，会分别分发到对应的节点进行执行，然后再将执行结果及产生的资源进行聚合展示到管理界面。
-
-### 安装节点工具
-
-因为 MakeScript 的节点没有管理界面、与 Makeflow 集成、提供 API 等功能，比 MakeScript 本体更轻量，所以单独提供了一个程序用于启动节点。与 MakeScript 一致，节点工具也以 npm 包的形式提供，可以通过 [`yarn`](https://yarnpkg.com/getting-started/install) 或 [`npm`](https://docs.npmjs.com/about-npm) 来进行安装：
+因为 MakeScript 的 Agent 没有管理界面、与 Makeflow 集成、提供 API 等功能，比 MakeScript 本体更轻量，所以单独提供了一个程序用于启动节点。与 MakeScript 一致，节点工具也以 npm 包的形式提供，可以通过 [`yarn`](https://yarnpkg.com/getting-started/install) 或 [`npm`](https://docs.npmjs.com/about-npm) 来进行安装：
 
 - yarn:
 
@@ -146,17 +183,40 @@ yarn global add @makeflow/makescript-agent
 npm install @makeflow/makescript-agent --global
 ```
 
-### 初始化节点
+### 初始化 Agent
 
-在目标机器上成功安装节点工具后，在控制台执行 `makescript-agent` 即可启动一个 Agent 作为节点。在第一次执行该命令时，需要输入一些必要的信息以初始化：
+在目标机器上成功安装 Agent 工具后，在控制台执行 `makescript-agent` 即可启动一个 Agent 并连接到 MakeScript 主节点。在第一次执行该命令时，需要输入一些必要的信息以初始化：
 
 ![agent-initialize.png](images/agent-initialize.png)
 
-1. 首先需要提供的是 MakeScript 管理节点提供的节点注册链接，该链接在 MakeScript 管理界面的 “节点管理” 界面里可以查看到并复制：
+1. 首先需要提供的是 MakeScript 祝节点节点提供的节点注册链接，该链接在 MakeScript 管理界面的 “节点管理” 界面里可以查看到并复制：
 <p align="center"><img src="images/makescript-home-with-agents-management-notation.png" alt="get-started-initialization.png" width="450"></p>
 <p align="center"><img src="images/makescript-agents-management-with-join-link-notation.png" alt="get-started-initialization.png" width="450"></p>
-2. 需要提供的第二个信息是一个名称空间，该名称空间用于区分不同的节点，不同节点的名称空间不能重复。
-3. 需要提供的第三个信息是一个脚本仓库的地址，这个脚本仓库中的脚本均可以在该节点上执行。
+2. 需要提供的第二个信息是一个名称空间，该名称空间用于区分不同的 Agent，不同 Agent 的名称空间不能重复。
+3. 需要提供的第三个信息是一个脚本仓库的地址，这个脚本仓库中的脚本均可以在该 Agent 上执行。
+
+### Agent 配置文件
+
+在 MakeScript 的 Agent 初始化后，可以通过编辑配置文件来修改 MakeScript Agent 的一些配置。该配置文件的路径默认在 `~/.config/makescript/agent/agent.json`。其可编辑的项及解释如下：
+
+```ts
+type AgentConfigFile = {
+  // MakeScript 主节点的加入链接
+  makescriptSecretURL: string;
+  // 脚本仓库地址
+  scriptsRepoURL: string;
+  // Agent 的名称空间
+  namespace: string;
+  // Agent 要使用的网络代理
+  proxy:
+    | {
+        url: string;
+        username: string;
+        password: string;
+      }
+    | undefined;
+};
+```
 
 ## 脚本仓库
 
@@ -167,7 +227,7 @@ npm install @makeflow/makescript-agent --global
 可选属性，`hooks` 属性中可以定义一系列钩子，在发生特定事件时，将会执行定义里的命令。目前可用的钩子有：
 
 - `install`: 初始化脚本仓库时将会执行，可以用于安装脚本仓库所需依赖
-- `postTrigger`: 当有脚本被触发时将会执行，可用于通知管理员手动执行脚本
+- `postscript`: 当有脚本被触发时将会执行，可用于通知管理员手动执行脚本
 
 示例：
 
@@ -175,7 +235,7 @@ npm install @makeflow/makescript-agent --global
 {
   "hooks": {
     "install": "yarn",
-    "postTrigger": "sh ./notify.sh"
+    "postscript": "sh ./notify.sh"
   }
 }
 ```
@@ -264,63 +324,16 @@ type ScriptDefinition = {
   passwordHash?: string;
   // 单个脚本的钩子，该属性下的子属性会覆盖全局属性中的子属性
   hooks?: {
-    postTrigger?: string;
+    postscript?: string;
   };
 };
-```
-
-## MakeScript 配置文件
-
-在 MakeScript 初始化后，可以通过编辑配置文件来修改 MakeScript 的一些配置。该配置文件的路径默认在 `~/.config/makescript/makescript.yaml`。其可编辑的项及解释如下：
-
-```yaml
-# Web 界面相关配置
-web:
-  host: localhost
-  port: 8900
-  url: http://localhost:8900
-# API 相关配置
-api:
-  host: localhost
-  port: 8901
-  url: http://localhost:8901
-# Makeflow 相关配置
-makeflow:
-  base-url: https://makeflow.com
-  power-app:
-    name: makescript
-    display-name: MakeScript
-    description: Auto generated by makescript
-# 默认节点相关配置
-default-agent:
-  # 脚本仓库的链接
-  scripts-repo-url: https://github.com/makeflow/makescript.git
-# 加入链接的 Token，如果改变该值必须更新所有节点的配置中的加入链接
-join-token: dfa5356a-25fc-4963-adb2-8d5d86fde8ad
-# 脚本生成的资源文件存放位置
-resources-path: /tmp/makescript-resources
-```
-
-## Agent 配置文件
-
-在 MakeScript 的节点初始化后，可以通过编辑配置文件来修改 MakeScript 节点的一些配置。该配置文件的路径默认在 `~/.config/makescript/agent/agent.yaml`。其可编辑的项及解释如下：
-
-```yaml
-# MakeScript 主节点的加入链接
-makescript-secret-url: http://localhost:8901/join/dfa5356a-25fc-4963-adb2-8d5d86fde8ad
-# 脚本仓库的链接
-scripts-repo-url: https://github.com/makeflow/makescript.git
-# 节点的名称空间
-namespace: a-unique-namespace
-# 使用的代理信息
-proxy: null
 ```
 
 ## How To
 
 ### 如何在有脚本被触发时发送通知？
 
-可以使用脚本仓库的定义中的 [`hooks#postTrigger`](#hooks) 或 `scripts[]#hooks#postTrigger` 属性来在脚本被触发时执行一个脚本，再结合 [TriggerScript](https://github.com/makeflow/triggerscript) 在脚本中使用 `curl` 等工具调用一个通知请求。
+可以使用脚本仓库的定义中的 [`hooks#postscript`](#hooks) 或 `scripts[]#hooks#postscript` 属性来在脚本被触发时执行一个脚本，再结合 [TriggerScript](https://github.com/makeflow/triggerscript) 在脚本中使用 `curl` 等工具调用一个通知请求。
 
 ### 如何实现脚本执行时需要密码验证？
 
@@ -332,6 +345,25 @@ proxy: null
 2. 登录成功后点击 "发布 Power App " 按钮后点击对话框中的 "确认发布" 按钮将应用发布或更新到 Makeflow
 3. 到 Makeflow 的应用商店中安装该应用
 4. 在 Makeflow 的流程中使用 MakeScript 应用提供的超级流程项
+
+### 如何在内网环境内使用 MakeScript
+
+如出于安全原因等，需要仅在内网环境内能管理 MakeScript ，但又需要与公网的 [Makeflow](https://www.makeflow.com) 进行集成。需要让运行 MakeScript 的服务器能访问 Makeflow，且用 Nginx 等反向代理工具，将 MakeScript 的 `/api/makeflow/*` API 暴露到公网供 Makeflow 访问。
+
+### 如何在同一台服务器上启动多个 MakeScript (Agent)
+
+MakeScript (Agent) 是通过一个工作目录来确定如何启动 MakeScript (Agent) 的，如果直接执行 `makescript` (`makescript-agent`) 命令，则会默认使用 `~/.config/makescript` (`~/.config/makescript/agent`) 作为工作目录。可以通过 `--workspace <workspace>` (`-w <workspace>`) 参数来手动指定工作目录，而达到在同一台服务器上启动多个独立的 MakeScript (Agent)。
+
+```bash
+# 在默认工作目录 (~/.config/makescript) 中启动 MakeScript
+makescript
+
+# 以 ~/.makescript/agent 为工作目录启动一个 MakeScript Agent
+makescript-agent --workspace ~/.makescript/agent
+
+# 以 ~/.makescript/another-agent 为工作目录启动另一个 MakeScript Agent
+makescript-agent -w ~/.makescript/another-agent
+```
 
 ## License
 

@@ -1,5 +1,4 @@
 import Hapi from '@hapi/hapi';
-import {logger} from '@makeflow/makescript-agent';
 
 import {Entrances} from '../../@entrances';
 
@@ -17,6 +16,4 @@ export async function serveExternalAPI(
   routeRunning(entrances.runningService, server);
 
   await server.start();
-
-  logger.info(`MakeScript api is running on port ${entrances.config.api.port}`);
 }

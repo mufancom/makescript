@@ -71,10 +71,10 @@ export class RunningService {
     try {
       await this.agentService.registeredRPCMap
         .get(namespace)
-        ?.triggerHook(name, 'postTrigger');
+        ?.triggerHook(name, 'postscript');
     } catch (error) {
       logger.error(
-        `Error to trigger hook "postTrigger" for script "${name}": ${error.message}`,
+        `Error to trigger hook "postscript" for script "${name}": ${error.message}`,
       );
     }
 
@@ -92,7 +92,7 @@ export class RunningService {
       throw new ExpectedError('SCRIPT_RUNNING_RECORD_NOT_FOUND');
     }
 
-    let resourcesBaseURL = `${this.config.web.url}/resources/${id}`;
+    let resourcesBaseURL = `${this.config.url}/resources/${id}`;
 
     let runningResult = await this.agentService.runScript(record.namespace, {
       id: record.id,

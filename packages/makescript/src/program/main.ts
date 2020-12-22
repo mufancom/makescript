@@ -20,21 +20,16 @@ const DEFAULT_AGENT_RELATIVE_PATH = 'default-agent';
 const AGENT_MODULE = '@makeflow/makescript-agent';
 
 export async function main(tiva: Tiva, config: Config): Promise<void> {
-  let webServer = Hapi.server({
-    host: config.web.host,
-    port: config.web.port,
+  let server = Hapi.server({
+    host: config.host,
+    port: config.port,
   });
 
-  let externalAPIServer = Hapi.server({
-    host: config.api.host,
-    port: config.api.port,
-  });
-
-  let entrances = new Entrances(externalAPIServer.listener, config);
+  let entrances = new Entrances(server.listener, config);
 
   await entrances.ready;
 
-  await serveAPI(webServer, externalAPIServer, entrances);
+  await serveAPI(server, entrances);
 
   let defaultAgentConfig = generateAgentConfig();
 
@@ -49,7 +44,7 @@ export async function main(tiva: Tiva, config: Config): Promise<void> {
 
     // Convert join link to localhost, because in theory, the default agent can be directly access MakeScript locally.
     let joinLinkURL = new URL(entrances.agentService.joinLink);
-    joinLinkURL.host = `${config.api.host}:${config.api.port}`;
+    joinLinkURL.host = `${config.host}:${config.port}`;
 
     return {
       makescriptSecretURL: joinLinkURL.toString(),

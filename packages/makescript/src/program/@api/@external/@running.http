@@ -1,4 +1,4 @@
-POST http://localhost:8901/api/script/default/echo-message/enqueue
+POST http://localhost:8900/api/script/default/echo-message/enqueue
 Content-Type: application/json
 Authorization: Token 2b5e49af-2454-41d8-9a6f-fa99399607de
 
@@ -10,7 +10,7 @@ Authorization: Token 2b5e49af-2454-41d8-9a6f-fa99399607de
 
 ###
 
-POST http://localhost:8901/api/script/default/generate-resources/enqueue
+POST http://localhost:8900/api/script/default/generate-resources/enqueue
 Content-Type: application/json
 Authorization: Token 2b5e49af-2454-41d8-9a6f-fa99399607de
 

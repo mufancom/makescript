@@ -2,7 +2,7 @@
   "passwordHash": "$2b$10$Qqz.Lqa1WwtvdFXgHM3pAu/sbzwpKo94zUCYwMiipDJZq.67QB/wW",
   "hooks": {
     "install": "echo \"This will run while scripts repo cloned.\"",
-    "postTrigger": "sh ./example-scripts/post-trigger-hook.sh"
+    "postscript": "sh ./example-scripts/post-trigger-hook.sh"
   },
   "scripts": [
     {
@@ -46,7 +46,7 @@
       ],
       "passwordHash": "$2b$10$WTept7/7AbSZ4hL0mBo92OK9hn6criSZ9bUjSxI4TyueV8BT3DEJ2",
       "hooks": {
-        "postTrigger": "sh example-scripts/post-trigger-hook-for-a-single-script.sh"
+        "postscript": "sh example-scripts/post-trigger-hook-for-a-single-script.sh"
       }
     }
   ]

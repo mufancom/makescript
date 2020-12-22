@@ -33,8 +33,7 @@
     "tslib": "^2.0.3",
     "typescript": "^4.1.3",
     "uuid": "^7.0.0",
-    "villa": "^0.3.2",
-    "yaml": "^1.10.0"
+    "villa": "^0.3.2"
   },
   "devDependencies": {
     "@makeflow/types": "^0.1.26",

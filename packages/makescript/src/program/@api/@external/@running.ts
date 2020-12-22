@@ -4,6 +4,8 @@ import type {Dict} from 'tslang';
 
 import {RunningService} from '../../@services';
 
+import {TOKEN_AUTH_STRATEGY_NAME} from './@auth';
+
 export function routeRunning(
   runningService: RunningService,
   server: Hapi.Server,
@@ -36,6 +38,7 @@ export function routeRunning(
           parameters: Joi.object(),
         }) as any,
       },
+      auth: TOKEN_AUTH_STRATEGY_NAME,
     },
   });
 }

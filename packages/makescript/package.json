@@ -29,7 +29,6 @@
     "entrance-decorator": "^0.1.0",
     "extendable-error": "^0.1.7",
     "extract-zip": "^2.0.1",
-    "ip": "^1.1.5",
     "lowdb": "^1.0.0",
     "node-fetch": "^2.6.1",
     "prompts": "^2.4.0",
@@ -40,11 +39,11 @@
     "tslib": "^2.0.3",
     "typescript": "^4.1.3",
     "uuid": "^7.0.0",
-    "villa": "^0.3.2",
-    "yaml": "^1.10.0"
+    "villa": "^0.3.2"
   },
   "devDependencies": {
     "@ant-design/icons": "^4.3.0",
+    "@babel/core": "^7.12.10",
     "@makeflow/types": "^0.1.24",
     "@makeflow/types-nominal": "^0.1.2",
     "@types/classnames": "^2.2.11",
@@ -54,7 +53,6 @@
     "@types/hapi__inert": "^5.2.2",
     "@types/hapi__joi": "^17.1.6",
     "@types/history": "^4.7.8",
-    "@types/ip": "^1.1.0",
     "@types/lowdb": "^1.0.9",
     "@types/prompts": "^2.0.9",
     "@types/react": "^16.9.55",

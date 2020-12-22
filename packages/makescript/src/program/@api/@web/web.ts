@@ -2,7 +2,6 @@ import * as Path from 'path';
 
 import Hapi from '@hapi/hapi';
 import Inert from '@hapi/inert';
-import {logger} from '@makeflow/makescript-agent';
 
 import {Entrances} from '../../@entrances';
 
@@ -48,8 +47,4 @@ export async function serveWeb(
     },
   });
   await server.start();
-
-  logger.info(
-    `MakeScript web ui is running on port ${entrances.config.web.port}`,
-  );
 }

@@ -38,7 +38,7 @@ export interface ScriptDefinition {
 // Hooks
 
 export interface ScriptDefinitionHooks {
-  postTrigger?: string;
+  postscript?: string;
 }
 
 // Parameters

@@ -225,7 +225,7 @@ function convertScriptDefinitionToBriefScriptDefinition(
     parameters: definition.parameters ?? [],
     needsPassword: !!definition.passwordHash,
     hooks: {
-      postTrigger: !!definition.hooks?.postTrigger,
+      postscript: !!definition.hooks?.postscript,
     },
   };
 }

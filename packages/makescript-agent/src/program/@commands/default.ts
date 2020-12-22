@@ -5,9 +5,8 @@ import * as Path from 'path';
 import {Castable, Command, Options, command, metadata, option} from 'clime';
 import prompts from 'prompts';
 import {Tiva} from 'tiva';
-import YAML from 'yaml';
 
-import {ConfigFile, generateYamlConfig, transformConfig} from '../config';
+import {JSONConfigFile} from '../config';
 import {main} from '../main';
 import {logger} from '../shared';
 
@@ -19,7 +18,7 @@ const WORKSPACE_PATH_DEFAULT = Path.resolve(
 );
 const GENERATE_CONFIG_DEFAULT = false;
 
-const CONFIG_FILE_NAME = 'agent.yaml';
+const CONFIG_FILE_NAME = 'agent.json';
 
 export class CLIOptions extends Options {
   @option({
@@ -87,23 +86,25 @@ export default class extends Command {
         return;
       }
 
-      let yamlConfigContent = generateYamlConfig({
-        'makescript-secret-url': answer.hostURL,
-        'scripts-repo-url': answer.repoURL,
+      let jsonConfig: JSONConfigFile = {
+        makescriptSecretURL: answer.hostURL,
+        scriptsRepoURL: answer.repoURL,
         namespace: answer.namespace,
         proxy: undefined,
-      });
+      };
 
-      FS.writeFileSync(configFilePath, yamlConfigContent);
+      let jsonConfigText = JSON.stringify(jsonConfig);
+
+      FS.writeFileSync(configFilePath, jsonConfigText);
     }
 
     if (generateConfigOnly) {
       return;
     }
 
-    let yamlConfigContent = FS.readFileSync(configFilePath).toString();
+    let jsonConfigText = FS.readFileSync(configFilePath).toString();
 
-    let configFileContent: ConfigFile = YAML.parse(yamlConfigContent);
+    let jsonConfig: JSONConfigFile = JSON.parse(jsonConfigText);
 
     let tiva = new Tiva({
       project: Path.join(__dirname, '../../../src/program'),
@@ -115,14 +116,16 @@ export default class extends Command {
       await tiva.validate(
         {
           module: './config',
-          type: 'ConfigFile',
+          type: 'JSONConfigFile',
         },
-        configFileContent,
+        jsonConfig,
       );
 
-      let config = transformConfig(configFileContent, workspace.fullName);
-
-      await main(tiva, config);
+      await main(tiva, {
+        ...jsonConfig,
+        workspace: workspace.fullName,
+        agentModule: undefined,
+      });
     } catch (error) {
       if (error.diagnostics) {
         logger.error(
