@@ -13,7 +13,10 @@ export interface Config extends JSONConfigFile {
 export interface JSONConfigFile {
   makescriptSecretURL: string;
   scriptsRepoURL: string;
+  // TODO: use `| undefined`
+  scriptsSubPath?: string;
   namespace: string;
+  // TODO: use `| undefined`
   proxy?: {
     url: string;
     username: string;

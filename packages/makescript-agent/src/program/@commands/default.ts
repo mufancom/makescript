@@ -77,6 +77,12 @@ export default class extends Command {
           message: 'Please enter the git repo url of the scripts',
           validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
         },
+        {
+          type: 'text',
+          name: 'subPath',
+          message:
+            'Please enter the path of the scripts definition in the repo',
+        },
       ]);
 
       // There is a bug (or unhandled behavior) with 'prompts'.
@@ -89,6 +95,8 @@ export default class extends Command {
       let jsonConfig: JSONConfigFile = {
         makescriptSecretURL: answer.hostURL,
         scriptsRepoURL: answer.repoURL,
+        // if subPath is "", pass undefined instead.
+        scriptsSubPath: answer.subPath || undefined,
         namespace: answer.namespace,
         proxy: undefined,
       };

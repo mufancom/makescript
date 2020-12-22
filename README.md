@@ -205,6 +205,8 @@ type AgentConfigFile = {
   makescriptSecretURL: string;
   // 脚本仓库地址
   scriptsRepoURL: string;
+  // 脚本定义所在位置对于脚本仓库的相对路径
+  scriptsSubPath?: string;
   // Agent 的名称空间
   namespace: string;
   // Agent 要使用的网络代理
@@ -369,6 +371,10 @@ makescript-agent --workspace ~/.makescript/agent
 # 以 ~/.makescript/another-agent 为工作目录启动另一个 MakeScript Agent
 makescript-agent -w ~/.makescript/another-agent
 ```
+
+### 如何在一个脚本仓库中定义提供多个脚本定义
+
+可以将脚本的定义放在不同的目录中，然后使用 [Agent 配置文件](#agent-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6) 中的 `scriptsSubPath` 来指定脚本定义存放位置。
 
 ## License
 

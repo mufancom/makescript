@@ -50,6 +50,7 @@ export async function main(tiva: Tiva, config: Config): Promise<void> {
       makescriptSecretURL: joinLinkURL.toString(),
       namespace: DEFAULT_AGENT_NAMESPACE,
       scriptsRepoURL: config.defaultAgent.scriptsRepoURL,
+      scriptsSubPath: config.defaultAgent.scriptsSubPath,
       agentModule: AGENT_MODULE,
       workspace: Path.join(config.workspace, DEFAULT_AGENT_RELATIVE_PATH),
       proxy: undefined,

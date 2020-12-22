@@ -25,8 +25,17 @@ export class ScriptService {
 
   private scriptsDefinition: ScriptsDefinition | undefined;
 
-  get scriptsPath(): string {
+  get scriptsBasePath(): string {
     return Path.join(this.config.workspace, SCRIPTS_DIRECTORY_NAME);
+  }
+
+  get scriptsPath(): string {
+    let scriptsBasePath = this.scriptsBasePath;
+    let scriptsSubPath = this.config.scriptsSubPath;
+
+    return scriptsSubPath
+      ? Path.join(scriptsBasePath, scriptsSubPath)
+      : scriptsBasePath;
   }
 
   private get scriptsDefinitionPath(): string {
@@ -55,9 +64,9 @@ export class ScriptService {
     logger.info('Syncing scripts ...');
 
     try {
-      if (FS.existsSync(this.scriptsPath)) {
+      if (FS.existsSync(this.scriptsBasePath)) {
         let cp = CP.spawn('git', ['remote', 'get-url', 'origin'], {
-          cwd: this.scriptsPath,
+          cwd: this.scriptsBasePath,
         });
 
         let remoteURL = '';
@@ -73,19 +82,19 @@ export class ScriptService {
             'Scripts repo url changed, start to sync from the new url',
           );
 
-          await villa.call(rimraf, this.scriptsPath);
+          await villa.call(rimraf, this.scriptsBasePath);
 
           await villa.awaitable(
             CP.spawn('git', [
               'clone',
               this.config.scriptsRepoURL,
-              this.scriptsPath,
+              this.scriptsBasePath,
             ]),
           );
         } else {
           await villa.awaitable(
             CP.spawn('git', ['pull'], {
-              cwd: this.scriptsPath,
+              cwd: this.scriptsBasePath,
             }),
           );
         }
@@ -94,7 +103,7 @@ export class ScriptService {
           CP.spawn('git', [
             'clone',
             this.config.scriptsRepoURL,
-            this.scriptsPath,
+            this.scriptsBasePath,
           ]),
         );
       }
@@ -112,7 +121,7 @@ export class ScriptService {
 
         await villa.awaitable(
           CP.exec(scriptsDefinition.hooks.install, {
-            cwd: this.scriptsPath,
+            cwd: this.scriptsBasePath,
           }),
         );
       } catch (error) {
@@ -161,7 +170,7 @@ export class ScriptService {
   }
 
   private async parseScriptsDefinition(): Promise<ScriptsDefinition> {
-    if (!FS.existsSync(this.scriptsPath)) {
+    if (!FS.existsSync(this.scriptsBasePath)) {
       throw new Error(`Scripts repo not cloned`);
     }
 

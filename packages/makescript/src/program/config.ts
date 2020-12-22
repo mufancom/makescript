@@ -21,6 +21,8 @@ export interface JSONConfigFile {
   defaultAgent:
     | {
         scriptsRepoURL: string;
+        // TODO: use `| undefined`
+        scriptsSubPath?: string;
       }
     | undefined;
 

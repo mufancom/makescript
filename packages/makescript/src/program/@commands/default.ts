@@ -70,14 +70,23 @@ export default class extends Command {
       }
 
       let defaultAgentScriptsRepoURL: string | undefined;
+      let defaultAgentScriptsSubPath: string | undefined;
 
       if (withDefaultAgent) {
-        let {repoURL} = await prompts({
-          type: 'text',
-          name: 'repoURL',
-          message: 'Please enter the git url of the scripts repo',
-          validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
-        });
+        let {repoURL, subPath} = await prompts([
+          {
+            type: 'text',
+            name: 'repoURL',
+            message: 'Please enter the git url of the scripts repo',
+            validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
+          },
+          {
+            type: 'text',
+            name: 'subPath',
+            message:
+              'Please enter the path of the scripts definition in the repo',
+          },
+        ]);
 
         // There is a bug (or unhandled behavior) with 'prompts'.
         // When user press CTRL + C , program will continue to execute with empty answers.
@@ -87,6 +96,7 @@ export default class extends Command {
         }
 
         defaultAgentScriptsRepoURL = repoURL;
+        defaultAgentScriptsSubPath = subPath;
       }
 
       let jsonConfig: JSONConfigFile = {
@@ -105,7 +115,11 @@ export default class extends Command {
 
         defaultAgent:
           withDefaultAgent && defaultAgentScriptsRepoURL
-            ? {scriptsRepoURL: defaultAgentScriptsRepoURL}
+            ? {
+                scriptsRepoURL: defaultAgentScriptsRepoURL,
+                // if defaultAgentScriptsSubPath is "", pass undefined instead
+                scriptsSubPath: defaultAgentScriptsSubPath || undefined,
+              }
             : undefined,
 
         joinToken: uuidv4(),

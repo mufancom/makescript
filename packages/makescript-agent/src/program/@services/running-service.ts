@@ -51,7 +51,7 @@ export class RunningService {
     }
 
     let cp = CP.exec(hookContent, {
-      cwd: this.scriptService.scriptsPath,
+      cwd: this.scriptService.scriptsBasePath,
       env: {
         ...process.env,
         ...this.scriptService.getEnvByScriptName(scriptName),
@@ -89,7 +89,7 @@ export class RunningService {
     );
 
     let result = await adapter.runScript({
-      cwd: this.scriptService.scriptsPath,
+      cwd: this.scriptService.scriptsBasePath,
       env: this.scriptService.getEnvByScriptName(name),
       source,
       parameters: allowedParameters,

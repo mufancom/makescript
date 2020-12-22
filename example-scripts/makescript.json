@@ -1,0 +1,12 @@
+{
+  "scripts": [
+    {
+      "displayName": "Echo Message",
+      "name": "echo-message",
+      "type": "node",
+      "source": "example-scripts/echo-message.js",
+      "parameters": ["message"],
+      "manual": false
+    }
+  ]
+}
