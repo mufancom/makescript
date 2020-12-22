@@ -240,6 +240,11 @@ type AgentConfigFile = {
 }
 ```
 
+`hooks` 中与脚本相关的钩子（`postscript`）在执行时，可以使用以下环境变量：
+
+- `SCRIPT_NAME`: 当前脚本名
+- `NAMESPACE`: 当前 Agent 的名称空间
+
 ### `passwordHash`
 
 可选属性，`passwordHash` 属性可以提供一个密码哈希值，提供了该值后，执行该脚本仓库中的所有脚本时均需要输入确认密码。该哈希值可以通过 `makescript generate-hash your-password` 生成。
@@ -322,7 +327,7 @@ type ScriptDefinition = {
   )[];
   // 单个脚本的执行密码的哈希值，该属性出现时将会覆盖同名全局属性
   passwordHash?: string;
-  // 单个脚本的钩子，该属性下的子属性会覆盖全局属性中的子属性
+  // 单个脚本的钩子，该属性下的子属性出现时会覆盖全局属性中的对应子属性
   hooks?: {
     postscript?: string;
   };

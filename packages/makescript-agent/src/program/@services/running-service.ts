@@ -52,6 +52,10 @@ export class RunningService {
 
     let cp = CP.exec(hookContent, {
       cwd: this.scriptService.scriptsPath,
+      env: {
+        ...process.env,
+        ...this.scriptService.getEnvByScriptName(scriptName),
+      },
     });
 
     await villa.awaitable(cp);
@@ -86,6 +90,7 @@ export class RunningService {
 
     let result = await adapter.runScript({
       cwd: this.scriptService.scriptsPath,
+      env: this.scriptService.getEnvByScriptName(name),
       source,
       parameters: allowedParameters,
       options,

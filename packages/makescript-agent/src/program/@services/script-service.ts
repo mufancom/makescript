@@ -4,6 +4,7 @@ import * as Path from 'path';
 
 import rimraf from 'rimraf';
 import {Tiva} from 'tiva';
+import {Dict} from 'tslang';
 import * as villa from 'villa';
 
 import {Config} from '../config';
@@ -146,6 +147,13 @@ export class ScriptService {
 
   resolveSource(script: ScriptDefinition): string {
     return Path.join(this.scriptsPath, script.source);
+  }
+
+  getEnvByScriptName(scriptName: string): Dict<string> {
+    return {
+      SCRIPT_NAME: scriptName,
+      NAMESPACE: this.config.namespace,
+    };
   }
 
   private async initialize(): Promise<void> {

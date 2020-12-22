@@ -12,6 +12,8 @@ export class ShellAdapter implements IAdapter {
   type = 'shell';
 
   async runScript({
+    cwd,
+    env,
     source,
     parameters,
     resourcesPath: resourcePath,
@@ -21,8 +23,10 @@ export class ShellAdapter implements IAdapter {
   }: AdapterRunScriptArgument): Promise<AdapterRunScriptResult> {
     try {
       let cp = CP.spawn('sh', [source], {
+        cwd,
         env: {
           ...process.env,
+          ...env,
           RESOURCE_PATH: resourcePath,
           RESOURCE_BASE_URL: resourceBaseURL,
           ...parameters,

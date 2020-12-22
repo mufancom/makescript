@@ -12,6 +12,7 @@ export interface AdapterRunScriptArgument<
   TOptions = AdapterRunScriptArgumentOptions
 > {
   cwd: string;
+  env: Dict<unknown>;
   source: string;
   resourcesPath: string;
   resourcesBaseURL: string;

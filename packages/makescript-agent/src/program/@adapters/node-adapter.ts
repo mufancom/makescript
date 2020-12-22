@@ -12,6 +12,8 @@ export class NodeAdapter implements IAdapter {
   type = 'node';
 
   async runScript({
+    cwd,
+    env,
     source,
     parameters,
     resourcesPath: resourcePath,
@@ -21,8 +23,10 @@ export class NodeAdapter implements IAdapter {
   }: AdapterRunScriptArgument): Promise<AdapterRunScriptResult> {
     try {
       let cp = CP.spawn(`node`, [source], {
+        cwd,
         env: {
           ...process.env,
+          ...env,
           RESOURCE_PATH: resourcePath,
           RESOURCE_BASE_URL: resourceBaseURL,
           ...parameters,
