@@ -10,6 +10,8 @@ import {JSONConfigFile} from '../config';
 import {main} from '../main';
 import {logger} from '../shared';
 
+const JSON_CONFIG_INDENTATION = 2;
+
 const WORKSPACE_PATH_DEFAULT = Path.resolve(
   OS.homedir(),
   '.config',
@@ -130,7 +132,11 @@ export default class extends Command {
     }
 
     function writeConfig(config: JSONConfigFile): void {
-      let jsonConfigText = JSON.stringify(config);
+      let jsonConfigText = JSON.stringify(
+        config,
+        undefined,
+        JSON_CONFIG_INDENTATION,
+      );
 
       FS.writeFileSync(configFilePath, jsonConfigText);
     }

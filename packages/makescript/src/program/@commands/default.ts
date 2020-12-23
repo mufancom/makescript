@@ -11,6 +11,8 @@ import {v4 as uuidv4} from 'uuid';
 import {JSONConfigFile} from '../config';
 import {main} from '../main';
 
+const JSON_CONFIG_INDENTATION = 2;
+
 const WORKSPACE_PATH_DEFAULT = Path.resolve(
   OS.homedir(),
   '.config',
@@ -127,7 +129,11 @@ export default class extends Command {
         resourcesPath: Path.join(OS.tmpdir(), 'makescript-resources'),
       };
 
-      let jsonConfigText = JSON.stringify(jsonConfig);
+      let jsonConfigText = JSON.stringify(
+        jsonConfig,
+        undefined,
+        JSON_CONFIG_INDENTATION,
+      );
 
       if (!FS.existsSync(dirname)) {
         FS.mkdirSync(dirname, {recursive: true});

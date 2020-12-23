@@ -10,11 +10,11 @@ MakeScript 是一个可以将脚本执行集成到 [Makeflow](https://www.makefl
 yarn global add @makeflow/makescript
 ```
 
-安装完成后在终端执行 `makescript` 命令，在第一个问题中输入 `Y`，在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车。
+安装完成后在终端执行 `makescript` 命令。在第一个问题中输入 `Y`；在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车；在第三个问题中直接回车。
 
 ![get-started-makescript.png](images/get-started-makescript.png)
 
-然后等待片刻，看到控制台输出了 `get-started-initialization.png` 字样后即代表 MakeScript 启动成功。（因为会从 GitHub clone 仓库，如果网络环境不好可能会等待较长时间）。
+然后等待片刻，看到控制台输出了 `Successfully to registered as "default"` 字样后即代表 MakeScript 启动成功。（因为会从 GitHub clone 仓库，如果网络环境不好可能会等待较长时间）。
 
 MakeScript 启动成功后，在浏览器中访问 [`http://localhost:8900`](http://localhost:8900) 即可进入 MakeScript 的管理界面。第一次进入时会要求输入一个密码进行初始化，以后再次进入需要提供初始化时输入的密码进行身份验证。
 
@@ -109,6 +109,8 @@ npm install @makeflow/makescript --global
    ![MakeScript scripts repo url prompts](images/makescript-scripts-repo-url-prompts.png)
    输入一个脚本仓库的地址并回车后，MakeScript 将会将该仓库的脚本同步到本地，以方便后续执行。该地址可以是一个 [HTTPS 地址](https://docs.github.com/en/free-pro-team@latest/github/using-git/which-remote-url-should-i-use#cloning-with-https-urls) 或 [SSH 地址](https://docs.github.com/en/free-pro-team@latest/github/using-git/which-remote-url-should-i-use#cloning-with-ssh-urls)，但请确保有对该仓库的访问权限。
 
+3. 如果启用了默认节点，且在上一步中输入了脚本仓库地址。则会提示输入脚本子路径，该路径为脚本定义文件 `makescript.json` 在脚本仓库中的相对路径。如果脚本定义文件在脚本仓库的根目录中，可直接回车。
+
 ### MakeScript 管理界面
 
 MakeScript 提供了一个 Web 管理界面，启动 MakeScript 后使用浏览器进入 [`http://localhost:8900`](http://localhost:8900) 来访问。第一次访问时会提示输入密码进行初始化：
@@ -122,7 +124,7 @@ MakeScript 提供了一个 Web 管理界面，启动 MakeScript 后使用浏览�
 - `脚本执行`: 在 `脚本执行` 界面中，可以查看历史执行记录、执行需要手动执行的脚本、查看所有可执行的脚本。
 - `Token 管理`: 在 `Token 管理` 界面中，可以创建和停用 Token。
 - `Makeflow 集成`: 在 `Makeflow 集成` 界面中，可以登录到 Makeflow 后将脚本列表以超级应用的形式发布到 Makeflow 。
-- `节点管理`: 在 `节点管理` 界面中，可以查看节点注册链接和已注册的节点及所有节点的脚本数量。
+- `节点管理`: 在 `节点管理` 界面中，可以查看节点注册命令、节点注册链接和已注册的节点及所有节点的脚本数量。
 
 ### MakeScript 配置文件
 
@@ -155,6 +157,8 @@ type MakeScriptConfigFile = {
     | {
         // 默认 Agent 所使用的脚本仓库
         scriptsRepoURL: string;
+        // 默认 Agent 的脚本子路径
+        scriptsSubPath?: string;
       }
     | undefined;
 
@@ -192,8 +196,12 @@ npm install @makeflow/makescript-agent --global
 1. 首先需要提供的是 MakeScript 祝节点节点提供的节点注册链接，该链接在 MakeScript 管理界面的 “节点管理” 界面里可以查看到并复制：
 <p align="center"><img src="images/makescript-home-with-agents-management-notation.png" alt="get-started-initialization.png" width="450"></p>
 <p align="center"><img src="images/makescript-agents-management-with-join-link-notation.png" alt="get-started-initialization.png" width="450"></p>
+
 2. 需要提供的第二个信息是一个名称空间，该名称空间用于区分不同的 Agent，不同 Agent 的名称空间不能重复。
+
 3. 需要提供的第三个信息是一个脚本仓库的地址，这个脚本仓库中的脚本均可以在该 Agent 上执行。
+
+4. 需要提供的第四个信息是一个脚本的子路径，这个路径为脚本定义文件 `makescript.json` 在脚本仓库中的位置。如果脚本定义文件在脚本仓库根目录中，可直接回车。
 
 ### Agent 配置文件
 
@@ -222,7 +230,7 @@ type AgentConfigFile = {
 
 ## 脚本仓库
 
-脚本仓库里包含了一系列将要执行的脚本以及根目录下一个名为 `makescript.json` 的定义文件。该定义文件中定义脚本列表、执行密码、脚本参数、脚本和脚本钩子等信息，可以参考本项目根目录中的 `makescript.json` 文件，也可以使用 `makescript check-definition` 命令来检测该文件是否符合定义要求。该定义文件可以有如下属性：
+脚本仓库里包含了一系列将要执行的脚本以及根目录或子目录下一个名为 `makescript.json` 的定义文件。该定义文件中定义脚本列表、执行密码、脚本参数、脚本和脚本钩子等信息，可以参考本项目根目录中的 `makescript.json` 文件，也可以使用 `makescript check-definition` 命令来检测该文件是否符合定义要求。该定义文件可以有如下属性：
 
 ### `hooks`
 
@@ -290,7 +298,7 @@ type ScriptDefinition = {
   name: string;
   // 脚本类型，可选值有 `executable`、`node`、`shell`、`sqlite`
   type: string;
-  // 脚本文件路径
+  // 脚本文件路径，其路径是相对于当前定义文件所在目录的
   source: string;
   // 执行该脚本时是否需手动确认
   manual?: boolean;
