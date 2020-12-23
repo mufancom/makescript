@@ -67,6 +67,7 @@ Authorization: Token the-token-created-before
   - [如何与 Makeflow 进行集成](#%E5%A6%82%E4%BD%95%E4%B8%8E-makeflow-%E8%BF%9B%E8%A1%8C%E9%9B%86%E6%88%90)
   - [如何在内网环境内使用 MakeScript](#%E5%A6%82%E4%BD%95%E5%9C%A8%E5%86%85%E7%BD%91%E7%8E%AF%E5%A2%83%E5%86%85%E4%BD%BF%E7%94%A8-makescript)
   - [如何在同一台服务器上启动多个 MakeScript (Agent)](#%E5%A6%82%E4%BD%95%E5%9C%A8%E5%90%8C%E4%B8%80%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E5%90%AF%E5%8A%A8%E5%A4%9A%E4%B8%AA-makescript-agent)
+  - [如何在一个脚本仓库中定义提供多个脚本定义](#%E5%A6%82%E4%BD%95%E5%9C%A8%E4%B8%80%E4%B8%AA%E8%84%9A%E6%9C%AC%E4%BB%93%E5%BA%93%E4%B8%AD%E5%AE%9A%E4%B9%89%E6%8F%90%E4%BE%9B%E5%A4%9A%E4%B8%AA%E8%84%9A%E6%9C%AC%E5%AE%9A%E4%B9%89)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
