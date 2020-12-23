@@ -76,11 +76,15 @@ export default class extends Command {
       let answer = await initialQuestions();
 
       let jsonConfig: JSONConfigFile = {
-        makescriptJoinLink: answer.joinLink,
-        scriptsRepoURL: answer.repoURL,
-        // if subPath is "", pass undefined instead.
-        scriptsSubPath: answer.subPath || undefined,
-        namespace: answer.namespace,
+        makescript: {
+          joinLink: answer.joinLink,
+          namespace: answer.namespace,
+        },
+        scripts: {
+          repoURL: answer.repoURL,
+          // if subPath is "", pass undefined instead.
+          path: answer.subPath || undefined,
+        },
         proxy: undefined,
       };
 
@@ -93,8 +97,8 @@ export default class extends Command {
 
     let jsonConfig = readConfig();
 
-    if (joinLink && jsonConfig.makescriptJoinLink !== joinLink) {
-      jsonConfig.makescriptJoinLink = joinLink;
+    if (joinLink && jsonConfig.makescript.joinLink !== joinLink) {
+      jsonConfig.makescript.joinLink = joinLink;
 
       writeConfig(jsonConfig);
     }

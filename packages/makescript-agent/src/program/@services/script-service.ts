@@ -31,7 +31,7 @@ export class ScriptService {
 
   get scriptsPath(): string {
     let scriptsBasePath = this.scriptsBasePath;
-    let scriptsSubPath = this.config.scriptsSubPath;
+    let scriptsSubPath = this.config.scripts.path;
 
     return scriptsSubPath
       ? Path.join(scriptsBasePath, scriptsSubPath)
@@ -77,7 +77,7 @@ export class ScriptService {
 
         await villa.awaitable(cp);
 
-        if (remoteURL.trim() !== this.config.scriptsRepoURL.trim()) {
+        if (remoteURL.trim() !== this.config.scripts.repoURL.trim()) {
           logger.info(
             'Scripts repo url changed, start to sync from the new url',
           );
@@ -87,7 +87,7 @@ export class ScriptService {
           await villa.awaitable(
             CP.spawn('git', [
               'clone',
-              this.config.scriptsRepoURL,
+              this.config.scripts.repoURL,
               this.scriptsBasePath,
             ]),
           );
@@ -102,7 +102,7 @@ export class ScriptService {
         await villa.awaitable(
           CP.spawn('git', [
             'clone',
-            this.config.scriptsRepoURL,
+            this.config.scripts.repoURL,
             this.scriptsBasePath,
           ]),
         );
@@ -157,7 +157,7 @@ export class ScriptService {
   getEnvByScriptName(scriptName: string): Dict<string> {
     return {
       SCRIPT_NAME: scriptName,
-      NAMESPACE: this.config.namespace,
+      NAMESPACE: this.config.makescript.namespace,
     };
   }
 

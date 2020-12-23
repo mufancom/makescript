@@ -16,7 +16,7 @@ export class SocketService {
     private config: Config,
     private entrancesReady: Promise<unknown>,
   ) {
-    let makescriptSecretURL = this.config.makescriptJoinLink;
+    let makescriptSecretURL = this.config.makescript.joinLink;
 
     let url = URL.parse(makescriptSecretURL);
 
@@ -35,13 +35,15 @@ export class SocketService {
         await this.entrancesReady;
 
         await this.makescriptRPC.register(
-          this.config.namespace,
+          this.config.makescript.namespace,
           this.registered,
         );
 
         this.registered = true;
 
-        logger.info(`Successfully to registered as "${this.config.namespace}"`);
+        logger.info(
+          `Successfully to registered as "${this.config.makescript.namespace}"`,
+        );
       })().catch(logger.error);
     });
     socket.on('disconnect', (reason: string) =>

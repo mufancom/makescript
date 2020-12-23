@@ -230,6 +230,7 @@ export class ScriptDefinitionViewer extends Component<
                   </td>
                   <td>
                     <Input
+                      type="password"
                       onChange={({currentTarget: {value}}) => {
                         password = value;
                       }}

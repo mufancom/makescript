@@ -171,7 +171,7 @@ export class MakeflowService {
     let scriptDefinitionsMap = await this.agentService.getScriptDefinitionsMap();
     let makeflowInfo = this.dbService.db.get('makeflow').value();
 
-    let hookBaseURL = `${this.config.url}/api/makeflow`;
+    let hookBaseURL = `${this.config.http.url}/api/makeflow`;
 
     let powerAppConfig = this.config.makeflow.powerApp;
 

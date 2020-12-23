@@ -3,9 +3,11 @@ export interface Config extends JSONConfigFile {
 }
 
 export interface JSONConfigFile {
-  host: string;
-  port: number;
-  url: string;
+  http: {
+    host: string;
+    port: number;
+    url: string;
+  };
 
   joinToken: string;
 

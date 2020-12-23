@@ -102,9 +102,11 @@ export default class extends Command {
       }
 
       let jsonConfig: JSONConfigFile = {
-        host: 'localhost',
-        port: 8900,
-        url: `http://localhost:8900`,
+        http: {
+          host: 'localhost',
+          port: 8900,
+          url: `http://localhost:8900`,
+        },
 
         makeflow: {
           baseURL: 'https://makeflow.com',
