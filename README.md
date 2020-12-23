@@ -61,6 +61,11 @@ Authorization: Token the-token-created-before
   - [`hooks`](#hooks)
   - [`passwordHash`](#passwordhash)
   - [`scripts`](#scripts)
+    - [命令类型](#%E5%91%BD%E4%BB%A4%E7%B1%BB%E5%9E%8B)
+      - [process](#process)
+      - [node](#node)
+      - [shell](#shell)
+      - [sqlite](#sqlite)
 - [How To](#how-to)
   - [如何在有脚本被触发时发送通知？](#%E5%A6%82%E4%BD%95%E5%9C%A8%E6%9C%89%E8%84%9A%E6%9C%AC%E8%A2%AB%E8%A7%A6%E5%8F%91%E6%97%B6%E5%8F%91%E9%80%81%E9%80%9A%E7%9F%A5)
   - [如何实现脚本执行时需要密码验证？](#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%84%9A%E6%9C%AC%E6%89%A7%E8%A1%8C%E6%97%B6%E9%9C%80%E8%A6%81%E5%AF%86%E7%A0%81%E9%AA%8C%E8%AF%81)
@@ -133,15 +138,18 @@ MakeScript 提供了一个 Web 管理界面，启动 MakeScript 后使用浏览�
 
 ```ts
 type MakeScriptConfigFile = {
-  // 要监听的 Host
-  host: string;
-  // 要监听的端口
-  port: number;
-  // 可访问到 makescript 的 url（一般为绑定的域名）
-  url: string;
-
   // 用于生成 Agent 加入链接的 Token
   joinToken: string;
+
+  // HTTP 相关配置
+  http: {
+    // 要监听的 Host
+    host: string;
+    // 要监听的端口
+    port: number;
+    // 可访问到 makescript 的 url（一般为绑定的域名）
+    url: string;
+  };
 
   // Makeflow 相关配置
   makeflow: {
@@ -210,14 +218,22 @@ npm install @makeflow/makescript-agent --global
 
 ```ts
 type AgentConfigFile = {
-  // MakeScript 主节点的加入链接
-  makescriptSecretURL: string;
-  // 脚本仓库地址
-  scriptsRepoURL: string;
-  // 脚本定义所在位置对于脚本仓库的相对路径
-  scriptsSubPath?: string;
-  // Agent 的名称空间
-  namespace: string;
+  // MakeScript 主节点相关信息
+  makescript: {
+    // MakeScript 主节点的加入链接
+    joinLink: string;
+    // Agent 的名称空间
+    namespace: string;
+  };
+
+  // 脚本仓库相关配置
+  scripts: {
+    // 脚本仓库地址
+    repoURL: string;
+    // 脚本定义所在位置对于脚本仓库的相对路径
+    path?: string;
+  };
+
   // Agent 要使用的网络代理
   proxy:
     | {
