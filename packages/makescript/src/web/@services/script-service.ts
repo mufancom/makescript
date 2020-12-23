@@ -1,5 +1,6 @@
 import {BriefScriptDefinition} from '@makeflow/makescript-agent';
 import {observable} from 'mobx';
+import {Dict} from 'tslang';
 
 import {RunningRecord} from '../../program/types';
 import {fetchAPI} from '../@helpers';
@@ -12,7 +13,7 @@ export interface AgentsStatus {
   }[];
 }
 
-export class AgentService {
+export class ScriptsService {
   @observable
   runningRecords: RunningRecord[] = [];
 
@@ -42,12 +43,27 @@ export class AgentService {
     return fetchAPI('/api/status');
   }
 
-  async runScript(id: string, password: string | undefined): Promise<void> {
+  async runScriptFromRecords(
+    id: string,
+    password: string | undefined,
+  ): Promise<void> {
     await fetchAPI('/api/records/run', {
       method: 'POST',
       body: JSON.stringify({id, password}),
     });
 
     await this.fetchRunningRecords();
+  }
+
+  async runScriptDirectly(options: {
+    namespace: string;
+    name: string;
+    parameters: Dict<unknown>;
+    password: string | undefined;
+  }): Promise<void> {
+    await fetchAPI('/api/scripts/run', {
+      method: 'POST',
+      body: JSON.stringify(options),
+    });
   }
 }

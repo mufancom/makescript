@@ -150,7 +150,7 @@ export class MakeflowLoginView extends Component<MakeflowLoginViewProps> {
           candidate.id,
         );
 
-        await message.success('登录成功');
+        void message.success('登录成功');
         this.goBack();
       } else {
         runInAction(() => {
@@ -159,7 +159,7 @@ export class MakeflowLoginView extends Component<MakeflowLoginViewProps> {
         });
       }
     } catch {
-      await message.error('登录失败');
+      void message.error('登录失败');
     }
   }
 

@@ -214,7 +214,7 @@ export class ScriptsManagementView extends Component<
   }
 
   componentDidMount(): void {
-    ENTRANCES.agentService
+    ENTRANCES.scriptService
       .fetchScriptDefinitionsMap()
       .then(({scriptsMap, baseURL}) => {
         this.scriptDefinitionsMap = scriptsMap;

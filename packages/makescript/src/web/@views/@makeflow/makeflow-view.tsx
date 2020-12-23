@@ -132,11 +132,11 @@ export class MakeflowView extends Component<MakeflowViewProps> {
             });
             break;
           default:
-            await message.error('发布失败');
+            void message.error('发布失败');
             break;
         }
       } else {
-        await message.error('发布失败');
+        void message.error('发布失败');
       }
     }
   };

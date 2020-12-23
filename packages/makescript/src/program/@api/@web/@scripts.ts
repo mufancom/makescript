@@ -1,10 +1,11 @@
 import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
+import type {Dict} from 'tslang';
 
 import {AgentService, RunningService} from '../../@services';
 import {Config} from '../../config';
 
-export function routeAgent(
+export function routeScripts(
   agentService: AgentService,
   runningService: RunningService,
   config: Config,
@@ -25,6 +26,38 @@ export function routeAgent(
           },
         ),
       };
+    },
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/scripts/run',
+    async handler(request) {
+      let {namespace, name, parameters, password} = request.payload as {
+        namespace: string;
+        name: string;
+        parameters: Dict<unknown>;
+        password: undefined;
+      };
+
+      await runningService.runScriptDirectly({
+        namespace,
+        name,
+        parameters,
+        password,
+      });
+
+      return {};
+    },
+    options: {
+      validate: {
+        payload: Joi.object({
+          namespace: Joi.string(),
+          name: Joi.string(),
+          parameters: Joi.object(),
+          password: Joi.string().optional(),
+        }) as any,
+      },
     },
   });
 
@@ -58,7 +91,7 @@ export function routeAgent(
         password: string | undefined;
       };
 
-      await runningService.runScript(id, password);
+      await runningService.runScriptFromRecords(id, password);
 
       return {};
     },

@@ -5,11 +5,11 @@ import Inert from '@hapi/inert';
 
 import {Entrances} from '../../@entrances';
 
-import {routeAgent} from './@agent';
 import {setupAuth} from './@auth';
 import {routeAuthorization} from './@authorization';
 import {routeMakeflow} from './@makeflow';
 import {routeResources} from './@resources';
+import {routeScripts} from './@scripts';
 import {routeTokens} from './@tokens';
 
 const WEB_STATIC_PATH = Path.join(__dirname, '..', '..', '..', 'web');
@@ -24,7 +24,7 @@ export async function serveWeb(
   await setupAuth(entrances.appService, server);
 
   routeAuthorization(entrances.appService, server);
-  routeAgent(
+  routeScripts(
     entrances.agentService,
     entrances.runningService,
     entrances.config,

@@ -63,14 +63,14 @@ export class RunningRecordsView extends Component<RunningRecordsViewProps> {
   private get toShowNamespaceInList(): boolean {
     return (
       new Set(
-        ENTRANCES.agentService.runningRecords.map(record => record.namespace),
+        ENTRANCES.scriptService.runningRecords.map(record => record.namespace),
       ).size > 1
     );
   }
 
   @computed
   private get recordsRendering(): ReactNode {
-    let runningRecords = ENTRANCES.agentService.runningRecords;
+    let runningRecords = ENTRANCES.scriptService.runningRecords;
 
     if (!runningRecords.length) {
       return (

@@ -82,9 +82,9 @@ export class LoginView extends Component<LoginViewProps> {
       route.$push();
     } catch (error) {
       if (error.code === 'PASSWORD_MISMATCH') {
-        await message.error('密码错误, 请重试');
+        void message.error('密码错误, 请重试');
       } else {
-        await message.error('登录失败');
+        void message.error('登录失败');
       }
     }
   }

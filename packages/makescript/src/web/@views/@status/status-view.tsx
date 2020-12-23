@@ -136,7 +136,7 @@ export class StatusView extends Component<StatusProps> {
   }
 
   componentDidMount(): void {
-    ENTRANCES.agentService
+    ENTRANCES.scriptService
       .fetchStatus()
       .then(status => {
         this.status = status;

@@ -11,6 +11,8 @@ import React, {Component, ReactNode} from 'react';
 import styled from 'styled-components';
 import {Dict} from 'tslang';
 
+import {ENTRANCES} from '../../@constants';
+
 import {ExecuteButton, Item, Label, Title} from './@common';
 
 const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
@@ -43,13 +45,17 @@ const Content = styled.div`
   overflow: auto;
 `;
 
-const InputItem = styled.div`
-  display: flex;
-  align-items: center;
+const RequiredTip = styled.span`
+  color: red;
 `;
 
-const RequiredTip = styled.div`
-  color: red;
+const ParametersTable = styled.table`
+  width: 100%;
+
+  tr,
+  td {
+    padding: 5px;
+  }
 `;
 
 export interface ScriptDefinitionViewerProps {
@@ -65,15 +71,10 @@ export class ScriptDefinitionViewer extends Component<
   private clipboardJS: ClipboardJS | undefined;
 
   @computed
-  private get scriptDefinition(): BriefScriptDefinition {
-    let {scriptDefinition} = this.props;
-
-    return scriptDefinition;
-  }
-
-  @computed
   private get parametersRendering(): ReactNode {
-    let parameters = this.scriptDefinition?.parameters;
+    let {
+      scriptDefinition: {parameters},
+    } = this.props;
 
     if (!parameters || !parameters.length) {
       return (
@@ -110,9 +111,7 @@ export class ScriptDefinitionViewer extends Component<
   }
 
   render(): ReactNode {
-    let {namespace, baseURL} = this.props;
-
-    let scriptDefinition = this.scriptDefinition;
+    let {namespace, baseURL, scriptDefinition} = this.props;
 
     if (!scriptDefinition) {
       return <div>脚本未找到</div>;
@@ -136,18 +135,14 @@ export class ScriptDefinitionViewer extends Component<
           <Item>{manual ? '是' : '否'}</Item>
           {this.parametersRendering}
         </Content>
-
-        {/* TODO: */}
-        {false ? (
-          <Tooltip
-            title="手动触发并执行该脚本"
-            mouseEnterDelay={TOOLTIP_MOUSE_ENTER_DELAY}
-          >
-            <ExecuteButton onClick={this.onExecuteButtonClick}>
-              <CaretRightFilled />
-            </ExecuteButton>
-          </Tooltip>
-        ) : undefined}
+        <Tooltip
+          title="手动触发并执行该脚本"
+          mouseEnterDelay={TOOLTIP_MOUSE_ENTER_DELAY}
+        >
+          <ExecuteButton onClick={this.onExecuteButtonClick}>
+            <CaretRightFilled />
+          </ExecuteButton>
+        </Tooltip>
       </Wrapper>
     );
   }
@@ -173,62 +168,90 @@ export class ScriptDefinitionViewer extends Component<
   }
 
   private onExecuteButtonClick = (): void => {
-    const command = this.scriptDefinition;
+    let {scriptDefinition, namespace} = this.props;
 
-    if (!command) {
-      return;
-    }
-
-    if (!command.parameters?.length) {
+    if (
+      !scriptDefinition.parameters?.length &&
+      !scriptDefinition.needsPassword
+    ) {
       Modal.confirm({
         title: '手动执行脚本',
-        content: `即使是需要手动执行的脚本在触发后也会立即执行，确定要手动触发并执行 "${command.name}" 脚本吗？`,
+        content: `即使是需要手动执行的脚本在触发后也会立即执行，确定要手动触发并执行 "${scriptDefinition.name}" 脚本吗？`,
         onOk: async () => {
-          // TODO:
-          // await ENTRANCES.scriptsService.executeCommand(command, {});
+          await ENTRANCES.scriptService.runScriptDirectly({
+            namespace,
+            name: scriptDefinition.name,
+            parameters: {},
+            password: undefined,
+          });
           void message.success('执行成功');
         },
       });
     } else {
-      let requiredParameterNames = command.parameters
+      let requiredParameterNames = scriptDefinition.parameters
         .filter(
           parameter => typeof parameter !== 'string' && parameter.required,
         )
         .map(paramter => (paramter as ScriptDefinitionDetailedParameter).name);
       let parameterResult: Dict<string> = {};
+      let password = '';
 
       Modal.confirm({
         title: '手动执行脚本',
         content: (
-          <>
-            {command.parameters.map(parameter => {
+          <ParametersTable>
+            {scriptDefinition.parameters.map(parameter => {
               let parameterName =
                 typeof parameter === 'string' ? parameter : parameter.name;
 
               return (
-                <InputItem key={parameterName}>
-                  {parameterName}
-                  {requiredParameterNames.includes(parameterName) ? (
-                    <RequiredTip>*</RequiredTip>
-                  ) : undefined}
-                  :
-                  <Input
-                    onChange={({currentTarget: {value}}) => {
-                      parameterResult[parameterName] = value;
-                    }}
-                  />
-                </InputItem>
+                <tr key={parameterName}>
+                  <td>
+                    {parameterName}
+                    {requiredParameterNames.includes(parameterName) ? (
+                      <RequiredTip>*</RequiredTip>
+                    ) : undefined}
+                  </td>
+                  <td>
+                    <Input
+                      onChange={({currentTarget: {value}}) => {
+                        parameterResult[parameterName] = value;
+                      }}
+                    />
+                  </td>
+                </tr>
               );
             })}
-          </>
+            {scriptDefinition.needsPassword ? (
+              <tr>
+                <td>
+                  执行密码<RequiredTip>*</RequiredTip>
+                </td>
+                <td>
+                  <Input
+                    onChange={({currentTarget: {value}}) => {
+                      password = value;
+                    }}
+                  />
+                </td>
+              </tr>
+            ) : undefined}
+          </ParametersTable>
         ),
         onOk: async () => {
-          if (requiredParameterNames.every(name => !!parameterResult[name])) {
-            // TODO:
-            // await ENTRANCES.scriptsService.executeCommand(command, parameterResult);
-            await message.success('执行成功');
+          if (
+            requiredParameterNames.every(name => !!parameterResult[name]) &&
+            (!scriptDefinition.needsPassword || password)
+          ) {
+            await ENTRANCES.scriptService.runScriptDirectly({
+              namespace,
+              name: scriptDefinition.name,
+              parameters: parameterResult,
+              password,
+            });
+            void message.success('执行成功');
           } else {
-            await message.error('必填的参数不能为空');
+            void message.error('必填的参数不能为空');
             // Do not close the modal
             throw new Error();
           }

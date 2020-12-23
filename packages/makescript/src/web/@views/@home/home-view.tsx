@@ -52,8 +52,9 @@ export interface HomeViewProps extends RouteComponentProps<Router> {}
 export class HomeView extends Component<HomeViewProps> {
   @computed
   private get scriptsQuantityToExecute(): number {
-    return ENTRANCES.agentService.runningRecords.filter(record => !record.ranAt)
-      .length;
+    return ENTRANCES.scriptService.runningRecords.filter(
+      record => !record.ranAt,
+    ).length;
   }
 
   render(): ReactNode {

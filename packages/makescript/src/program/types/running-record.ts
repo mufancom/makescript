@@ -9,7 +9,7 @@ export interface RunningRecord {
   name: string;
   parameters: ScriptRunningArgumentParameters;
   deniedParameters: ScriptRunningArgumentParameters;
-  triggerTokenLabel: string;
+  triggerTokenLabel: string | undefined;
   makeflow: RunningRecordMakeflowInfo | undefined;
   result: AdapterRunScriptResult | undefined;
   output: RunningRecordOutput | undefined;

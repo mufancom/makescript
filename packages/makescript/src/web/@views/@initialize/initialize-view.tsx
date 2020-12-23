@@ -95,9 +95,9 @@ export class InitializeView extends Component<InitializeViewProps> {
       console.error(error);
 
       if (error.code === 'HAS_BEEN_INITIALIZED_ALREADY') {
-        await message.error(<div>应用已经初始化过了</div>);
+        void message.error(<div>应用已经初始化过了</div>);
       } else {
-        await message.error('初始化失败');
+        void message.error('初始化失败');
       }
     }
   }

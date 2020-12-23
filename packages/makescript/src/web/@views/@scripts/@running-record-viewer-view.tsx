@@ -68,7 +68,7 @@ export class RunningRecordViewerView extends Component<
       },
     } = this.props;
 
-    return ENTRANCES.agentService.getRunningRecord(recordId);
+    return ENTRANCES.scriptService.getRunningRecord(recordId);
   }
 
   @computed
@@ -212,14 +212,16 @@ export class RunningRecordViewerView extends Component<
       confirmationMessage = '请确保已检查脚本参数';
     }
 
-    let {scriptsMap} = await ENTRANCES.agentService.fetchScriptDefinitionsMap();
+    let {
+      scriptsMap,
+    } = await ENTRANCES.scriptService.fetchScriptDefinitionsMap();
 
     let definition = scriptsMap
       .get(record.namespace)
       ?.find(definition => definition.name === record?.name);
 
     if (!definition) {
-      await message.error(
+      void message.error(
         '未找到该记录所对应的脚本定义。请检查节点注册信息及对应节点的脚本列表。',
       );
       return;
@@ -259,7 +261,7 @@ export class RunningRecordViewerView extends Component<
       cancelText: '取消',
       onOk: async () => {
         try {
-          await ENTRANCES.agentService.runScript(
+          await ENTRANCES.scriptService.runScriptFromRecords(
             record!.id,
             inputValueObservable.get(),
           );

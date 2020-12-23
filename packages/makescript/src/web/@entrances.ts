@@ -5,9 +5,9 @@ import {ENTRANCES} from './@constants';
 /* eslint-disable @mufan/explicit-return-type */
 import {route} from './@routes';
 import {
-  AgentService,
   AuthorizationService,
   MakeflowService,
+  ScriptsService as ScriptService,
   TokenService,
 } from './@services';
 
@@ -24,8 +24,8 @@ export class Entrances {
   }
 
   @entrance
-  get agentService() {
-    return new AgentService();
+  get scriptService() {
+    return new ScriptService();
   }
 
   @entrance
@@ -42,14 +42,14 @@ export class Entrances {
     // Route services
     route.$beforeEnterOrUpdate(match => {
       if (match.$exact) {
-        ENTRANCES.agentService.fetchRunningRecords().catch(console.error);
+        ENTRANCES.scriptService.fetchRunningRecords().catch(console.error);
       }
 
       Modal.destroyAll();
     });
 
     route.status.$beforeEnterOrUpdate(() => {
-      this.agentService.fetchStatus().catch(console.error);
+      this.scriptService.fetchStatus().catch(console.error);
     });
 
     route.scripts.$beforeEnterOrUpdate(match => {
@@ -59,11 +59,11 @@ export class Entrances {
     });
 
     route.scripts.records.$beforeEnter(() => {
-      this.agentService.fetchRunningRecords().catch(console.error);
+      this.scriptService.fetchRunningRecords().catch(console.error);
     });
 
     route.scripts.management.$beforeEnter(() => {
-      this.agentService.fetchScriptDefinitionsMap().catch(console.error);
+      this.scriptService.fetchScriptDefinitionsMap().catch(console.error);
     });
 
     route.tokens.$beforeEnter(() => {

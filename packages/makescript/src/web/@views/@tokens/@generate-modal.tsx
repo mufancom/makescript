@@ -51,7 +51,7 @@ export class GenerateModal extends Component<GenerateModalProps> {
       let label = this.label;
 
       if (!label) {
-        await message.error('请输入备注');
+        void message.error('请输入备注');
         return;
       }
 
@@ -84,13 +84,13 @@ export class GenerateModal extends Component<GenerateModalProps> {
       });
 
       clipboard.on('success', async () => {
-        await message.success('已复制到剪切板');
+        void message.success('已复制到剪切板');
       });
       clipboard.on('error', async () => {
-        await message.error('复制失败, 请手动复制');
+        void message.error('复制失败, 请手动复制');
       });
     } catch (error) {
-      await message.error(`操作失败${error.message}`);
+      void message.error(`操作失败${error.message}`);
     }
 
     let {onCancel} = this.props;

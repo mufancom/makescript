@@ -154,9 +154,9 @@ export class TokensView extends Component<TokensViewProps> {
         onOk: async () => {
           try {
             await ENTRANCES.tokenService.disableToken(id);
-            await message.success('停用成功');
+            void message.success('停用成功');
           } catch (error) {
-            await message.error('停用失败');
+            void message.error('停用失败');
           }
         },
       });

@@ -31,18 +31,43 @@ export class RunningService {
     private config: Config,
   ) {}
 
+  async runScriptDirectly({
+    namespace,
+    name,
+    parameters,
+    password,
+  }: {
+    namespace: string;
+    name: string;
+    parameters: ScriptRunningArgumentParameters;
+    password: string | undefined;
+  }): Promise<void> {
+    let recordId = await this.enqueueRunningRecord({
+      namespace,
+      name,
+      parameters,
+      triggerTokenLabel: undefined,
+      makeflowTask: undefined,
+      tryToRun: false,
+    });
+
+    await this.runScriptFromRecords(recordId, password);
+  }
+
   async enqueueRunningRecord({
     namespace,
     name,
     parameters,
     triggerTokenLabel,
     makeflowTask,
+    tryToRun = true,
   }: {
     namespace: string;
     name: string;
     parameters: ScriptRunningArgumentParameters;
-    triggerTokenLabel: string;
+    triggerTokenLabel: string | undefined;
     makeflowTask: RunningRecordModelMakeflowInfo | undefined;
+    tryToRun?: boolean;
   }): Promise<string> {
     let definition = await this.agentService.requireScriptDefinition(
       namespace,
@@ -78,14 +103,17 @@ export class RunningService {
       );
     }
 
-    if (!definition.manual && !definition.needsPassword) {
-      await this.runScript(recordId, undefined);
+    if (tryToRun && !definition.manual && !definition.needsPassword) {
+      await this.runScriptFromRecords(recordId, undefined);
     }
 
     return recordId;
   }
 
-  async runScript(id: string, password: string | undefined): Promise<void> {
+  async runScriptFromRecords(
+    id: string,
+    password: string | undefined,
+  ): Promise<void> {
     let record = this.dbService.db.get('records').find({id}).value();
 
     if (!record) {
