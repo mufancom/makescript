@@ -11,6 +11,8 @@ import {ENTRANCES} from '../../@constants';
 import {Router, route} from '../../@routes';
 import {AgentsStatus} from '../../@services';
 
+const JOIN_LINK_ID = 'join-link';
+
 type StatusMatch = Router['status'];
 
 const Wrapper = styled.div`
@@ -70,6 +72,8 @@ export class StatusView extends Component<StatusProps> {
   @observable
   private status: AgentsStatus | undefined;
 
+  private clipboardJS: ClipboardJS | undefined;
+
   render(): ReactNode {
     let status = this.status;
 
@@ -81,7 +85,7 @@ export class StatusView extends Component<StatusProps> {
               <Label>节点加入链接</Label>
               <Item>
                 <Tooltip title="点击复制到剪切板">
-                  <JoinLink id="join-link">{status.joinLink}</JoinLink>
+                  <JoinLink id={JOIN_LINK_ID}>{status.joinLink}</JoinLink>
                 </Tooltip>
               </Item>
               <Label>已注册节点</Label>
@@ -138,8 +142,8 @@ export class StatusView extends Component<StatusProps> {
         this.status = status;
 
         setTimeout(() => {
-          let clipboard = new ClipboardJS('#join-link', {
-            target: () => document.querySelector('#join-link')!,
+          let clipboard = new ClipboardJS(`#${JOIN_LINK_ID}`, {
+            target: element => element,
           });
 
           clipboard.on('success', () => {
@@ -149,8 +153,14 @@ export class StatusView extends Component<StatusProps> {
           clipboard.on('error', async () => {
             void message.error(`操作失败，请手动复制`);
           });
+
+          this.clipboardJS = clipboard;
         });
       })
       .catch(console.error);
+  }
+
+  componentWillUnmount(): void {
+    this.clipboardJS?.destroy();
   }
 }

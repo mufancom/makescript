@@ -4,6 +4,7 @@ import {
   ScriptDefinitionDetailedParameter,
 } from '@makeflow/makescript-agent';
 import {Input, Modal, Table, Tooltip, message} from 'antd';
+import ClipboardJS from 'clipboard';
 import {computed} from 'mobx';
 import {observer} from 'mobx-react';
 import React, {Component, ReactNode} from 'react';
@@ -16,6 +17,8 @@ const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
 
 const JSON_INDENTATION = 2;
 
+const RUNNING_LINK_ID = 'running-link';
+
 const Wrapper = styled.div`
   flex: 1;
   background-color: #fff;
@@ -23,6 +26,14 @@ const Wrapper = styled.div`
   border-radius: 2px;
   position: relative;
   overflow: hidden;
+
+  .ant-table-cell {
+    padding: 5px 10px !important;
+
+    pre {
+      margin: 0;
+    }
+  }
 `;
 
 const Content = styled.div`
@@ -42,6 +53,8 @@ const RequiredTip = styled.div`
 `;
 
 export interface ScriptDefinitionViewerProps {
+  baseURL: string;
+  namespace: string;
   scriptDefinition: BriefScriptDefinition;
 }
 
@@ -49,6 +62,8 @@ export interface ScriptDefinitionViewerProps {
 export class ScriptDefinitionViewer extends Component<
   ScriptDefinitionViewerProps
 > {
+  private clipboardJS: ClipboardJS | undefined;
+
   @computed
   private get scriptDefinition(): BriefScriptDefinition {
     let {scriptDefinition} = this.props;
@@ -95,6 +110,8 @@ export class ScriptDefinitionViewer extends Component<
   }
 
   render(): ReactNode {
+    let {namespace, baseURL} = this.props;
+
     let scriptDefinition = this.scriptDefinition;
 
     if (!scriptDefinition) {
@@ -109,6 +126,12 @@ export class ScriptDefinitionViewer extends Component<
           <Title>
             {type}: {name}
           </Title>
+          <Label>执行链接</Label>
+          <Tooltip title="点击复制到剪切板">
+            <Item
+              id={RUNNING_LINK_ID}
+            >{`${baseURL}/api/script/${namespace}/${name}/enqueue`}</Item>
+          </Tooltip>
           <Label>需手动执行</Label>
           <Item>{manual ? '是' : '否'}</Item>
           {this.parametersRendering}
@@ -127,6 +150,26 @@ export class ScriptDefinitionViewer extends Component<
         ) : undefined}
       </Wrapper>
     );
+  }
+
+  componentDidMount(): void {
+    let clipboard = new ClipboardJS(`#${RUNNING_LINK_ID}`, {
+      target: element => element,
+    });
+
+    clipboard.on('success', () => {
+      void message.success('已成功复制剪切板');
+    });
+
+    clipboard.on('error', async () => {
+      void message.error(`操作失败，请手动复制`);
+    });
+
+    this.clipboardJS = clipboard;
+  }
+
+  componentWillUnmount(): void {
+    this.clipboardJS?.destroy();
   }
 
   private onExecuteButtonClick = (): void => {

@@ -24,7 +24,12 @@ export async function serveWeb(
   await setupAuth(entrances.appService, server);
 
   routeAuthorization(entrances.appService, server);
-  routeAgent(entrances.agentService, entrances.runningService, server);
+  routeAgent(
+    entrances.agentService,
+    entrances.runningService,
+    entrances.config,
+    server,
+  );
   routeTokens(entrances.tokenService, server);
   routeMakeflow(entrances.makeflowService, server);
 

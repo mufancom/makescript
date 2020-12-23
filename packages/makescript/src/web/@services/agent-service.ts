@@ -20,12 +20,16 @@ export class AgentService {
     return this.runningRecords.find(item => item.id === id);
   }
 
-  async fetchScriptDefinitionsMap(): Promise<
-    Map<string, BriefScriptDefinition[]>
-  > {
-    let {definitionsDict} = await fetchAPI('/api/scripts');
+  async fetchScriptDefinitionsMap(): Promise<{
+    scriptsMap: Map<string, BriefScriptDefinition[]>;
+    baseURL: string;
+  }> {
+    let {definitionsDict, url} = await fetchAPI('/api/scripts');
 
-    return new Map(Object.entries(definitionsDict));
+    return {
+      scriptsMap: new Map(Object.entries(definitionsDict)),
+      baseURL: url,
+    };
   }
 
   async fetchRunningRecords(): Promise<void> {

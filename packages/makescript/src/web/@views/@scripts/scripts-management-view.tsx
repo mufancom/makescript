@@ -33,7 +33,11 @@ const ViewerPanel = styled.div`
 `;
 
 const ScriptsWrapper = styled.div`
-  overflow-y: auto;
+  overflow-y: hidden;
+
+  &:hover {
+    overflow-y: auto;
+  }
 
   .ant-menu-item {
     padding-left: 30px !important;
@@ -51,6 +55,9 @@ export class ScriptsManagementView extends Component<
   private scriptDefinitionsMap:
     | Map<string, BriefScriptDefinition[]>
     | undefined;
+
+  @observable
+  private baseURL: string | undefined;
 
   @computed
   private get activeScriptName(): [string, string] | undefined {
@@ -88,13 +95,19 @@ export class ScriptsManagementView extends Component<
   private scriptDefinitionViewerView = observer(
     (): ReactElement => {
       let activeScriptDefinition = this.activeScriptDefinition;
+      let activeScriptName = this.activeScriptName;
+      let baseURL = this.baseURL;
 
-      if (!activeScriptDefinition) {
+      if (!activeScriptName || !activeScriptDefinition || !baseURL) {
         return <></>;
       }
 
       return (
-        <ScriptDefinitionViewer scriptDefinition={activeScriptDefinition} />
+        <ScriptDefinitionViewer
+          namespace={activeScriptName[0]}
+          baseURL={baseURL}
+          scriptDefinition={activeScriptDefinition}
+        />
       );
     },
   );
@@ -203,8 +216,9 @@ export class ScriptsManagementView extends Component<
   componentDidMount(): void {
     ENTRANCES.agentService
       .fetchScriptDefinitionsMap()
-      .then(scriptDefinitionsMap => {
-        this.scriptDefinitionsMap = scriptDefinitionsMap;
+      .then(({scriptsMap, baseURL}) => {
+        this.scriptDefinitionsMap = scriptsMap;
+        this.baseURL = baseURL;
       })
       .catch(console.error);
   }

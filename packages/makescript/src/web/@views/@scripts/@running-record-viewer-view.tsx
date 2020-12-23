@@ -212,7 +212,7 @@ export class RunningRecordViewerView extends Component<
       confirmationMessage = '请确保已检查脚本参数';
     }
 
-    let scriptsMap = await ENTRANCES.agentService.fetchScriptDefinitionsMap();
+    let {scriptsMap} = await ENTRANCES.agentService.fetchScriptDefinitionsMap();
 
     let definition = scriptsMap
       .get(record.namespace)
