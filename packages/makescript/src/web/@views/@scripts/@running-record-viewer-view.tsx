@@ -18,7 +18,7 @@ const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
 
 // TODO: Cannot import `OUTPUT_CLEAR_CHARACTER` from '@makeflow/makescript-agent' ?
 const OUTPUT_CLEAR_CHARACTER = '\x1Bc';
-const SHOWABLE_CLEAR_CHARACTER = '-- clear --';
+const SHOWABLE_CLEAR_CHARACTER = '\n\n-- clear --\n\n';
 
 const RESULT_DISPLAY_NAME_DICT: {
   [TKey in AdapterRunScriptResult['result']]: {

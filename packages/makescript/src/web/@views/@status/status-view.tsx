@@ -12,6 +12,7 @@ import {Router, route} from '../../@routes';
 import {AgentsStatus} from '../../@services';
 
 const JOIN_LINK_ID = 'join-link';
+const JOIN_COMMAND_ID = 'join-command';
 
 type StatusMatch = Router['status'];
 
@@ -72,7 +73,7 @@ export class StatusView extends Component<StatusProps> {
   @observable
   private status: AgentsStatus | undefined;
 
-  private clipboardJS: ClipboardJS | undefined;
+  private disposes: (() => void)[] = [];
 
   render(): ReactNode {
     let status = this.status;
@@ -82,6 +83,14 @@ export class StatusView extends Component<StatusProps> {
         <Card title="节点管理" summary="节点加入链接及已注册节点">
           {status ? (
             <>
+              <Label>节点加入命令</Label>
+              <Item>
+                <Tooltip title="点击复制到剪切板">
+                  <JoinLink id={JOIN_COMMAND_ID}>
+                    makescript-agent --join-link {status.joinLink}
+                  </JoinLink>
+                </Tooltip>
+              </Item>
               <Label>节点加入链接</Label>
               <Item>
                 <Tooltip title="点击复制到剪切板">
@@ -142,25 +151,38 @@ export class StatusView extends Component<StatusProps> {
         this.status = status;
 
         setTimeout(() => {
-          let clipboard = new ClipboardJS(`#${JOIN_LINK_ID}`, {
+          let joinLinkClipboard = new ClipboardJS(`#${JOIN_LINK_ID}`, {
             target: element => element,
           });
 
-          clipboard.on('success', () => {
+          let joinCommandClipboard = new ClipboardJS(`#${JOIN_COMMAND_ID}`, {
+            target: element => element,
+          });
+
+          let successHandler = (): void => {
             void message.success('已成功复制剪切板');
-          });
+          };
 
-          clipboard.on('error', async () => {
+          let errorHandler = (): void => {
             void message.error(`操作失败，请手动复制`);
-          });
+          };
 
-          this.clipboardJS = clipboard;
+          joinLinkClipboard.on('success', successHandler);
+          joinLinkClipboard.on('error', errorHandler);
+
+          joinCommandClipboard.on('success', successHandler);
+          joinCommandClipboard.on('error', errorHandler);
+
+          this.disposes.push(() => joinLinkClipboard.destroy());
+          this.disposes.push(() => joinCommandClipboard.destroy());
         });
       })
       .catch(console.error);
   }
 
   componentWillUnmount(): void {
-    this.clipboardJS?.destroy();
+    for (let dispose of this.disposes) {
+      dispose();
+    }
   }
 }

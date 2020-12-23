@@ -16,7 +16,7 @@ export class SocketService {
     private config: Config,
     private entrancesReady: Promise<unknown>,
   ) {
-    let makescriptSecretURL = this.config.makescriptSecretURL;
+    let makescriptSecretURL = this.config.makescriptJoinLink;
 
     let url = URL.parse(makescriptSecretURL);
 

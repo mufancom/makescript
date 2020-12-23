@@ -47,7 +47,7 @@ export async function main(tiva: Tiva, config: Config): Promise<void> {
     joinLinkURL.host = `${config.host}:${config.port}`;
 
     return {
-      makescriptSecretURL: joinLinkURL.toString(),
+      makescriptJoinLink: joinLinkURL.toString(),
       namespace: DEFAULT_AGENT_NAMESPACE,
       scriptsRepoURL: config.defaultAgent.scriptsRepoURL,
       scriptsSubPath: config.defaultAgent.scriptsSubPath,

@@ -11,7 +11,7 @@ export interface Config extends JSONConfigFile {
 }
 
 export interface JSONConfigFile {
-  makescriptSecretURL: string;
+  makescriptJoinLink: string;
   scriptsRepoURL: string;
   // TODO: use `| undefined`
   scriptsSubPath?: string;

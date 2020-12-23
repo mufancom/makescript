@@ -37,7 +37,7 @@ export function routeScripts(
         namespace: string;
         name: string;
         parameters: Dict<unknown>;
-        password: undefined;
+        password: string | undefined;
       };
 
       await runningService.runScriptDirectly({

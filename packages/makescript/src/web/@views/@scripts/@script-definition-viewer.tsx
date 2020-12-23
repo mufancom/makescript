@@ -194,48 +194,50 @@ export class ScriptDefinitionViewer extends Component<
         )
         .map(paramter => (paramter as ScriptDefinitionDetailedParameter).name);
       let parameterResult: Dict<string> = {};
-      let password = '';
+      let password: string | undefined;
 
       Modal.confirm({
         title: '手动执行脚本',
         content: (
           <ParametersTable>
-            {scriptDefinition.parameters.map(parameter => {
-              let parameterName =
-                typeof parameter === 'string' ? parameter : parameter.name;
+            <tbody>
+              {scriptDefinition.parameters.map(parameter => {
+                let parameterName =
+                  typeof parameter === 'string' ? parameter : parameter.name;
 
-              return (
-                <tr key={parameterName}>
+                return (
+                  <tr key={parameterName}>
+                    <td>
+                      {parameterName}
+                      {requiredParameterNames.includes(parameterName) ? (
+                        <RequiredTip>*</RequiredTip>
+                      ) : undefined}
+                    </td>
+                    <td>
+                      <Input
+                        onChange={({currentTarget: {value}}) => {
+                          parameterResult[parameterName] = value;
+                        }}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+              {scriptDefinition.needsPassword ? (
+                <tr>
                   <td>
-                    {parameterName}
-                    {requiredParameterNames.includes(parameterName) ? (
-                      <RequiredTip>*</RequiredTip>
-                    ) : undefined}
+                    执行密码<RequiredTip>*</RequiredTip>
                   </td>
                   <td>
                     <Input
                       onChange={({currentTarget: {value}}) => {
-                        parameterResult[parameterName] = value;
+                        password = value;
                       }}
                     />
                   </td>
                 </tr>
-              );
-            })}
-            {scriptDefinition.needsPassword ? (
-              <tr>
-                <td>
-                  执行密码<RequiredTip>*</RequiredTip>
-                </td>
-                <td>
-                  <Input
-                    onChange={({currentTarget: {value}}) => {
-                      password = value;
-                    }}
-                  />
-                </td>
-              </tr>
-            ) : undefined}
+              ) : undefined}
+            </tbody>
           </ParametersTable>
         ),
         onOk: async () => {
