@@ -154,10 +154,6 @@ export class ScriptService {
     return fillScriptDefinitionDefaultValue(definition, scriptsDefinition);
   }
 
-  resolveSource(script: ScriptDefinition): string {
-    return Path.join(this.scriptsPath, script.source);
-  }
-
   getEnvByScriptName(scriptName: string): Dict<string> {
     return {
       SCRIPT_NAME: scriptName,

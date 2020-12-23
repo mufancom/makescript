@@ -1,4 +1,5 @@
 import type {ProcedureField} from '@makeflow/types';
+import {Dict} from 'tslang';
 
 export interface BriefScriptDefinition {
   displayName: string;
@@ -23,16 +24,45 @@ export interface ScriptsDefinitionHooks extends ScriptDefinitionHooks {
   install: string;
 }
 
-export interface ScriptDefinition {
+export interface IScriptDefinition {
   displayName: string;
   name: string;
   type: string;
-  source: string;
   manual?: boolean;
   parameters?: ScriptDefinitionParameter[];
-  options?: ScriptDefinitionOptionsItem[];
+  options?: Dict<ScriptDefinitionOptionsItem>;
   passwordHash?: string;
   hooks?: ScriptDefinitionHooks;
+}
+
+export type ScriptDefinition =
+  | NodeScriptDefinition
+  | ProcessScriptDefinition
+  | ShellScriptDefinition
+  | SQLITEScriptDefinition;
+
+export interface NodeScriptDefinition extends IScriptDefinition {
+  type: 'node';
+  module: string;
+}
+
+export interface ProcessScriptDefinition extends IScriptDefinition {
+  type: 'process';
+  command: string;
+}
+
+export interface ShellScriptDefinition extends IScriptDefinition {
+  type: 'shell';
+  command: string;
+}
+
+export interface SQLITEScriptDefinition extends IScriptDefinition {
+  type: 'sqlite';
+  file: string;
+  options: {
+    path: ScriptDefinitionOptionsItem;
+    password: ScriptDefinitionOptionsItem;
+  };
 }
 
 // Hooks
@@ -70,13 +100,11 @@ export type ScriptDefinitionOptionsItem =
   | ScriptDefinitionOptionsEnvItem;
 
 export interface ScriptDefinitionOptionsValueItem {
-  name: string;
   type: 'value';
   value: unknown;
 }
 
 export interface ScriptDefinitionOptionsEnvItem {
-  name: string;
   type: 'env';
   env: string;
   required?: boolean;

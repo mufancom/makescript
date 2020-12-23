@@ -6,23 +6,26 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
+  ShellScriptDefinition,
 } from '../types';
 
-export class ShellAdapter implements IAdapter {
-  type = 'shell';
+export class ShellAdapter implements IAdapter<ShellScriptDefinition> {
+  type = 'shell' as const;
 
   async runScript({
     cwd,
     env,
-    source,
+    definition,
     parameters,
     resourcesPath: resourcePath,
     resourcesBaseURL: resourceBaseURL,
     onOutput,
     onError,
-  }: AdapterRunScriptArgument): Promise<AdapterRunScriptResult> {
+  }: AdapterRunScriptArgument<ShellScriptDefinition>): Promise<
+    AdapterRunScriptResult
+  > {
     try {
-      let cp = CP.spawn('sh', [source], {
+      let cp = CP.exec(definition.command, {
         cwd,
         env: {
           ...process.env,
@@ -33,10 +36,10 @@ export class ShellAdapter implements IAdapter {
         },
       });
 
-      cp.stdout.on('data', (buffer: Buffer) => {
+      cp.stdout?.on('data', (buffer: Buffer) => {
         onOutput(buffer.toString());
       });
-      cp.stderr.on('data', (buffer: Buffer) => {
+      cp.stderr?.on('data', (buffer: Buffer) => {
         onError(buffer.toString());
       });
 

@@ -7,25 +7,28 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
+  ProcessScriptDefinition,
 } from '../types';
 
-export class ExecutableAdapter implements IAdapter {
-  type = 'executable';
+export class ProcessAdapter implements IAdapter<ProcessScriptDefinition> {
+  type = 'process' as const;
 
   async runScript({
     cwd,
     env,
-    source,
+    definition,
     parameters,
     resourcesPath: resourcePath,
     resourcesBaseURL: resourceBaseURL,
     onOutput,
     onError,
-  }: AdapterRunScriptArgument): Promise<AdapterRunScriptResult> {
+  }: AdapterRunScriptArgument<ProcessScriptDefinition>): Promise<
+    AdapterRunScriptResult
+  > {
     const which = NPMWhich(cwd);
 
     try {
-      let commandPath = await villa.call(which, source);
+      let commandPath = await villa.call(which, definition.command);
 
       let cp = CP.spawn(commandPath, {
         cwd,

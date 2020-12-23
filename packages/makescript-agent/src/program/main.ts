@@ -3,8 +3,8 @@ import 'villa/platform/node';
 import {Tiva} from 'tiva';
 
 import {
-  ExecutableAdapter,
   NodeAdapter,
+  ProcessAdapter,
   ShellAdapter,
   SqliteAdapter,
 } from './@adapters';
@@ -16,14 +16,15 @@ export async function main(tiva: Tiva, config: Config): Promise<void> {
   let entrances = new Entrances(tiva, config);
 
   let adapters = [
-    new ExecutableAdapter(),
+    new ProcessAdapter(),
     new NodeAdapter(),
     new ShellAdapter(),
     new SqliteAdapter(),
   ];
 
   for (let adapter of adapters) {
-    entrances.runningService.registerAdapter(adapter.type, adapter);
+    // TODO: any
+    entrances.runningService.registerAdapter(adapter.type, adapter as any);
   }
 
   logger.info('MakeScript agent started.');

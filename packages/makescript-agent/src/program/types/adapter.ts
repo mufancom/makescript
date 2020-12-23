@@ -1,19 +1,26 @@
 import {Dict} from 'tslang';
 
-export interface IAdapter<TOptions = AdapterRunScriptArgumentOptions> {
-  readonly type: string;
+import {ScriptDefinition} from './script-definition';
+
+export interface IAdapter<
+  TDefinition extends ScriptDefinition,
+  TOptions = AdapterRunScriptArgumentOptions
+> {
+  readonly type: TDefinition['type'];
 
   runScript(
-    argument: AdapterRunScriptArgument<TOptions>,
+    argument: AdapterRunScriptArgument<TDefinition, TOptions>,
   ): Promise<AdapterRunScriptResult>;
 }
 
 export interface AdapterRunScriptArgument<
+  TDefinition extends ScriptDefinition,
   TOptions = AdapterRunScriptArgumentOptions
 > {
+  repoPath: string;
   cwd: string;
   env: Dict<unknown>;
-  source: string;
+  definition: TDefinition;
   resourcesPath: string;
   resourcesBaseURL: string;
   parameters: AdapterRunScriptArgumentParameters;

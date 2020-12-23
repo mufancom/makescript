@@ -29,7 +29,7 @@ const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 const OUTPUT_FLUSH_INTERVAL_TIME = 1000;
 
 export class RunningService {
-  private adapterMap = new Map<string, IAdapter>();
+  private adapterMap = new Map<string, IAdapter<ScriptDefinition>>();
 
   constructor(
     private scriptService: ScriptService,
@@ -72,7 +72,6 @@ export class RunningService {
 
     await this.validatePassword(definition, argument);
 
-    let source = this.resolveSource(definition);
     let adapter = this.requireAdapter(definition);
     let options = this.resolveOptions(definition);
     let resourcesPath = this.generateRandomResourcesPath();
@@ -89,9 +88,10 @@ export class RunningService {
     );
 
     let result = await adapter.runScript({
-      cwd: this.scriptService.scriptsBasePath,
+      repoPath: this.scriptService.scriptsBasePath,
+      cwd: this.scriptService.scriptsPath,
       env: this.scriptService.getEnvByScriptName(name),
-      source,
+      definition,
       parameters: allowedParameters,
       options,
       resourcesPath,
@@ -155,15 +155,9 @@ export class RunningService {
     }
   }
 
-  private resolveSource(scriptDefinition: ScriptDefinition): string {
-    let source = this.scriptService.resolveSource(scriptDefinition);
-
-    // TODO: check
-
-    return source;
-  }
-
-  private requireAdapter(scriptDefinition: ScriptDefinition): IAdapter {
+  private requireAdapter<TDefinition extends ScriptDefinition>(
+    scriptDefinition: TDefinition,
+  ): IAdapter<TDefinition> {
     let adapter = this.adapterMap.get(scriptDefinition.type);
 
     if (!adapter) {
@@ -173,7 +167,7 @@ export class RunningService {
       );
     }
 
-    return adapter;
+    return adapter as IAdapter<TDefinition>;
   }
 
   private resolveOptions(scriptDefinition: ScriptDefinition): Dict<unknown> {
@@ -182,18 +176,18 @@ export class RunningService {
     }
 
     return Object.fromEntries(
-      scriptDefinition.options.map(option => {
-        if (option.type === 'value') {
-          return [option.name, option.value];
-        } else if (option.type === 'env') {
-          let resolvedValue = process.env[option.env];
+      Object.entries(scriptDefinition.options).map(([name, value]) => {
+        if (value.type === 'value') {
+          return [name, value.value];
+        } else if (value.type === 'env') {
+          let resolvedValue = process.env[value.env];
 
-          if (!resolvedValue && option.required) {
+          if (!resolvedValue && value.required) {
             // TODO:
             throw new Error();
           }
 
-          return [option.name, resolvedValue];
+          return [name, resolvedValue];
         }
 
         // TODO:
@@ -239,7 +233,10 @@ export class RunningService {
   private getOnOutput(
     argument: ScriptRunningArgument,
     error: boolean,
-  ): {onOutput: AdapterRunScriptArgument['onOutput']; done(): Promise<string>} {
+  ): {
+    onOutput: AdapterRunScriptArgument<ScriptDefinition>['onOutput'];
+    done(): Promise<string>;
+  } {
     let output = '';
 
     let lastFlushedText: string | undefined;

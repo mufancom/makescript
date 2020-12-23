@@ -1,4 +1,5 @@
 import * as FS from 'fs';
+import * as Path from 'path';
 
 import sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
@@ -7,25 +8,29 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
+  SQLITEScriptDefinition,
 } from '../types';
 
 export interface SqliteAdapterOptions {
   path: string;
 }
 
-export class SqliteAdapter implements IAdapter<SqliteAdapterOptions> {
-  type = 'sqlite';
+export class SqliteAdapter
+  implements IAdapter<SQLITEScriptDefinition, SqliteAdapterOptions> {
+  type = 'sqlite' as const;
 
   async runScript({
-    source,
+    cwd,
+    definition,
     parameters,
     options,
     resourcesPath: resourcePath,
     resourcesBaseURL: resourceBaseURL,
     onOutput,
-  }: AdapterRunScriptArgument<SqliteAdapterOptions>): Promise<
-    AdapterRunScriptResult
-  > {
+  }: AdapterRunScriptArgument<
+    SQLITEScriptDefinition,
+    SqliteAdapterOptions
+  >): Promise<AdapterRunScriptResult> {
     try {
       if (!options || !options.path) {
         return {
@@ -39,7 +44,7 @@ export class SqliteAdapter implements IAdapter<SqliteAdapterOptions> {
         driver: sqlite3.Database,
       });
 
-      let buffer = await FS.promises.readFile(source);
+      let buffer = await FS.promises.readFile(Path.join(cwd, definition.file));
 
       let result = await db.run(buffer.toString(), {
         $resource_path: resourcePath,

@@ -270,7 +270,7 @@ type AgentConfigFile = {
 
 ### `scripts`
 
-必选属性，`scripts` 属性接受一个数组，其定义了所有需要执行的脚本，以及这些脚本的需要接受的参数。
+必选属性，`scripts` 属性接受一个数组，其定义了所有需要执行的脚本，以及这些脚本的需要接受的参数。除了通用属性外，当脚本定义的 `type` 不同时，也会有一些额外的属性，在后面有单独的介绍。
 
 示例：
 
@@ -281,7 +281,7 @@ type AgentConfigFile = {
       "displayName": "Echo Message",
       "name": "echo-message",
       "type": "node",
-      "source": "example-scripts/echo-message.js",
+      "module": "example-scripts/echo-message.js",
       "parameters": ["message"],
       "manual": false
     }
@@ -297,10 +297,8 @@ type ScriptDefinition = {
   displayName: string;
   // 脚本的唯一识别名称，在同一个脚本仓库中需唯一
   name: string;
-  // 脚本类型，可选值有 `executable`、`node`、`shell`、`sqlite`
+  // 脚本类型，可选值有 `process`、`node`、`shell`、`sqlite`
   type: string;
-  // 脚本文件路径，其路径是相对于当前定义文件所在目录的
-  source: string;
   // 执行该脚本时是否需手动确认
   manual?: boolean;
   // 脚本的参数列表，接受参数定义或字符串数组
@@ -323,19 +321,19 @@ type ScriptDefinition = {
     | string
   )[];
   // 脚本选项，执行脚本时会传递给执行脚本的 Adapter
-  options?: (
-    | {
-        name: string;
-        type: 'value';
-        value: unknown;
-      }
-    | {
-        name: string;
-        type: 'env';
-        env: string;
-        required?: boolean;
-      }
-  )[];
+  options?: {
+    // name 会根据 `type` 不同而不同
+    [name]:
+      | {
+          type: 'value';
+          value: unknown;
+        }
+      | {
+          type: 'env';
+          env: string;
+          required?: boolean;
+        };
+  };
   // 单个脚本的执行密码的哈希值，该属性出现时将会覆盖同名全局属性
   passwordHash?: string;
   // 单个脚本的钩子，该属性下的子属性出现时会覆盖全局属性中的对应子属性
@@ -344,6 +342,27 @@ type ScriptDefinition = {
   };
 };
 ```
+
+#### 命令类型
+
+##### process
+
+`scripts[]#type` 为 `process` 时，必须提供 `scripts[]#command` 属性指定一个个执行文件。
+
+##### node
+
+`scripts[]#type` 为 `node` 时，必须提供 `scripts[]#module` 指定一个 js 文件。
+
+##### shell
+
+`scripts[]#type` 为 `shell` 时，必须提供 `scripts[]#command` 指定一个命令。
+
+##### sqlite
+
+`scripts[]#type` 为 `sqlite` 时，必须提供 `scripts[]#file` 指定一个 sql 文件，和有 `path` 和 `password` 的 `scripts[]#options` 指定 sqlite 选项，其中：
+
+- `path`: 为一个 sqlite 数据库文件的地址
+- `password`: 为 sqlite 数据库文件的密码
 
 ## How To
 

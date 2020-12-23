@@ -6,23 +6,26 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
+  NodeScriptDefinition,
 } from '../types';
 
-export class NodeAdapter implements IAdapter {
-  type = 'node';
+export class NodeAdapter implements IAdapter<NodeScriptDefinition> {
+  type = 'node' as const;
 
   async runScript({
     cwd,
     env,
-    source,
+    definition,
     parameters,
     resourcesPath: resourcePath,
     resourcesBaseURL: resourceBaseURL,
     onOutput,
     onError,
-  }: AdapterRunScriptArgument): Promise<AdapterRunScriptResult> {
+  }: AdapterRunScriptArgument<NodeScriptDefinition>): Promise<
+    AdapterRunScriptResult
+  > {
     try {
-      let cp = CP.spawn(`node`, [source], {
+      let cp = CP.spawn(`node`, [definition.module], {
         cwd,
         env: {
           ...process.env,
