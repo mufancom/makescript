@@ -93,14 +93,16 @@ export class RunningService {
       })
       .write();
 
-    try {
-      await this.agentService.registeredRPCMap
-        .get(namespace)
-        ?.triggerHook(name, 'postscript');
-    } catch (error) {
-      logger.error(
-        `Error to trigger hook "postscript" for script "${name}": ${error.message}`,
-      );
+    if (definition.hooks.postscript) {
+      try {
+        await this.agentService.registeredRPCMap
+          .get(namespace)
+          ?.triggerHook(name, 'postscript');
+      } catch (error) {
+        logger.error(
+          `Error to trigger hook "postscript" for script "${name}": ${error.message}`,
+        );
+      }
     }
 
     if (tryToRun && !definition.manual && !definition.needsPassword) {

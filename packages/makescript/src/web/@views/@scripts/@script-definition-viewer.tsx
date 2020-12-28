@@ -73,7 +73,7 @@ export class ScriptDefinitionViewer extends Component<
       scriptDefinition: {parameters},
     } = this.props;
 
-    if (!parameters || !parameters.length) {
+    if (!parameters || !Object.entries(parameters ?? {}).length) {
       return (
         <>
           <Label>脚本参数</Label>
@@ -168,7 +168,7 @@ export class ScriptDefinitionViewer extends Component<
     let {scriptDefinition, namespace} = this.props;
 
     if (
-      !scriptDefinition.parameters?.length &&
+      !Object.entries(scriptDefinition.parameters ?? {}).length &&
       !scriptDefinition.needsPassword
     ) {
       Modal.confirm({

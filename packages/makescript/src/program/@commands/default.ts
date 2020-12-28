@@ -5,6 +5,7 @@ import * as Path from 'path';
 import {
   JSONConfigFile as AgentJSONConfigFile,
   logger,
+  main as agentMain,
 } from '@makeflow/makescript-agent';
 import {Command, command, metadata} from 'clime';
 import prompts from 'prompts';
@@ -50,6 +51,7 @@ export const MAKESCRIPT_CONFIG_DEFAULT: JSONConfigFile = {
 };
 
 export const MAKESCRIPT_DEFAULT_AGENT_CONFIG_DEFAULT = (
+  token: string,
   git: string,
   dir: string | undefined,
 ): AgentJSONConfigFile => {
@@ -57,7 +59,7 @@ export const MAKESCRIPT_DEFAULT_AGENT_CONFIG_DEFAULT = (
     name: 'default',
 
     server: {
-      url: 'http://localhost:8900',
+      url: `http://localhost:8900/${token}`,
     },
 
     scripts: {
@@ -115,7 +117,11 @@ export default class extends Command {
 
         writeConfig(
           MAKESCRIPT_DEFAULT_AGENT_CONFIG_FILE_PATH,
-          MAKESCRIPT_DEFAULT_AGENT_CONFIG_DEFAULT(repoURL, subPath),
+          MAKESCRIPT_DEFAULT_AGENT_CONFIG_DEFAULT(
+            MAKESCRIPT_CONFIG_DEFAULT.agent.token,
+            repoURL,
+            subPath,
+          ),
         );
       }
 
@@ -142,20 +148,24 @@ export default class extends Command {
         makescriptConfig,
       );
 
-      await main(
-        tiva,
-        {
-          ...makescriptConfig,
+      await main({
+        ...makescriptConfig,
+        workspace: WORKSPACE_PATH,
+      });
+
+      if (defaultAgentConfig) {
+        logger.info('Checking config file of default agent ...');
+        await tiva.validate(
+          {module: '@makeflow/makescript-agent', type: 'JSONConfigFile'},
+          defaultAgentConfig,
+        );
+
+        await agentMain(tiva, {
+          ...defaultAgentConfig,
+          agentModule: '@makeflow/makescript-agent',
           workspace: WORKSPACE_PATH,
-        },
-        defaultAgentConfig
-          ? {
-              ...defaultAgentConfig,
-              agentModule: '@makeflow/makescript-agent',
-              workspace: WORKSPACE_PATH,
-            }
-          : undefined,
-      );
+        });
+      }
     } catch (error) {
       if (error.diagnostics) {
         logger.error(

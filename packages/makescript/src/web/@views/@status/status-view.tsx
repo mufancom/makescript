@@ -87,7 +87,7 @@ export class StatusView extends Component<StatusProps> {
               <Item>
                 <Tooltip title="点击复制到剪切板">
                   <JoinLink id={JOIN_COMMAND_ID}>
-                    makescript-agent --join-link {status.joinLink}
+                    makescript-agent --server-url {status.joinLink}
                   </JoinLink>
                 </Tooltip>
               </Item>

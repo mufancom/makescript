@@ -191,11 +191,7 @@ export class ScriptService {
 
     logger.info('Checking scripts definition file ...');
 
-    let {default: scriptsDefinitionContent} = await import(
-      existingScriptsDefinitionPath
-    );
-
-    let parsedDefinition = JSON.parse(scriptsDefinitionContent);
+    let {default: definition} = await import(existingScriptsDefinitionPath);
 
     try {
       await this.tiva.validate(
@@ -203,7 +199,7 @@ export class ScriptService {
           module: this.config.agentModule ?? AGENT_MODULE_DEFAULT,
           type: 'ScriptsDefinition',
         },
-        parsedDefinition,
+        definition,
       );
     } catch (error) {
       if (error.diagnostics) {
@@ -219,7 +215,7 @@ export class ScriptService {
 
     logger.info('The scripts definition file is correct');
 
-    return parsedDefinition;
+    return definition;
   }
 }
 

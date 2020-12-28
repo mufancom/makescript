@@ -132,7 +132,7 @@ export default class extends Command {
         promptObjects.push({
           type: 'text' as const,
           name: 'serverURL',
-          message: 'Please enter MakeScript server URL with token.',
+          message: 'Please enter MakeScript server URL with token',
           validate: value => /^https?:\/\/.+$/.test(value),
         });
       }
