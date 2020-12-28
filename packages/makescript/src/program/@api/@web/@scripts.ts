@@ -18,7 +18,7 @@ export function routeScripts(
       let scriptDefinitionsMap = await agentService.getScriptDefinitionsMap();
 
       return {
-        url: config.http.url,
+        url: config.url,
         joinLink: agentService.joinLink,
         registeredAgents: Array.from(scriptDefinitionsMap).map(
           ([namespace, definitions]) => {
@@ -68,7 +68,7 @@ export function routeScripts(
       let scriptDefinitionsMap = await agentService.getScriptDefinitionsMap();
 
       return {
-        url: config.http.url,
+        url: config.url,
         definitionsDict: Object.fromEntries(scriptDefinitionsMap.entries()),
       };
     },

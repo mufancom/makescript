@@ -14,7 +14,7 @@ import {Socket} from 'socket.io';
 import {v4 as uuidv4} from 'uuid';
 import * as villa from 'villa';
 
-import {calculateHash} from '../@utils';
+import {RESOURCES_RELATIVE_PATH, calculateHash} from '../@utils';
 import {Config} from '../config';
 
 import {AgentService} from './agent-service';
@@ -119,7 +119,7 @@ class RPC implements MakescriptRPC {
     await villa.async(FS.writeFile)(temporaryPath, buffer);
 
     await extractZip(temporaryPath, {
-      dir: Path.join(this.config.resourcesPath, id),
+      dir: Path.join(this.config.workspace, RESOURCES_RELATIVE_PATH, id),
     });
 
     // TODO: It will throw an error and failed to extract zip file in previous step.

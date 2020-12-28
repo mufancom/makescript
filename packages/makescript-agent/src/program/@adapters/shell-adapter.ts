@@ -6,10 +6,25 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
-  ShellScriptDefinition,
 } from '../types';
 
-export class ShellAdapter implements IAdapter<ShellScriptDefinition> {
+declare global {
+  namespace MakeScript {
+    namespace Adapter {
+      interface AdapterOptionsDict {
+        shell: {
+          command: string;
+        };
+      }
+    }
+  }
+}
+
+export class ShellAdapter
+  implements
+    IAdapter<
+      Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'shell'}>
+    > {
   type = 'shell' as const;
 
   async runScript({
@@ -21,9 +36,9 @@ export class ShellAdapter implements IAdapter<ShellScriptDefinition> {
     resourcesBaseURL: resourceBaseURL,
     onOutput,
     onError,
-  }: AdapterRunScriptArgument<ShellScriptDefinition>): Promise<
-    AdapterRunScriptResult
-  > {
+  }: AdapterRunScriptArgument<
+    Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'shell'}>
+  >): Promise<AdapterRunScriptResult> {
     try {
       let cp = CP.exec(definition.command, {
         cwd,
@@ -45,9 +60,9 @@ export class ShellAdapter implements IAdapter<ShellScriptDefinition> {
 
       await villa.awaitable(cp);
 
-      return {result: 'done', message: ''};
+      return {ok: true, message: ''};
     } catch (error) {
-      return {result: 'unknown-error', message: error.message ?? String(error)};
+      return {ok: false, message: error.message ?? String(error)};
     }
   }
 }

@@ -1,8 +1,7 @@
+import {ScriptDefinitionHooks} from '../@adapters';
+
 import {ScriptRunningArgumentParameters, ScriptRunningResult} from './running';
-import {
-  BriefScriptDefinition,
-  ScriptDefinitionHooks,
-} from './script-definition';
+import {BriefScriptDefinition} from './script-definition';
 
 export interface IRPC {}
 

@@ -1,8 +1,5 @@
 import {CaretRightFilled} from '@ant-design/icons';
-import {
-  BriefScriptDefinition,
-  ScriptDefinitionDetailedParameter,
-} from '@makeflow/makescript-agent';
+import {BriefScriptDefinition} from '@makeflow/makescript-agent';
 import {Input, Modal, Table, Tooltip, message} from 'antd';
 import ClipboardJS from 'clipboard';
 import {computed} from 'mobx';
@@ -90,14 +87,14 @@ export class ScriptDefinitionViewer extends Component<
         <Label>脚本参数</Label>
         <Table
           pagination={false}
-          dataSource={parameters.map(item => {
-            let name = typeof item === 'string' ? item : item.name;
-
+          dataSource={Object.entries(parameters).map(([name, definition]) => {
             return {
               key: name,
               name,
               definition: (
-                <pre>{JSON.stringify(item, undefined, JSON_INDENTATION)}</pre>
+                <pre>
+                  {JSON.stringify(definition, undefined, JSON_INDENTATION)}
+                </pre>
               ),
             };
           })}
@@ -188,11 +185,12 @@ export class ScriptDefinitionViewer extends Component<
         },
       });
     } else {
-      let requiredParameterNames = scriptDefinition.parameters
+      let requiredParameterNames = Object.entries(scriptDefinition.parameters)
         .filter(
-          parameter => typeof parameter !== 'string' && parameter.required,
+          ([, definition]) =>
+            typeof definition === 'object' && definition.required,
         )
-        .map(paramter => (paramter as ScriptDefinitionDetailedParameter).name);
+        .map(([name]) => name);
       let parameterResult: Dict<string> = {};
       let password: string | undefined;
 
@@ -201,28 +199,32 @@ export class ScriptDefinitionViewer extends Component<
         content: (
           <ParametersTable>
             <tbody>
-              {scriptDefinition.parameters.map(parameter => {
-                let parameterName =
-                  typeof parameter === 'string' ? parameter : parameter.name;
+              {Object.entries(scriptDefinition.parameters).map(
+                ([name, definition]) => {
+                  let displayName =
+                    typeof definition === 'object'
+                      ? definition.displayName ?? name
+                      : name;
 
-                return (
-                  <tr key={parameterName}>
-                    <td>
-                      {parameterName}
-                      {requiredParameterNames.includes(parameterName) ? (
-                        <RequiredTip>*</RequiredTip>
-                      ) : undefined}
-                    </td>
-                    <td>
-                      <Input
-                        onChange={({currentTarget: {value}}) => {
-                          parameterResult[parameterName] = value;
-                        }}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={name}>
+                      <td>
+                        {displayName}
+                        {requiredParameterNames.includes(name) ? (
+                          <RequiredTip>*</RequiredTip>
+                        ) : undefined}
+                      </td>
+                      <td>
+                        <Input
+                          onChange={({currentTarget: {value}}) => {
+                            parameterResult[name] = value;
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  );
+                },
+              )}
               {scriptDefinition.needsPassword ? (
                 <tr>
                   <td>

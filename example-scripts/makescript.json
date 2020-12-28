@@ -5,7 +5,7 @@
       "name": "echo-message",
       "type": "node",
       "module": "echo-message.js",
-      "parameters": ["message"],
+      "parameters": {"message": true},
       "manual": false
     }
   ]

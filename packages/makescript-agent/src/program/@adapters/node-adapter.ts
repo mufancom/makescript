@@ -6,10 +6,25 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
-  NodeScriptDefinition,
 } from '../types';
 
-export class NodeAdapter implements IAdapter<NodeScriptDefinition> {
+declare global {
+  namespace MakeScript {
+    namespace Adapter {
+      interface AdapterOptionsDict {
+        node: {
+          module: string;
+        };
+      }
+    }
+  }
+}
+
+export class NodeAdapter
+  implements
+    IAdapter<
+      Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'node'}>
+    > {
   type = 'node' as const;
 
   async runScript({
@@ -21,9 +36,9 @@ export class NodeAdapter implements IAdapter<NodeScriptDefinition> {
     resourcesBaseURL: resourceBaseURL,
     onOutput,
     onError,
-  }: AdapterRunScriptArgument<NodeScriptDefinition>): Promise<
-    AdapterRunScriptResult
-  > {
+  }: AdapterRunScriptArgument<
+    Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'node'}>
+  >): Promise<AdapterRunScriptResult> {
     try {
       let cp = CP.spawn(`node`, [definition.module], {
         cwd,
@@ -45,9 +60,9 @@ export class NodeAdapter implements IAdapter<NodeScriptDefinition> {
 
       await villa.awaitable(cp);
 
-      return {result: 'done', message: ''};
+      return {ok: true, message: ''};
     } catch (error) {
-      return {result: 'unknown-error', message: error.message ?? String(error)};
+      return {ok: false, message: error.message ?? String(error)};
     }
   }
 }

@@ -14,7 +14,7 @@ export class AgentService {
   registeredRPCMap = new Map<string, MakescriptAgentRPC>();
 
   get joinLink(): string {
-    return `${this.config.http.url}/join/${this.config.joinToken}`;
+    return getConnectURL(this.config);
   }
 
   constructor(private config: Config) {}
@@ -88,4 +88,8 @@ export class AgentService {
 
     return result;
   }
+}
+
+export function getConnectURL(config: Config): string {
+  return `${config.url}/${config.agent.token}`;
 }

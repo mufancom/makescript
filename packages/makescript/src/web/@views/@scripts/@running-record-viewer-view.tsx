@@ -1,5 +1,4 @@
 import {CaretRightFilled, RedoOutlined} from '@ant-design/icons';
-import {AdapterRunScriptResult} from '@makeflow/makescript-agent';
 import {Input, Modal, Tooltip, message} from 'antd';
 import {RouteComponentProps} from 'boring-router-react';
 import {computed, observable} from 'mobx';
@@ -20,17 +19,8 @@ const TOOLTIP_MOUSE_ENTER_DELAY = 0.5;
 const OUTPUT_CLEAR_CHARACTER = '\x1Bc';
 const SHOWABLE_CLEAR_CHARACTER = '\n\n-- clear --\n\n';
 
-const RESULT_DISPLAY_NAME_DICT: {
-  [TKey in AdapterRunScriptResult['result']]: {
-    color: string;
-    displayName: string;
-  };
-} = {
-  done: {color: 'green', displayName: '执行成功'},
-  'options-error': {color: 'red', displayName: '脚本配置错误错误'},
-  'parameters-error': {color: 'red', displayName: '脚本参数错误'},
-  'unknown-error': {color: 'red', displayName: '未知错误'},
-};
+const SUCCESS_MESSAGE = '执行成功';
+const FAILED_MESSAGE = '未知错误';
 
 type RecordIdMatch = Router['scripts']['records']['recordId'];
 
@@ -117,14 +107,19 @@ export class RunningRecordViewerView extends Component<
       return;
     }
 
-    let resultInfo = RESULT_DISPLAY_NAME_DICT[record.result.result];
+    let message: string;
+
+    if (record.result.ok) {
+      message = record.result.message || SUCCESS_MESSAGE;
+    } else {
+      message = record.result.message || FAILED_MESSAGE;
+    }
 
     return (
       <>
         <Label>执行结果</Label>
-        <Item style={{color: resultInfo.color}}>
-          {resultInfo.displayName}
-          {record.result.message ? `: ${record.result.message}` : undefined}
+        <Item style={{color: record.result.ok ? 'green' : 'red'}}>
+          {message}
         </Item>
       </>
     );

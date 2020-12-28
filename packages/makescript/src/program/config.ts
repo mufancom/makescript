@@ -3,30 +3,23 @@ export interface Config extends JSONConfigFile {
 }
 
 export interface JSONConfigFile {
-  http: {
+  url: string;
+
+  listen: {
     host: string;
     port: number;
-    url: string;
   };
 
-  joinToken: string;
+  agent: {
+    token: string;
+  };
 
   makeflow: {
-    baseURL: string;
+    url: string;
     powerApp: {
       name: string;
       displayName: string;
       description: string;
     };
   };
-
-  defaultAgent:
-    | {
-        scriptsRepoURL: string;
-        // TODO: use `| undefined`
-        scriptsSubPath?: string;
-      }
-    | undefined;
-
-  resourcesPath: string;
 }

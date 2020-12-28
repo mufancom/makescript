@@ -13,5 +13,5 @@ export async function serveAPI(
   await serveExternalAPI(server, entrances);
   await serveWeb(server, entrances);
 
-  logger.info(`MakeScript is running on port ${entrances.config.http.port}`);
+  logger.info(`MakeScript is running on port ${entrances.config.listen.port}`);
 }

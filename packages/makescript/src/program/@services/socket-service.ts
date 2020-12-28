@@ -6,7 +6,7 @@ import {Config} from '../config';
 
 export class SocketService {
   readonly server = new SocketIO.Server(this.httpServer, {
-    path: `/join/${this.config.joinToken}`,
+    path: `/${this.config.agent.token}`,
   });
 
   constructor(private httpServer: Server, private config: Config) {}

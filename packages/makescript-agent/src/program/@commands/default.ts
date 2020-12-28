@@ -12,62 +12,37 @@ import {logger} from '../shared';
 
 const JSON_CONFIG_INDENTATION = 2;
 
-const WORKSPACE_PATH_DEFAULT = Path.resolve(
-  OS.homedir(),
-  '.config',
-  'makescript',
-  'agent',
-);
-const GENERATE_CONFIG_DEFAULT = false;
+const DIR_DEFAULT = Path.resolve(OS.homedir(), '.makescript', 'agent');
 
-const CONFIG_FILE_NAME = 'agent.json';
+const CONFIG_FILE_NAME = 'makescript-agent.json';
 
 export class CLIOptions extends Options {
   @option({
-    flag: 'g',
-    description: 'Whether only to generate makescript agent config file.',
-    toggle: true,
-    default: GENERATE_CONFIG_DEFAULT,
+    flag: 's',
+    description: 'MakeScript server URL with token.',
+    type: String,
   })
-  generateConfigOnly!: boolean;
+  serverURL: string | undefined;
 
   @option({
-    flag: 'l',
-    description: 'The makescript host join link.',
-    // TODO: It will throw an error if this is not pass
-    type: Castable.CommaSeparatedStrings,
+    flag: 'd',
+    description:
+      'Directory containing MakeScript node config file and contents.',
+    default: DIR_DEFAULT,
   })
-  joinLink: Castable.CommaSeparatedStrings | undefined;
-
-  @option({
-    flag: 'w',
-    description: 'The path for makescript agent to work.',
-    default: WORKSPACE_PATH_DEFAULT,
-  })
-  workspace!: Castable.Directory;
+  dir!: Castable.Directory;
 }
 
 @command()
 export default class extends Command {
   @metadata
-  async execute({
-    generateConfigOnly,
-    workspace,
-    joinLink: [joinLink] = [],
-  }: CLIOptions): Promise<void> {
-    let configFilePath = Path.join(workspace.fullName, CONFIG_FILE_NAME);
+  async execute({dir, serverURL}: CLIOptions): Promise<void> {
+    let configFilePath = Path.join(dir.fullName, CONFIG_FILE_NAME);
 
     let configFileExists = FS.existsSync(configFilePath);
 
-    if (configFileExists && generateConfigOnly) {
-      console.warn(
-        `The config file "${configFilePath}" has existed, so the new config has not generated.`,
-      );
-      return;
-    }
-
     if (!configFileExists) {
-      let dirname = workspace.fullName;
+      let dirname = dir.fullName;
 
       if (!FS.existsSync(dirname)) {
         FS.mkdirSync(dirname, {recursive: true});
@@ -76,14 +51,14 @@ export default class extends Command {
       let answer = await initialQuestions();
 
       let jsonConfig: JSONConfigFile = {
-        makescript: {
-          joinLink: answer.joinLink,
-          namespace: answer.namespace,
+        name: answer.name,
+        server: {
+          url: answer.serverURL,
         },
         scripts: {
-          repoURL: answer.repoURL,
+          git: answer.repoURL,
           // if subPath is "", pass undefined instead.
-          path: answer.subPath || undefined,
+          dir: answer.subPath || undefined,
         },
         proxy: undefined,
       };
@@ -91,14 +66,10 @@ export default class extends Command {
       writeConfig(jsonConfig);
     }
 
-    if (generateConfigOnly) {
-      return;
-    }
-
     let jsonConfig = readConfig();
 
-    if (joinLink && jsonConfig.makescript.joinLink !== joinLink) {
-      jsonConfig.makescript.joinLink = joinLink;
+    if (serverURL && jsonConfig.server.url !== serverURL) {
+      jsonConfig.server.url = serverURL;
 
       writeConfig(jsonConfig);
     }
@@ -120,7 +91,7 @@ export default class extends Command {
 
       await main(tiva, {
         ...jsonConfig,
-        workspace: workspace.fullName,
+        workspace: dir.fullName,
         agentModule: undefined,
       });
     } catch (error) {
@@ -128,11 +99,9 @@ export default class extends Command {
         logger.error(
           `Config file structure does not match:\n${error.diagnostics}`,
         );
-      } else {
-        logger.error(`Unknown error occurred:\n${error.message}`);
       }
 
-      process.exit(1);
+      throw error;
     }
 
     function writeConfig(config: JSONConfigFile): void {
@@ -152,18 +121,18 @@ export default class extends Command {
     }
 
     async function initialQuestions(): Promise<{
-      joinLink: string;
-      namespace: string;
+      serverURL: string;
+      name: string;
       repoURL: string;
       subPath: string | undefined;
     }> {
       let promptObjects: PromptObject[] = [];
 
-      if (!joinLink) {
+      if (!serverURL) {
         promptObjects.push({
           type: 'text' as const,
-          name: 'joinLink',
-          message: 'Please enter the makescript host join link',
+          name: 'serverURL',
+          message: 'Please enter MakeScript server URL with token.',
           validate: value => /^https?:\/\/.+$/.test(value),
         });
       }
@@ -172,8 +141,8 @@ export default class extends Command {
         ...([
           {
             type: 'text',
-            name: 'namespace',
-            message: 'What namespace do you want to register as',
+            name: 'name',
+            message: 'What name do you want to register as',
           },
           {
             type: 'text',
@@ -196,16 +165,16 @@ export default class extends Command {
       // When user press CTRL + C , program will continue to execute with empty answers.
       // https://github.com/terkelg/prompts/issues/252
       if (
-        (!joinLink && !answer.joinLink) ||
-        !answer.namespace ||
+        (!serverURL && !answer.serverURL) ||
+        !answer.name ||
         !answer.repoURL
       ) {
         process.exit(0);
       }
 
       return {
-        joinLink: joinLink ?? answer.joinLink,
-        namespace: answer.namespace,
+        serverURL: serverURL ?? answer.serverURL,
+        name: answer.name,
         repoURL: answer.repoURL,
         subPath: answer.subPath ?? undefined,
       };

@@ -11,12 +11,18 @@ const INDEX_FILE_NAME = 'index.html';
 
 const RESOURCES_CONFIG_FILE_NAME = 'config.json';
 
+export const RESOURCES_RELATIVE_PATH = 'outputs';
+
 export async function getResourcePath(
   id: string,
   path: string,
   config: Config,
 ): Promise<string> {
-  let resourceBasePath = Path.join(config.resourcesPath, id);
+  let resourceBasePath = Path.join(
+    config.workspace,
+    RESOURCES_RELATIVE_PATH,
+    id,
+  );
   let resourceConfigPath = Path.join(
     resourceBasePath,
     RESOURCES_CONFIG_FILE_NAME,

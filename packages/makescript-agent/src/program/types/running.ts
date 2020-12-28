@@ -1,6 +1,6 @@
 import {Dict} from 'tslang';
 
-import {AdapterRunScriptResult} from './adapter';
+import {AdapterRunScriptResult} from '../@adapters/adapter';
 
 export interface ScriptRunningArgument {
   id: string;
@@ -14,7 +14,6 @@ export type ScriptRunningArgumentParameters = Dict<unknown>;
 
 export interface ScriptRunningResult {
   name: string;
-  displayName: string;
   parameters: ScriptRunningArgumentParameters;
   deniedParameters: ScriptRunningArgumentParameters;
   result: AdapterRunScriptResult;

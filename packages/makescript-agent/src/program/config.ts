@@ -11,19 +11,17 @@ export interface Config extends JSONConfigFile {
 }
 
 export interface JSONConfigFile {
-  makescript: {
-    joinLink: string;
-    namespace: string;
+  name: string;
+
+  server: {
+    url: string;
   };
+
   scripts: {
-    repoURL: string;
+    git: string;
     // TODO: use `| undefined`
-    path?: string;
+    dir?: string;
   };
   // TODO: use `| undefined`
-  proxy?: {
-    url: string;
-    username: string;
-    password: string;
-  };
+  proxy?: string | undefined;
 }

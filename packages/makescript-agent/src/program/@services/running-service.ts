@@ -15,7 +15,6 @@ import {logger} from '../shared';
 import {
   AdapterRunScriptArgument,
   IAdapter,
-  ScriptDefinition,
   ScriptDefinitionHooks,
   ScriptRunningArgument,
   ScriptRunningResult,
@@ -29,7 +28,10 @@ const MAKESCRIPT_TMPDIR = Path.join(OS.tmpdir(), 'makescript-temp');
 const OUTPUT_FLUSH_INTERVAL_TIME = 1000;
 
 export class RunningService {
-  private adapterMap = new Map<string, IAdapter<ScriptDefinition>>();
+  private adapterMap = new Map<
+    string,
+    IAdapter<MakeScript.Adapter.AdapterScriptDefinition>
+  >();
 
   constructor(
     private scriptService: ScriptService,
@@ -73,7 +75,6 @@ export class RunningService {
     await this.validatePassword(definition, argument);
 
     let adapter = this.requireAdapter(definition);
-    let options = this.resolveOptions(definition);
     let resourcesPath = this.generateRandomResourcesPath();
 
     let [allowedParameters, deniedParameters] = validateParameters(
@@ -93,7 +94,6 @@ export class RunningService {
       env: this.scriptService.getEnvByScriptName(name),
       definition,
       parameters: allowedParameters,
-      options,
       resourcesPath,
       resourcesBaseURL,
       onOutput,
@@ -111,7 +111,6 @@ export class RunningService {
 
     return {
       name,
-      displayName: definition.displayName,
       parameters,
       deniedParameters,
       result,
@@ -126,7 +125,9 @@ export class RunningService {
     this.adapterMap.set(type, adapter);
   }
 
-  private requireScriptDefinition(name: string): ScriptDefinition {
+  private requireScriptDefinition(
+    name: string,
+  ): MakeScript.Adapter.AdapterScriptDefinition {
     let scriptDefinition = this.scriptService.getDefaultValueFilledScriptDefinitionByName(
       name,
     );
@@ -139,14 +140,14 @@ export class RunningService {
   }
 
   private async validatePassword(
-    scriptDefinition: ScriptDefinition,
+    scriptDefinition: MakeScript.Adapter.AdapterScriptDefinition,
     {password}: ScriptRunningArgument,
   ): Promise<void> {
-    if (!scriptDefinition.passwordHash) {
+    if (!scriptDefinition.password) {
       return;
     }
 
-    let result = await Bcrypt.compare(password, scriptDefinition.passwordHash);
+    let result = await Bcrypt.compare(password, scriptDefinition.password);
 
     if (!result) {
       throw new Error(
@@ -155,9 +156,9 @@ export class RunningService {
     }
   }
 
-  private requireAdapter<TDefinition extends ScriptDefinition>(
-    scriptDefinition: TDefinition,
-  ): IAdapter<TDefinition> {
+  private requireAdapter<
+    TDefinition extends MakeScript.Adapter.AdapterScriptDefinition
+  >(scriptDefinition: TDefinition): IAdapter<TDefinition> {
     let adapter = this.adapterMap.get(scriptDefinition.type);
 
     if (!adapter) {
@@ -168,32 +169,6 @@ export class RunningService {
     }
 
     return adapter as IAdapter<TDefinition>;
-  }
-
-  private resolveOptions(scriptDefinition: ScriptDefinition): Dict<unknown> {
-    if (!scriptDefinition.options) {
-      return {};
-    }
-
-    return Object.fromEntries(
-      Object.entries(scriptDefinition.options).map(([name, value]) => {
-        if (value.type === 'value') {
-          return [name, value.value];
-        } else if (value.type === 'env') {
-          let resolvedValue = process.env[value.env];
-
-          if (!resolvedValue && value.required) {
-            // TODO:
-            throw new Error();
-          }
-
-          return [name, resolvedValue];
-        }
-
-        // TODO:
-        throw new Error();
-      }),
-    );
   }
 
   private generateRandomResourcesPath(): string {
@@ -234,7 +209,9 @@ export class RunningService {
     argument: ScriptRunningArgument,
     error: boolean,
   ): {
-    onOutput: AdapterRunScriptArgument<ScriptDefinition>['onOutput'];
+    onOutput: AdapterRunScriptArgument<
+      MakeScript.Adapter.AdapterScriptDefinition
+    >['onOutput'];
     done(): Promise<string>;
   } {
     let output = '';
@@ -279,23 +256,21 @@ export class RunningService {
 
 function validateParameters(
   parameters: Dict<unknown>,
-  definition: ScriptDefinition,
+  definition: MakeScript.Adapter.AdapterScriptDefinition,
 ): [Dict<unknown>, Dict<unknown>] {
   if (!definition.parameters) {
     return [{}, {}];
   }
 
-  let {filteredParameters, missingParameters} = definition.parameters.reduce<{
+  let {filteredParameters, missingParameters} = Object.entries(
+    definition.parameters,
+  ).reduce<{
     filteredParameters: Dict<unknown>;
     missingParameters: string[];
   }>(
-    (reducer, parameterDefinition) => {
+    (reducer, [parameterName, parameterDefinition]) => {
       let {filteredParameters, missingParameters} = reducer;
 
-      let parameterName =
-        typeof parameterDefinition === 'object'
-          ? parameterDefinition.name
-          : parameterDefinition;
       let parameterRequired =
         typeof parameterDefinition === 'object'
           ? parameterDefinition.required

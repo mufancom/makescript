@@ -7,10 +7,25 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
-  ProcessScriptDefinition,
 } from '../types';
 
-export class ProcessAdapter implements IAdapter<ProcessScriptDefinition> {
+declare global {
+  namespace MakeScript {
+    namespace Adapter {
+      interface AdapterOptionsDict {
+        process: {
+          command: string;
+        };
+      }
+    }
+  }
+}
+
+export class ProcessAdapter
+  implements
+    IAdapter<
+      Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'process'}>
+    > {
   type = 'process' as const;
 
   async runScript({
@@ -22,9 +37,9 @@ export class ProcessAdapter implements IAdapter<ProcessScriptDefinition> {
     resourcesBaseURL: resourceBaseURL,
     onOutput,
     onError,
-  }: AdapterRunScriptArgument<ProcessScriptDefinition>): Promise<
-    AdapterRunScriptResult
-  > {
+  }: AdapterRunScriptArgument<
+    Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'process'}>
+  >): Promise<AdapterRunScriptResult> {
     const which = NPMWhich(cwd);
 
     try {
@@ -50,9 +65,9 @@ export class ProcessAdapter implements IAdapter<ProcessScriptDefinition> {
 
       await villa.awaitable(cp);
 
-      return {result: 'done', message: ''};
+      return {ok: true, message: ''};
     } catch (error) {
-      return {result: 'unknown-error', message: error.message ?? String(error)};
+      return {ok: false, message: error.message ?? String(error)};
     }
   }
 }

@@ -1,10 +1,6 @@
 import {EventEmitter} from 'events';
 
-import {
-  BriefScriptDefinition,
-  ScriptDefinitionParameter,
-  logger,
-} from '@makeflow/makescript-agent';
+import {BriefScriptDefinition, logger} from '@makeflow/makescript-agent';
 import type {
   PowerApp,
   PowerAppConfig,
@@ -171,7 +167,7 @@ export class MakeflowService {
     let scriptDefinitionsMap = await this.agentService.getScriptDefinitionsMap();
     let makeflowInfo = this.dbService.db.get('makeflow').value();
 
-    let hookBaseURL = `${this.config.http.url}/api/makeflow`;
+    let hookBaseURL = `${this.config.url}/api/makeflow`;
 
     let powerAppConfig = this.config.makeflow.powerApp;
 
@@ -220,17 +216,14 @@ export class MakeflowService {
       throw new ExpectedError('MAKEFLOW_LOGGING_IN_REQUIRED');
     }
 
-    let response = await fetch(
-      `${this.config.makeflow.baseURL}/api/v1${path}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-          ...(toAuth ? {'X-Access-Token': loginToken!} : undefined),
-        },
+    let response = await fetch(`${this.config.makeflow.url}/api/v1${path}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(toAuth ? {'X-Access-Token': loginToken!} : undefined),
       },
-    );
+    });
 
     let result = await response.json();
 
@@ -254,18 +247,14 @@ function convertCommandConfigsToPowerItemDefinitions(
   return Array.from(scriptDefinitionsMap)
     .map(([namespace, scriptDefinitions]): PowerItem.Definition[] => {
       return scriptDefinitions.map(
-        ({name, displayName = name, parameters = []}): PowerItem.Definition => {
+        ({name, displayName = name, parameters = {}}): PowerItem.Definition => {
           return {
             name: convertScriptNameToActionName(
               namespace,
               name,
             ) as PowerItem.Name,
             displayName: `[${namespace}] ${displayName}`,
-            fields: compact(
-              parameters.map(parameter =>
-                convertCommandConfigParameterToPowerItemField(parameter),
-              ),
-            ),
+            fields: convertCommandConfigParameterToPowerItemField(parameters),
             inputs: [
               {
                 name: TASK_NUMERIC_ID_INPUT_NAME,
@@ -299,9 +288,7 @@ function convertCommandConfigsToPowerItemDefinitions(
                   variable: TASK_URL_VARIABLE,
                 },
               },
-              ...parameters.map(parameter =>
-                convertCommandConfigParamaterToPowerItemActionInput(parameter),
-              ),
+              ...convertParamatersToPowerItemActionInputs(parameters),
             ],
             actions: [
               {
@@ -316,64 +303,66 @@ function convertCommandConfigsToPowerItemDefinitions(
     .flatMap(definitions => definitions);
 }
 
-function convertCommandConfigParamaterToPowerItemActionInput(
-  parameter: ScriptDefinitionParameter,
-): PowerAppInput.Definition {
-  let [name, displayName] = getNameAndDisplayNameOfParameter(parameter);
+function convertParamatersToPowerItemActionInputs(
+  parameter: MakeScript.Adapter.AdapterScriptDefinition['parameters'],
+): PowerAppInput.Definition[] {
+  if (!parameter) {
+    return [];
+  }
 
-  return {
-    displayName,
-    name: name as PowerAppInput.Name,
-    default: {
-      type: 'variable',
-      variable: name,
+  return Object.entries(parameter).map(
+    ([parameterName, parameterDefinition]) => {
+      return {
+        displayName:
+          typeof parameterDefinition === 'object' &&
+          parameterDefinition.displayName
+            ? parameterDefinition.displayName
+            : parameterName,
+        name: parameterName as PowerAppInput.Name,
+        default: {
+          type: 'variable',
+          variable: parameterName,
+        },
+      };
     },
-  };
+  );
 }
 
 function convertCommandConfigParameterToPowerItemField(
-  parameter: ScriptDefinitionParameter,
-): PowerItem.PowerItemFieldDefinition | undefined {
-  let type: ProcedureField.BuiltInProcedureFieldType;
-  let data: unknown;
-
-  if (typeof parameter !== 'object' || !parameter.field) {
-    return;
+  parameters: MakeScript.Adapter.AdapterScriptDefinition['parameters'],
+): PowerItem.PowerItemFieldDefinition[] | undefined {
+  if (!parameters) {
+    return undefined;
   }
 
-  if (typeof parameter.field === 'object') {
-    type = parameter.field.type;
-    data = parameter.field.data;
-  } else {
-    type = parameter.field;
-  }
+  return compact(
+    Object.entries(parameters).map(([parameterName, parameterDefinition]) => {
+      let type: ProcedureField.BuiltInProcedureFieldType;
+      let data: unknown;
 
-  let [name, displayName] = getNameAndDisplayNameOfParameter(parameter);
+      if (
+        typeof parameterDefinition !== 'object' ||
+        !parameterDefinition.field
+      ) {
+        return undefined;
+      }
 
-  return {
-    id: name as PowerItem.PowerItemFieldId,
-    type,
-    output: name,
-    displayName,
-    data,
-  };
-}
+      if (typeof parameterDefinition.field === 'object') {
+        type = parameterDefinition.field.type;
+        data = parameterDefinition.field.data;
+      } else {
+        type = parameterDefinition.field;
+      }
 
-function getNameAndDisplayNameOfParameter(
-  parameter: ScriptDefinitionParameter,
-): [string, string] {
-  let name: string;
-  let displayName: string;
-
-  if (typeof parameter === 'string') {
-    name = parameter;
-    displayName = parameter;
-  } else {
-    name = parameter.name;
-    displayName = parameter.displayName ?? name;
-  }
-
-  return [name, displayName];
+      return {
+        id: parameterName as PowerItem.PowerItemFieldId,
+        type,
+        output: parameterName,
+        displayName: parameterDefinition.displayName ?? parameterName,
+        data,
+      };
+    }),
+  );
 }
 
 function compact<T>(list: (T | undefined)[]): T[] {

@@ -9,14 +9,11 @@ import * as villa from 'villa';
 
 import {Config} from '../config';
 import {logger} from '../shared';
-import {
-  BriefScriptDefinition,
-  ScriptDefinition,
-  ScriptsDefinition,
-} from '../types';
+import {BriefScriptDefinition, ScriptsDefinition} from '../types';
 
 const SCRIPTS_DIRECTORY_NAME = 'scripts';
 const SCRIPTS_CONFIG_FILE_NAME_JSON = 'makescript.json';
+const SCRIPTS_CONFIG_FILE_NAME_JS = 'makescript.js';
 
 const AGENT_MODULE_DEFAULT = './types';
 
@@ -31,15 +28,11 @@ export class ScriptService {
 
   get scriptsPath(): string {
     let scriptsBasePath = this.scriptsBasePath;
-    let scriptsSubPath = this.config.scripts.path;
+    let scriptsSubPath = this.config.scripts.dir;
 
     return scriptsSubPath
       ? Path.join(scriptsBasePath, scriptsSubPath)
       : scriptsBasePath;
-  }
-
-  private get scriptsDefinitionPath(): string {
-    return Path.join(this.scriptsPath, SCRIPTS_CONFIG_FILE_NAME_JSON);
   }
 
   get briefScriptDefinitions(): BriefScriptDefinition[] {
@@ -77,7 +70,7 @@ export class ScriptService {
 
         await villa.awaitable(cp);
 
-        if (remoteURL.trim() !== this.config.scripts.repoURL.trim()) {
+        if (remoteURL.trim() !== this.config.scripts.git.trim()) {
           logger.info(
             'Scripts repo url changed, start to sync from the new url',
           );
@@ -87,7 +80,7 @@ export class ScriptService {
           await villa.awaitable(
             CP.spawn('git', [
               'clone',
-              this.config.scripts.repoURL,
+              this.config.scripts.git,
               this.scriptsBasePath,
             ]),
           );
@@ -102,7 +95,7 @@ export class ScriptService {
         await villa.awaitable(
           CP.spawn('git', [
             'clone',
-            this.config.scripts.repoURL,
+            this.config.scripts.git,
             this.scriptsBasePath,
           ]),
         );
@@ -136,7 +129,7 @@ export class ScriptService {
 
   getDefaultValueFilledScriptDefinitionByName(
     name: string,
-  ): ScriptDefinition | undefined {
+  ): MakeScript.Adapter.AdapterScriptDefinition | undefined {
     let scriptsDefinition = this.scriptsDefinition;
 
     if (!scriptsDefinition) {
@@ -157,7 +150,7 @@ export class ScriptService {
   getEnvByScriptName(scriptName: string): Dict<string> {
     return {
       SCRIPT_NAME: scriptName,
-      NAMESPACE: this.config.makescript.namespace,
+      NAMESPACE: this.config.name,
     };
   }
 
@@ -166,23 +159,41 @@ export class ScriptService {
   }
 
   private async parseScriptsDefinition(): Promise<ScriptsDefinition> {
+    let scriptsPath = this.scriptsPath;
+
     if (!FS.existsSync(this.scriptsBasePath)) {
       throw new Error(`Scripts repo not cloned`);
     }
 
-    if (!FS.existsSync(this.scriptsDefinitionPath)) {
+    let jsonScriptsDefinitionPath = Path.join(
+      scriptsPath,
+      SCRIPTS_CONFIG_FILE_NAME_JSON,
+    );
+    let jsScriptsDefinitionPath = Path.join(
+      scriptsPath,
+      SCRIPTS_CONFIG_FILE_NAME_JS,
+    );
+
+    let existingScriptsDefinitionPath: string | undefined;
+
+    if (FS.existsSync(jsScriptsDefinitionPath)) {
+      existingScriptsDefinitionPath = jsScriptsDefinitionPath;
+    } else if (FS.existsSync(jsonScriptsDefinitionPath)) {
+      existingScriptsDefinitionPath = jsonScriptsDefinitionPath;
+    }
+
+    if (!existingScriptsDefinitionPath) {
       throw new Error(
         'Scripts definition not found: \n' +
-          `please ensure the definition file "${SCRIPTS_CONFIG_FILE_NAME_JSON}" is existing in scripts repo.`,
+          `please ensure the definition file "${SCRIPTS_CONFIG_FILE_NAME_JSON}" or "${SCRIPTS_CONFIG_FILE_NAME_JS}" is existing in scripts repo.`,
       );
     }
 
     logger.info('Checking scripts definition file ...');
 
-    let scriptsDefinitionBuffer = await villa.async(FS.readFile)(
-      this.scriptsDefinitionPath,
+    let {default: scriptsDefinitionContent} = await import(
+      existingScriptsDefinitionPath
     );
-    let scriptsDefinitionContent = scriptsDefinitionBuffer.toString();
 
     let parsedDefinition = JSON.parse(scriptsDefinitionContent);
 
@@ -197,7 +208,7 @@ export class ScriptService {
     } catch (error) {
       if (error.diagnostics) {
         logger.error(
-          `The structure of the scripts definition file "${this.scriptsDefinitionPath}" not matched: \n` +
+          `The structure of the scripts definition file not matched: \n` +
             `    ${error.diagnostics}`,
         );
         process.exit(1);
@@ -213,12 +224,12 @@ export class ScriptService {
 }
 
 function fillScriptDefinitionDefaultValue(
-  definition: ScriptDefinition,
+  definition: MakeScript.Adapter.AdapterScriptDefinition,
   scriptsDefinition: ScriptsDefinition,
-): ScriptDefinition {
+): MakeScript.Adapter.AdapterScriptDefinition {
   return {
     ...definition,
-    passwordHash: definition.passwordHash ?? scriptsDefinition.passwordHash,
+    password: definition.password ?? scriptsDefinition.password,
     manual: definition.manual === true,
     hooks: {
       ...scriptsDefinition.hooks,
@@ -228,15 +239,15 @@ function fillScriptDefinitionDefaultValue(
 }
 
 function convertScriptDefinitionToBriefScriptDefinition(
-  definition: ScriptDefinition,
+  definition: MakeScript.Adapter.AdapterScriptDefinition,
 ): BriefScriptDefinition {
   return {
-    displayName: definition.displayName,
+    displayName: definition.displayName ?? definition.name,
     name: definition.name,
     type: definition.type,
     manual: definition.manual === true,
-    parameters: definition.parameters ?? [],
-    needsPassword: !!definition.passwordHash,
+    parameters: definition.parameters ?? {},
+    needsPassword: !!definition.password,
     hooks: {
       postscript: !!definition.hooks?.postscript,
     },

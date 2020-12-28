@@ -8,39 +8,56 @@ import {
   AdapterRunScriptArgument,
   AdapterRunScriptResult,
   IAdapter,
-  SQLITEScriptDefinition,
 } from '../types';
 
-export interface SqliteAdapterOptions {
-  path: string;
+declare global {
+  namespace MakeScript {
+    namespace Adapter {
+      interface AdapterOptionsDict {
+        sqlite: {
+          file: string;
+          db:
+            | {
+                path: string;
+                password?: string;
+              }
+            | string;
+        };
+      }
+    }
+  }
 }
 
 export class SqliteAdapter
-  implements IAdapter<SQLITEScriptDefinition, SqliteAdapterOptions> {
+  implements
+    IAdapter<
+      Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'sqlite'}>
+    > {
   type = 'sqlite' as const;
 
   async runScript({
     cwd,
     definition,
     parameters,
-    options,
     resourcesPath: resourcePath,
     resourcesBaseURL: resourceBaseURL,
     onOutput,
   }: AdapterRunScriptArgument<
-    SQLITEScriptDefinition,
-    SqliteAdapterOptions
+    Extract<MakeScript.Adapter.AdapterScriptDefinition, {type: 'sqlite'}>
   >): Promise<AdapterRunScriptResult> {
     try {
-      if (!options || !options.path) {
+      let dbPath =
+        typeof definition.db === 'string' ? definition.db : definition.db.path;
+
+      if (!dbPath) {
         return {
-          result: 'options-error',
-          message: 'The "path" field is not found in options.',
+          ok: false,
+          message: 'The "db" field is not found in definition.',
         };
       }
 
       let db = await sqlite.open({
-        filename: options.path,
+        filename: dbPath,
         driver: sqlite3.Database,
       });
 
@@ -59,11 +76,11 @@ export class SqliteAdapter
       );
 
       return {
-        result: 'done',
+        ok: true,
         message: '',
       };
     } catch (error) {
-      return {result: 'unknown-error', message: error.message || String(error)};
+      return {ok: false, message: error.message || String(error)};
     }
   }
 }

@@ -28,7 +28,7 @@ export default class extends Command {
 
     let tiva = new Tiva();
 
-    let content = await path.json();
+    let {default: content} = await import(path.fullName);
 
     try {
       await tiva.validate(
@@ -41,7 +41,6 @@ export default class extends Command {
     } catch (error) {
       if (error.diagnostics) {
         logger.error(error.diagnostics);
-        process.exit(1);
       }
 
       throw error;
