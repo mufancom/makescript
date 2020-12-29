@@ -132,7 +132,7 @@ export default class extends Command {
         promptObjects.push({
           type: 'text' as const,
           name: 'serverURL',
-          message: 'Please enter MakeScript server URL with token',
+          message: 'Enter MakeScript server URL with token',
           validate: value => /^https?:\/\/.+$/.test(value),
         });
       }
@@ -142,19 +142,18 @@ export default class extends Command {
           {
             type: 'text',
             name: 'name',
-            message: 'What name do you want to register as',
+            message: 'Enter the name to register as',
           },
           {
             type: 'text',
             name: 'repoURL',
-            message: 'Please enter the git repo url of the scripts',
+            message: 'Enter the scripts repo url',
             validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
           },
           {
             type: 'text',
             name: 'subPath',
-            message:
-              'Please enter the path of the scripts definition in the repo',
+            message: 'Enter the scripts definition dir path',
           },
         ] as PromptObject[]),
       );

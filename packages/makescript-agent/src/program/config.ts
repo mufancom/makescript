@@ -11,17 +11,31 @@ export interface Config extends JSONConfigFile {
 }
 
 export interface JSONConfigFile {
+  /**
+   * MakeScript Agent 注册到 MakeScript 时的名称
+   */
   name: string;
 
   server: {
+    /**
+     * 包含 Token 信息的 MakeScript 地址，类似 https://example.com/token
+     */
     url: string;
   };
 
   scripts: {
+    /**
+     * 脚本仓库的地址
+     */
     git: string;
-    // TODO: use `| undefined`
+    /**
+     * 脚本定义文件所在目录
+     */
     dir?: string;
   };
-  // TODO: use `| undefined`
+
+  /**
+   * Agent 要使用的网络代理
+   */
   proxy?: string | undefined;
 }

@@ -19,12 +19,17 @@ export const JSON_CONFIG_INDENTATION = 2;
 
 export const WORKSPACE_PATH = Path.resolve(OS.homedir(), '.makescript');
 
+export const DEFAULT_AGENT_WORKSPACE_PATH = Path.join(
+  WORKSPACE_PATH,
+  'default-agent',
+);
+
 export const MAKESCRIPT_CONFIG_FILE_PATH = Path.join(
   WORKSPACE_PATH,
   'makescript.json',
 );
 export const MAKESCRIPT_DEFAULT_AGENT_CONFIG_FILE_PATH = Path.join(
-  WORKSPACE_PATH,
+  DEFAULT_AGENT_WORKSPACE_PATH,
   'makescript-agent.json',
 );
 
@@ -81,7 +86,7 @@ export default class extends Command {
       let {withDefaultAgent} = await prompts({
         type: 'confirm',
         name: 'withDefaultAgent',
-        message: 'Do you want run with a default agent?',
+        message: 'Run with a default agent?',
         initial: true,
       });
 
@@ -97,14 +102,13 @@ export default class extends Command {
           {
             type: 'text',
             name: 'repoURL',
-            message: 'Please enter the git url of the scripts repo',
+            message: 'Enter the scripts repo url',
             validate: value => /^(https?:\/\/.+)|(\w+\.git)$/.test(value),
           },
           {
             type: 'text',
             name: 'subPath',
-            message:
-              'Please enter the path of the scripts definition in the repo',
+            message: 'Enter the scripts definition dir path',
           },
         ]);
 
@@ -163,7 +167,7 @@ export default class extends Command {
         await agentMain(tiva, {
           ...defaultAgentConfig,
           agentModule: '@makeflow/makescript-agent',
-          workspace: WORKSPACE_PATH,
+          workspace: DEFAULT_AGENT_WORKSPACE_PATH,
         });
       }
     } catch (error) {

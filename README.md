@@ -10,7 +10,7 @@ MakeScript 是一个可以将脚本执行集成到 [Makeflow](https://www.makefl
 yarn global add @makeflow/makescript
 ```
 
-安装完成后在终端执行 `makescript` 命令。在第一个问题中输入 `Y`；在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车；在第三个问题中直接回车。
+安装完成后在终端执行 `makescript` 命令。在第一个问题中输入 `y`；在第二个问题中输入当前仓库的 git 地址 (`https://github.com/makeflow/makescript.git`) 后回车；在第三个问题中直接回车。
 
 ![get-started-makescript.png](images/get-started-makescript.png)
 
@@ -59,7 +59,7 @@ Authorization: Token the-token-created-before
   - [Agent 配置文件](#agent-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
 - [脚本仓库](#%E8%84%9A%E6%9C%AC%E4%BB%93%E5%BA%93)
   - [`hooks`](#hooks)
-  - [`passwordHash`](#passwordhash)
+  - [`password`](#password)
   - [`scripts`](#scripts)
     - [命令类型](#%E5%91%BD%E4%BB%A4%E7%B1%BB%E5%9E%8B)
       - [process](#process)
@@ -107,15 +107,16 @@ npm install @makeflow/makescript --global
 
 安装 MakeScript 后，直接在控制台中输入 `makescript` 命令即可启动。首次启动时会要求输入一些必要信息：
 
-1. 首先会询问是否启用默认 [Agent](#agent)，输入 `Y` 或直接回车为启用，输入 `n` 为不启用：
+1. 首先会询问是否启用默认 [Agent](#agent)，输入 `y` 或直接回车为启用，输入 `n` 为不启用：
    ![MakeScript default agent prompts](images/makescript-default-agent-prompts.png)
    如果需要在启动 MakeScript 的本机上执行脚本，则可以启用默认 Agent。如果当前机器仅作为 API 端，或仅与 Makeflow 进行桥接，而执具体的脚本会在其他机器上执行，则可以不启用默认节点。
 
-2. 如果启用了默认节点，则会提示输入 [脚本仓库](#脚本仓库) 的地址，MakeScript 在每次启动时将会同步该仓库：
+2. 如果启用了默认 Agent，则会提示输入 [脚本仓库](#脚本仓库) 的地址，MakeScript 在每次启动时将会同步该仓库：
    ![MakeScript scripts repo url prompts](images/makescript-scripts-repo-url-prompts.png)
    输入一个脚本仓库的地址并回车后，MakeScript 将会将该仓库的脚本同步到本地，以方便后续执行。该地址可以是一个 [HTTPS 地址](https://docs.github.com/en/free-pro-team@latest/github/using-git/which-remote-url-should-i-use#cloning-with-https-urls) 或 [SSH 地址](https://docs.github.com/en/free-pro-team@latest/github/using-git/which-remote-url-should-i-use#cloning-with-ssh-urls)，但请确保有对该仓库的访问权限。
 
-3. 如果启用了默认节点，且在上一步中输入了脚本仓库地址。则会提示输入脚本子路径，该路径为脚本定义文件 `makescript.json` 在脚本仓库中的相对路径。如果脚本定义文件在脚本仓库的根目录中，可直接回车。
+3. 如果启用了默认节点，且在上一步中输入了脚本仓库地址。则会提示输入脚本子路径，该路径为脚本定义文件 `makescript.json` 或 `makescript.js` 在脚本仓库中的相对路径。如果脚本定义文件在脚本仓库的根目录中，可直接回车。
+   ![MakeScript dir prompts](images/makescript-dir-prompts.png)
 
 ### MakeScript 管理界面
 
@@ -134,47 +135,55 @@ MakeScript 提供了一个 Web 管理界面，启动 MakeScript 后使用浏览�
 
 ### MakeScript 配置文件
 
-在 MakeScript 初始化后，可以通过编辑配置文件来修改 MakeScript 的一些配置。该配置文件的路径默认在 `~/.config/makescript/makescript.json`。其可编辑的项及解释如下：
+在 MakeScript 初始化后，可以通过编辑配置文件来修改 MakeScript 的一些配置。该配置文件的路径默认在 `~/.makescript/makescript.json`。其类型定义文件如下：
+
+<!--
+  @inplate
+  ```ts
+  {{makescriptConfigTypeText}}
+  ```
+-->
 
 ```ts
-type MakeScriptConfigFile = {
-  // 用于生成 Agent 加入链接的 Token
-  joinToken: string;
-
-  // HTTP 相关配置
-  http: {
-    // 要监听的 Host
+export interface JSONConfigFile {
+  /**
+   * 可让外部访问到的地址，默认为 http://localhost:8900
+   */
+  url: string;
+  listen: {
+    /**
+     * MakeScript 服务监听到的 host，默认为 localhost
+     */
     host: string;
-    // 要监听的端口
+    /**
+     * MakeScript 服务监听到的端口，默认为 8900
+     */
     port: number;
-    // 可访问到 makescript 的 url（一般为绑定的域名）
-    url: string;
   };
-
-  // Makeflow 相关配置
+  agent: {
+    /**
+     * 提供给 Agent 验证身份的 Token
+     */
+    token: string;
+  };
+  /**
+   * Makeflow 相关配置
+   */
   makeflow: {
-    baseURL: string;
+    /**
+     * Makeflow 的地址，默认为 https://www.makeflow.com
+     */
+    url: string;
     powerApp: {
       name: string;
       displayName: string;
       description: string;
     };
   };
-
-  // 默认 Agent 相关配置
-  defaultAgent:
-    | {
-        // 默认 Agent 所使用的脚本仓库
-        scriptsRepoURL: string;
-        // 默认 Agent 的脚本子路径
-        scriptsSubPath?: string;
-      }
-    | undefined;
-
-  // 脚本生成的资源文件的存放位置
-  resourcesPath: string;
-};
+}
 ```
+
+<!-- @end -->
 
 ## Agent
 
@@ -198,13 +207,15 @@ npm install @makeflow/makescript-agent --global
 
 ### 初始化 Agent
 
-在目标机器上成功安装 Agent 工具后，在控制台执行 `makescript-agent` 即可启动一个 Agent 并连接到 MakeScript 主节点。在第一次执行该命令时，需要输入一些必要的信息以初始化：
+在目标机器上成功安装 Agent 工具后，在控制台执行 `makescript-agent` 并在控制台输入一些必要的信息进行初始化后，即可启动一个 Agent 并连接到 MakeScript 主节点。在第一次执行该命令时，需要输入一些必要的信息以初始化：
 
 ![agent-initialize.png](images/agent-initialize.png)
 
 1. 首先需要提供的是 MakeScript 祝节点节点提供的节点注册链接，该链接在 MakeScript 管理界面的 “节点管理” 界面里可以查看到并复制：
-<p align="center"><img src="images/makescript-home-with-agents-management-notation.png" alt="get-started-initialization.png" width="450"></p>
-<p align="center"><img src="images/makescript-agents-management-with-join-link-notation.png" alt="get-started-initialization.png" width="450"></p>
+<p align="center"><img src="images/makescript-home-with-agents-management-notation.png" alt="makescript-home-with-agents-management-notation.png" width="450"></p>
+<p align="center"><img src="images/makescript-agents-management-with-join-link-notation.png" alt="makescript-agents-management-with-join-link-notation.png" width="450"></p>
+
+> 也可以在节点管理界面中点击 "节点加入命令" 复制该命令后，直接使用该命令初始化 Agent。这样会在初始化时跳过这一步。
 
 2. 需要提供的第二个信息是一个名称空间，该名称空间用于区分不同的 Agent，不同 Agent 的名称空间不能重复。
 
@@ -214,44 +225,53 @@ npm install @makeflow/makescript-agent --global
 
 ### Agent 配置文件
 
-在 MakeScript 的 Agent 初始化后，可以通过编辑配置文件来修改 MakeScript Agent 的一些配置。该配置文件的路径默认在 `~/.config/makescript/agent/agent.json`。其可编辑的项及解释如下：
+在 MakeScript 的 Agent 初始化后，可以通过编辑配置文件来修改 MakeScript Agent 的一些配置。该配置文件的路径默认在 `~/.makescript/agent/makescript-agent.json`。其类型定义文件如下：
+
+<!--
+  @inplate
+  ```ts
+  {{agentConfigTypeText}}
+  ```
+-->
 
 ```ts
-type AgentConfigFile = {
-  // MakeScript 主节点相关信息
-  makescript: {
-    // MakeScript 主节点的加入链接
-    joinLink: string;
-    // Agent 的名称空间
-    namespace: string;
+export interface JSONConfigFile {
+  /**
+   * MakeScript Agent 注册到 MakeScript 时的名称
+   */
+  name: string;
+  server: {
+    /**
+     * 包含 Token 信息的 MakeScript 地址，类似 https://example.com/token
+     */
+    url: string;
   };
-
-  // 脚本仓库相关配置
   scripts: {
-    // 脚本仓库地址
-    repoURL: string;
-    // 脚本定义所在位置对于脚本仓库的相对路径
-    path?: string;
+    /**
+     * 脚本仓库的地址
+     */
+    git: string;
+    /**
+     * 脚本定义文件所在目录
+     */
+    dir?: string;
   };
-
-  // Agent 要使用的网络代理
-  proxy:
-    | {
-        url: string;
-        username: string;
-        password: string;
-      }
-    | undefined;
-};
+  /**
+   * Agent 要使用的网络代理
+   */
+  proxy?: string | undefined;
+}
 ```
+
+<!-- @end -->
 
 ## 脚本仓库
 
-脚本仓库里包含了一系列将要执行的脚本以及根目录或子目录下一个名为 `makescript.json` 的定义文件。该定义文件中定义脚本列表、执行密码、脚本参数、脚本和脚本钩子等信息，可以参考本项目根目录中的 `makescript.json` 文件，也可以使用 `makescript check-definition` 命令来检测该文件是否符合定义要求。该定义文件可以有如下属性：
+脚本仓库里包含了一系列将要执行的脚本以及根目录或子目录下一个名为 `makescript.json` 或 `makescript.js` 的定义文件。该定义文件中定义脚本列表、执行密码、脚本参数、脚本和脚本钩子等信息。可以参考本项目根目录中的 `makescript.js` 文件和 `example-scripts/makescript.json` 文件。在编写脚本定义时，可以使用 `makescript check-definition` 命令来检测该文件是否符合定义要求。该定义文件可以有如下属性：
 
 ### `hooks`
 
-可选属性，`hooks` 属性中可以定义一系列钩子，在发生特定事件时，将会执行定义里的命令。目前可用的钩子有：
+可选属性，`hooks` 属性中可以定义一系列 hook，在发生特定事件时，将会执行定义里的命令。目前可用的钩子有：
 
 - `install`: 初始化脚本仓库时将会执行，可以用于安装脚本仓库所需依赖
 - `postscript`: 当有脚本被触发时将会执行，可用于通知管理员手动执行脚本
@@ -267,26 +287,26 @@ type AgentConfigFile = {
 }
 ```
 
-`hooks` 中与脚本相关的钩子（`postscript`）在执行时，可以使用以下环境变量：
+`hooks` 中与脚本相关的 hook（`postscript`）在执行时，可以使用以下环境变量：
 
 - `SCRIPT_NAME`: 当前脚本名
 - `NAMESPACE`: 当前 Agent 的名称空间
 
-### `passwordHash`
+### `password`
 
-可选属性，`passwordHash` 属性可以提供一个密码哈希值，提供了该值后，执行该脚本仓库中的所有脚本时均需要输入确认密码。该哈希值可以通过 `makescript generate-hash your-password` 生成。
+可选属性，`password` 属性可以提供一个密码哈希值，提供了该值后，执行该脚本仓库中的所有脚本时均需要输入确认密码。该哈希值可以通过 `makescript generate-hash` 生成。
 
 示例：
 
 ```json
 {
-  "passwordHash": "$2b$10$Qqz.Lqa1WwtvdFXgHM3pAu/sbzwpKo94zUCYwMiipDJZq.67QB/wW"
+  "password": "$2b$10$Qqz.Lqa1WwtvdFXgHM3pAu/sbzwpKo94zUCYwMiipDJZq.67QB/wW"
 }
 ```
 
 ### `scripts`
 
-必选属性，`scripts` 属性接受一个数组，其定义了所有需要执行的脚本，以及这些脚本的需要接受的参数。除了通用属性外，当脚本定义的 `type` 不同时，也会有一些额外的属性，在后面有单独的介绍。
+必选属性，`scripts` 属性接受一个数组，其定义了所有可供执行的脚本，以及这些脚本的需要接受的参数。除了通用属性外，当脚本定义的 `type` 不同时，也会有一些额外的属性，在后面有单独的介绍。
 
 示例：
 
@@ -309,24 +329,44 @@ type AgentConfigFile = {
 
 ```ts
 type ScriptDefinition = {
-  // 脚本的展示名称
-  displayName: string;
-  // 脚本的唯一识别名称，在同一个脚本仓库中需唯一
+  /**
+   * 脚本的展示名称
+   */
+  displayName?: string;
+  /**
+   * 脚本的唯一识别名称，在同一个脚本仓库中需唯一
+   */
   name: string;
-  // 脚本类型，可选值有 `process`、`node`、`shell`、`sqlite`
+  /**
+   * 脚本类型，可选值有 `process`、`node`、`shell`、`sqlite`
+   */
   type: string;
-  // 执行该脚本时是否需手动确认
+  /**
+   * 执行该脚本时是否需手动确认
+   */
   manual?: boolean;
-  // 脚本的参数列表，接受参数定义或字符串数组
+  /**
+   * 脚本的参数列表，接受参数定义或字符串数组
+   *
+   * 参数的传递方式根据不同类型的脚本而不同，具体请查看不同类型脚本的相关介绍
+   */
   parameters?: (
     | {
-        // 参数唯一识别名称，在同一个脚本的定义里需唯一
+        /**
+         * 参数唯一识别名称，在同一个脚本的定义里需唯一
+         */
         name: string;
-        // 参数的展示名称
-        displayName: string;
-        // 是否为必选参数
+        /**
+         * 参数的展示名称
+         */
+        displayName?: string;
+        /**
+         * 是否为必选参数
+         */
         required?: boolean;
-        // 要创建 MakeScript 的表单类型
+        /**
+         * 要创建 MakeScript 的表单类型
+         */
         field?:
           | string
           | {
@@ -336,23 +376,13 @@ type ScriptDefinition = {
       }
     | string
   )[];
-  // 脚本选项，执行脚本时会传递给执行脚本的 Adapter
-  options?: {
-    // name 会根据 `type` 不同而不同
-    [name]:
-      | {
-          type: 'value';
-          value: unknown;
-        }
-      | {
-          type: 'env';
-          env: string;
-          required?: boolean;
-        };
-  };
-  // 单个脚本的执行密码的哈希值，该属性出现时将会覆盖同名全局属性
-  passwordHash?: string;
-  // 单个脚本的钩子，该属性下的子属性出现时会覆盖全局属性中的对应子属性
+  /**
+   * 单个脚本的执行密码的哈希值，该属性出现时将会覆盖同名全局属性
+   */
+  password?: string;
+  /**
+   * 单个脚本的钩子，该属性下的子属性出现时会覆盖全局属性中的对应子属性
+   */
   hooks?: {
     postscript?: string;
   };
@@ -365,20 +395,28 @@ type ScriptDefinition = {
 
 `scripts[]#type` 为 `process` 时，必须提供 `scripts[]#command` 属性指定一个个执行文件。
 
+该类型的脚本的参数会通过环境变量进行传递。
+
 ##### node
 
 `scripts[]#type` 为 `node` 时，必须提供 `scripts[]#module` 指定一个 js 文件。
+
+该类型的脚本的参数会通过环境变量进行传递。
 
 ##### shell
 
 `scripts[]#type` 为 `shell` 时，必须提供 `scripts[]#command` 指定一个命令。
 
+该类型的脚本的参数会通过环境变量进行传递。
+
 ##### sqlite
 
-`scripts[]#type` 为 `sqlite` 时，必须提供 `scripts[]#file` 指定一个 sql 文件，和有 `path` 和 `password` 的 `scripts[]#options` 指定 sqlite 选项，其中：
+`scripts[]#type` 为 `sqlite` 时，脚本定义里有一下的额外属性：
 
-- `path`: 为一个 sqlite 数据库文件的地址
-- `password`: 为 sqlite 数据库文件的密码
+- `file`: SQL 文件路径
+- `db`: 为一个 sqlite 数据库文件的地址或结构为 `{path: string; password: string}` 的对象
+
+该类型的脚本的参数会通过 SQL 参数传递，在 SQL 文件中使用 `$parameterName` 的形式来使用。
 
 ## How To
 
@@ -388,7 +426,7 @@ type ScriptDefinition = {
 
 ### 如何实现脚本执行时需要密码验证？
 
-可以使用脚本仓库的定义中的 [`passwordHash`](#passwordhash) 或 `scripts[]#passwordHash` 结合 `makescript generate-hash your-password` 命令来实现。
+可以使用脚本仓库的定义中的 [`password`](#password) 或 `scripts[]#password` 结合 `makescript generate-hash` 命令来实现。
 
 ### 如何与 Makeflow 进行集成
 
@@ -403,22 +441,22 @@ type ScriptDefinition = {
 
 ### 如何在同一台服务器上启动多个 MakeScript (Agent)
 
-MakeScript (Agent) 是通过一个工作目录来确定如何启动 MakeScript (Agent) 的，如果直接执行 `makescript` (`makescript-agent`) 命令，则会默认使用 `~/.config/makescript` (`~/.config/makescript/agent`) 作为工作目录。可以通过 `--workspace <workspace>` (`-w <workspace>`) 参数来手动指定工作目录，而达到在同一台服务器上启动多个独立的 MakeScript (Agent)。
+MakeScript (Agent) 是通过一个工作目录来确定如何启动 MakeScript (Agent) 的，如果直接执行 `makescript` (`makescript-agent`) 命令，则会默认使用 `~/.makescript` (`~/.makescript/agent`) 作为工作目录。可以通过 `--dir <dir>` (`-d <dir>`) 参数来手动指定工作目录，而达到在同一台服务器上启动多个独立的 MakeScript (Agent)。
 
 ```bash
 # 在默认工作目录 (~/.config/makescript) 中启动 MakeScript
 makescript
 
-# 以 ~/.makescript/agent 为工作目录启动一个 MakeScript Agent
-makescript-agent --workspace ~/.makescript/agent
+# 以 ~/.makescript/a-agent 为工作目录启动一个 MakeScript Agent
+makescript-agent --dir ~/.makescript/a-agent
 
 # 以 ~/.makescript/another-agent 为工作目录启动另一个 MakeScript Agent
-makescript-agent -w ~/.makescript/another-agent
+makescript-agent -d ~/.makescript/another-agent
 ```
 
 ### 如何在一个脚本仓库中定义提供多个脚本定义
 
-可以将脚本的定义放在不同的目录中，然后使用 [Agent 配置文件](#agent-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6) 中的 `scriptsSubPath` 来指定脚本定义存放位置。
+可以将脚本的定义放在不同的目录中，然后在初始化 Agent 时输入定义文件所在目录或使用 [Agent 配置文件](#agent-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6) 中的 `scripts#dir` 来指定脚本定义存放位置。
 
 ## License
 

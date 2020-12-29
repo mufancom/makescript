@@ -10,6 +10,9 @@ export async function main(config: Config): Promise<void> {
   let server = Hapi.server({
     host: config.listen.host,
     port: config.listen.port,
+    state: {
+      strictHeader: false,
+    },
   });
 
   let entrances = new Entrances(server.listener, config);
