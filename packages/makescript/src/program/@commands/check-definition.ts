@@ -1,3 +1,5 @@
+import * as Path from 'path';
+
 import {logger} from '@makeflow/makescript-agent';
 import {Castable, Command, command, metadata, param} from 'clime';
 import {Tiva} from 'tiva';
@@ -26,7 +28,9 @@ export default class extends Command {
 
     logger.info(`Checking scripts definition "${path.baseName}"`);
 
-    let tiva = new Tiva();
+    let tiva = new Tiva({
+      project: Path.join(__dirname, '../../../src/program'),
+    });
 
     let {default: content} = await import(path.fullName);
 
